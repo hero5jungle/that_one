@@ -46,7 +46,7 @@ namespace Backtrack {
       BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ).Length(), hitbox } );
       BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, 128, 256, gInts.globals->curtime );
       
-      while( BacktrackData[i].size() && ( ( ( int )BacktrackData[i].size() > gCvars.Backtrack_max.value ) || !is_tick_valid( BacktrackData[i].back().simtime ) ) ) {
+      while( BacktrackData[i].size() && !is_tick_valid( BacktrackData[i].back().simtime ) )  {
         BacktrackData[i].pop_back();
       }
       

@@ -15,7 +15,6 @@ namespace Backtrack {
   void Run( CUserCmd *cmd );
   
 #define TIME_TO_TICKS( dt )   ( (int)( 0.5f + (float)(dt) / gInts.globals->interval_per_tick  ) )
-  
   template<typename T> constexpr T clamp( T val, T  min, T max ) {
     return ( ( ( val ) > ( max ) ) ? ( max ) : ( ( ( val ) < ( min ) ) ? ( min ) : ( val ) ) );
   }
@@ -52,12 +51,12 @@ namespace Backtrack {
   
   inline bool is_tick_valid( float simtime ) {
     float correct = 0;
-    correct += gInts.Engine->GetNetChannelInfo()->GetAvgLatency( FLOW_INCOMING );
-    correct += gInts.Engine->GetNetChannelInfo()->GetAvgLatency( FLOW_OUTGOING );
+    INetChannel *ch = gInts.Engine->GetNetChannelInfo();
+    correct += ch->GetAvgLatency( FLOW_INCOMING );
+    correct += ch->GetAvgLatency( FLOW_OUTGOING );
     correct += LerpTime();
     correct = clamp( correct, 0.0f, gInts.cvar->FindVar( "sv_maxunlag" )->GetFloat() );
     float deltaTime = correct - ( gInts.globals->curtime - simtime );
     return fabs( deltaTime ) <= 0.2f;
   }
-  
 }

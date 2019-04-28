@@ -23,7 +23,6 @@ struct CGlobalVariables {
   Checkbox Aimbot_range{ "range check", true };
   Slider   Aimbot_ranges{ "shotgun wpn range", 26, 1, 100, 1, 160 };
   Checkbox Backtrack{ "backtrack", true };
-  Slider   Backtrack_max{ "max tick for backtrack", 12, 0, 24, 1, 200 };
   Checkbox Aimbot_melee{ "melee aim", true };
   KeyBind  Aimbot_auto_aim{ "Aim key", VK_SHIFT, e_kbmode::always };
   KeyBind  Aimbot_auto_shoot{ "Shoot key", VK_SHIFT, e_kbmode::always };
@@ -32,7 +31,7 @@ struct CGlobalVariables {
       &Aimbot_enable,
       &Aimbot_fov, &Aimbot_proj, &Aimbot_hitbox, &Aimbot_silent, &Aimbot_smooth,
       &Aimbot_range, &Aimbot_ranges,
-      &Backtrack, &Backtrack_max,
+      &Backtrack,
       &Aimbot_melee,
       
       &Aimbot_auto_aim, &Aimbot_auto_shoot,

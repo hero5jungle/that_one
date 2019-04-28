@@ -18,14 +18,15 @@
 
 int __fastcall hkSendDatagram( CNetChan *netchan, PVOID, bf_write *datagram ) {
   VMTManager &hook = VMTManager::GetHook( netchan );
-  int Return = hook.GetMethod<int( __thiscall * )( CNetChan *, bf_write * ) > ( 46 )( netchan, datagram ); //Call the original.
+  auto orig = hook.GetMethod<int( __thiscall * )( CNetChan *, bf_write * ) >( 46 );
   
   if( gCvars.latency.value == 0 || datagram )
-    return Return;
+    return orig( netchan, datagram );
     
   int instate = netchan->m_nInReliableState;
   int insequencenr = netchan->m_nInSequenceNr;
-  Latency::AddLatencyToNetchan( netchan, gCvars.latency_amount.value / 1000 );
+  Latency::AddLatencyToNetchan( netchan, gCvars.latency_amount.value / 1000.0f );
+  int Return = orig( netchan, datagram );
   netchan->m_nInReliableState = instate;
   netchan->m_nInSequenceNr = insequencenr;
   return Return;
