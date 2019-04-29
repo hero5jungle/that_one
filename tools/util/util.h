@@ -18,8 +18,9 @@ namespace Util {
   
   Vector EstimateAbsVelocity( CBaseEntity *ent );
   
-  bool IsHeadshotWeapon( CBaseCombatWeapon *pWep );
+  bool IsHeadshotWeapon( const char *Class, CBaseCombatWeapon *pWep );
   bool CanAmbassadorHeadshot( CBaseCombatWeapon *wpn );
+  bool canBackstab( CBaseEntity *from, CBaseEntity *to, Vector from_angle );
   
   void minDist( weaponid id, float &dist );
   bool projSetup( float &speed, float &chargetime, float &gravity, bool &quick_release, weaponid id, CBaseCombatWeapon *wpn );

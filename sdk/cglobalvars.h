@@ -190,11 +190,13 @@ struct CGlobalVariables {
   Checkbox Thirdperson{ "Third person" };
   Checkbox latency{ "latency test" };
   Slider latency_amount{ "added latency", 0, 0, 800, 10, 120 };
+  Slider ping_diff{ "ping diffrence", 0, -100, 100, 10  };
   Tab Testing{ "Testing", {
       &Sv_cheat,
       &Thirdperson,
       &latency,
-      &latency_amount
+      &latency_amount,
+      &ping_diff
     }
   };
   

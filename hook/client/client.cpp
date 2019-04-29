@@ -20,7 +20,7 @@ int __fastcall hkSendDatagram( CNetChan *netchan, PVOID, bf_write *datagram ) {
   VMTManager &hook = VMTManager::GetHook( netchan );
   auto orig = hook.GetMethod<int( __thiscall * )( CNetChan *, bf_write * ) >( 46 );
   
-  if( gCvars.latency.value == 0 || datagram )
+  if( !gCvars.latency.value || datagram )
     return orig( netchan, datagram );
     
   int instate = netchan->m_nInReliableState;
@@ -238,17 +238,18 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
                 if( gCvars.aim_index == pInfo.entity_index ) {
                   if( BacktrackData[gCvars.aim_index].size() ) {
                     for( int i = 0; i < ( int )BacktrackData[gCvars.aim_index].size(); i++ ) {
-                      if( BacktrackData[gCvars.aim_index][i].valid && BacktrackData[gCvars.aim_index][i].movement > 45 ) {
-                        Color tick = i == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
-                        //Hidden
-                        wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-                        Materials::ForceMaterial( wanted, tick );
-                        gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
-                        //Visible
-                        wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-                        Materials::ForceMaterial( wanted, tick );
-                        gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
-                      }
+                      if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][i].simtime ) )
+                        if( BacktrackData[gCvars.aim_index][i].valid && BacktrackData[gCvars.aim_index][i].movement > 45 ) {
+                          Color tick = i == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
+                          //Hidden
+                          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+                          Materials::ForceMaterial( wanted, tick );
+                          gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
+                          //Visible
+                          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+                          Materials::ForceMaterial( wanted, tick );
+                          gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
+                        }
                     }
                   }
                 }

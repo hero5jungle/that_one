@@ -118,15 +118,17 @@ namespace Util {
     return v;
   }
   
-  bool IsHeadshotWeapon( CBaseCombatWeapon *pWep ) {
+  bool IsHeadshotWeapon( const char *Class, CBaseCombatWeapon *pWep ) {
     if( pWep->GetSlot() == 0 ) {
       auto wep = pWep->GetItemDefinitionIndex();
       
-      if( wep != weaponid::Sniper_m_TheHuntsman && wep != weaponid::Sniper_m_FestiveHuntsman && wep != weaponid::Sniper_m_TheFortifiedCompound )
-        return true;
-        
-      if( wep == weaponid::Spy_m_TheAmbassador || wep == weaponid::Spy_m_FestiveAmbassador )
-        return true;
+      if( strcmp( Class, "Sniper" ) == 0 )
+        if( wep != weaponid::Sniper_m_TheHuntsman && wep != weaponid::Sniper_m_FestiveHuntsman && wep != weaponid::Sniper_m_TheFortifiedCompound )
+          return true;
+          
+      if( strcmp( Class, "Spy" ) == 0 )
+        if( wep == weaponid::Spy_m_TheAmbassador || wep == weaponid::Spy_m_FestiveAmbassador )
+          return true;
     }
     
     return false;
@@ -134,7 +136,32 @@ namespace Util {
   bool CanAmbassadorHeadshot( CBaseCombatWeapon *wpn ) {
     return gInts.globals->curtime - wpn->m_flLastFireTime() >= 1.0f;
   }
-  
+  bool canBackstab( CBaseEntity *from, CBaseEntity *to, Vector from_angle ) {
+    Vector tarAngle = to->GetEyeAngles();
+    Vector wsc_spy_to_victim;
+    wsc_spy_to_victim = to->GetVecOrigin() - from->GetVecOrigin();
+    wsc_spy_to_victim.z = 0;
+    wsc_spy_to_victim.NormalizeInPlace();
+    Vector eye_spy;
+    AngleVectors( from_angle, &eye_spy );
+    eye_spy.z = 0;
+    eye_spy.NormalizeInPlace();
+    Vector eye_victim;
+    AngleVectors( tarAngle, &eye_victim );
+    eye_victim.z = 0;
+    eye_victim.NormalizeInPlace();
+    
+    if( Dot( wsc_spy_to_victim, eye_victim ) <= 0.0f )
+      return false;
+      
+    if( Dot( wsc_spy_to_victim, eye_spy ) <= 0.5f )
+      return false;
+      
+    if( Dot( eye_spy, eye_victim ) <= -0.3f )
+      return false;
+      
+    return true;
+  }
   void minDist( weaponid id, float &dist ) {
     switch( id ) {
     case weaponid::Demoman_t_TheEyelander:

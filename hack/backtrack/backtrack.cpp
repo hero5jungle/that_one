@@ -46,7 +46,7 @@ namespace Backtrack {
       BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ).Length(), hitbox } );
       BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, 128, 256, gInts.globals->curtime );
       
-      while( BacktrackData[i].size() && !is_tick_valid( BacktrackData[i].back().simtime ) )  {
+      if( BacktrackData[i].size() > 64 )  {
         BacktrackData[i].pop_back();
       }
       
@@ -71,7 +71,7 @@ namespace Backtrack {
       float minFov = FLT_MAX;
       
       for( int t = 0; t < ( int )BacktrackData[iBestTarget].size(); t++ ) {
-        if( !BacktrackData[iBestTarget][t].valid ) continue;
+        if( !BacktrackData[iBestTarget][t].valid || !is_tick_valid( BacktrackData[iBestTarget][t].simtime ) ) continue;
         
         Vector angle = Util::CalcAngle( vLocal, BacktrackData[iBestTarget][t].hitbox );
         float tempFOVDistance = Util::GetFOV( cmd->viewangles, angle );
