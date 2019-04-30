@@ -25,15 +25,16 @@ void SaveToJson() {
   
   string player_class;
   
-  if( !gInts.Engine->IsInGame() )
+  if( !gInts.Engine->IsInGame() ) {
     player_class = "general";
-  else if( gCvars.loadbyclass.value ) {
+  } else if( gCvars.loadbyclass.value ) {
     CBaseEntity *pLocal = GetBaseEntity( me );
     
-    if( pLocal )
+    if( pLocal ) {
       player_class = string( pLocal->szGetClass() );
-    else
+    } else {
       player_class = "general";
+    }
   } else {
     player_class = "general";
   }
@@ -91,15 +92,16 @@ void LoadFromJson() {
     json main;
     string player_class;
     
-    if( !gInts.Engine->IsInGame() )
+    if( !gInts.Engine->IsInGame() ) {
       player_class = "general";
-    else if( gCvars.loadbyclass.value ) {
+    } else if( gCvars.loadbyclass.value ) {
       CBaseEntity *pLocal = GetBaseEntity( me );
       
-      if( pLocal )
+      if( pLocal ) {
         player_class = string( pLocal->szGetClass() );
-      else
+      } else {
         player_class = "general";
+      }
     } else {
       player_class = "general";
     }
@@ -108,9 +110,10 @@ void LoadFromJson() {
     read >> main;
     read.close();
     
-    if( !main[player_class].size() )
+    if( !main[player_class].size() ) {
       player_class = "general";
-      
+    }
+    
     for( auto tab : gMenu.GetTabs()->tabs ) {
       for( auto setting : tab->children ) {
         switch( setting->type ) {

@@ -14,7 +14,9 @@ void CEvents::FireGameEvent( IGameEvent *event ) {
     int attacker = event->GetInt( "attacker" );
     int crit = event->GetInt( "crit" );
     
-    if( userid == attacker || attacker == 0 ) return;
+    if( userid == attacker || attacker == 0 ) {
+      return;
+    }
     
     int ind = gInts.Engine->GetPlayerForUserID( userid );
     shots[ind].hits++;
@@ -26,14 +28,19 @@ void CEvents::FireGameEvent( IGameEvent *event ) {
     int userid = event->GetInt( "userid" );
     int attacker = event->GetInt( "attacker" );
     
-    if( userid == attacker ) return;
+    if( userid == attacker ) {
+      return;
+    }
     
     player_info_t pInfo;
     
-    if( !gInts.Engine->GetPlayerInfo( userid, &pInfo ) )
+    if( !gInts.Engine->GetPlayerInfo( userid, &pInfo ) ) {
       return;
-      
-    if( userid == attacker || attacker == 0 ) return;
+    }
+    
+    if( userid == attacker || attacker == 0 ) {
+      return;
+    }
     
     int ind = gInts.Engine->GetPlayerForUserID( userid );
     shots[ind].deaths++;

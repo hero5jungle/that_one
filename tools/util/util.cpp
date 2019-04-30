@@ -15,8 +15,9 @@ namespace Util {
   }
   
   void vector_transform( const Vector &vSome, const matrix3x4 vMatrix, Vector &vOut ) {
-    if( &vMatrix == nullptr )return;
-    
+    if( &vMatrix == nullptr )
+      return;
+      
     Vector xm = ( Vector & )vMatrix[0];
     Vector ym = ( Vector & )vMatrix[1];
     Vector zm = ( Vector & )vMatrix[2];
@@ -35,8 +36,9 @@ namespace Util {
     return 8192.0f * ground_trace->fraction;
   }
   float DistanceToGround( CBaseEntity *ent ) {
-    if( ent->GetFlags() & FL_ONGROUND ) return 0;
-    
+    if( ent->GetFlags() & FL_ONGROUND )
+      return 0;
+      
     Vector origin = ent->GetVecOrigin();
     float v1 = VectorialDistanceToGround( origin + Vector( 10.0f, 10.0f, 0.0f ) );
     float v2 = VectorialDistanceToGround( origin + Vector( -10.0f, 10.0f, 0.0f ) );
@@ -70,9 +72,9 @@ namespace Util {
     pCmd->sidemove = sin( DEG2RAD( deltaView ) ) * m_fOldForward + sin( DEG2RAD( deltaView + 90.f ) ) * m_fOldSidemove;
   }
   void lookAt( const bool silent, Vector vAngs, CUserCmd *pCommand ) {
-    if( silent ) {
+    if( silent )
       pCommand->viewangles = vAngs;
-    } else {
+    else {
       pCommand->viewangles = vAngs;
       gInts.Engine->SetViewAngles( pCommand->viewangles );
     }
@@ -97,8 +99,9 @@ namespace Util {
     vAngle.y = float( atanf( float( delta.y / delta.x ) ) * 57.295779513082f );
     vAngle.z = 0.0f;
     
-    if( delta.x >= 0.0 ) vAngle.y += 180.0f;
-    
+    if( delta.x >= 0.0 )
+      vAngle.y += 180.0f;
+      
     return vAngle;
   }
   float GetFOV( Vector viewAngle, const Vector &aimAngle ) {
@@ -118,15 +121,15 @@ namespace Util {
     return v;
   }
   
-  bool IsHeadshotWeapon( const char *Class, CBaseCombatWeapon *pWep ) {
+  bool IsHeadshotWeapon( int Class, CBaseCombatWeapon *pWep ) {
     if( pWep->GetSlot() == 0 ) {
       auto wep = pWep->GetItemDefinitionIndex();
       
-      if( strcmp( Class, "Sniper" ) == 0 )
+      if( Class == TF2_Sniper )
         if( wep != weaponid::Sniper_m_TheHuntsman && wep != weaponid::Sniper_m_FestiveHuntsman && wep != weaponid::Sniper_m_TheFortifiedCompound )
           return true;
           
-      if( strcmp( Class, "Spy" ) == 0 )
+      if( Class == TF2_Spy )
         if( wep == weaponid::Spy_m_TheAmbassador || wep == weaponid::Spy_m_FestiveAmbassador )
           return true;
     }
@@ -164,16 +167,6 @@ namespace Util {
   }
   void minDist( weaponid id, float &dist ) {
     switch( id ) {
-    case weaponid::Demoman_t_TheEyelander:
-    case weaponid::Demoman_t_FestiveEyelander:
-    case weaponid::Demoman_t_NessiesNineIron:
-    case weaponid::Demoman_t_TheScotsmansSkullcutter:
-    case weaponid::Demoman_t_HorselessHeadlessHorsemannsHeadtaker:
-    case weaponid::Soldier_t_TheDisciplinaryAction: {
-      dist = 11.5f;
-      break;
-    }
-    
     case weaponid::Engi_s_TheShortCircuit: {
       dist = 17.0f;
       break;
@@ -348,6 +341,7 @@ namespace Util {
     }
     
     default: {
+      dist = 9999.0f;
       break;
     }
     }

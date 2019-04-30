@@ -5,5 +5,4 @@ namespace ESP {
 
   void Run( CBaseEntity *pLocal );
   
-  void Player_ESP( CBaseEntity *pLocal, CBaseEntity *pEntity );
 }

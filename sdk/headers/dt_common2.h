@@ -108,10 +108,10 @@ typedef enum {
 
 class DVariant {
  public:
-  DVariant()        {
+  DVariant() {
     m_Type = DPT_Float;
   }
-  DVariant( float val )   {
+  DVariant( float val ) {
     m_Type = DPT_Float;
     m_Float = val;
   }
@@ -120,43 +120,44 @@ class DVariant {
     static char text[128];
     
     switch( m_Type ) {
-    case DPT_Int :
+    case DPT_Int:
       sprintf_s( text, sizeof( text ), "%i", m_Int );
       break;
       
-    case DPT_Float :
+    case DPT_Float:
       sprintf_s( text, sizeof( text ), "%.3f", m_Float );
       break;
       
-    case DPT_Vector :
+    case DPT_Vector:
       sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f)",
                  m_Vector[0], m_Vector[1], m_Vector[2] );
       break;
 #if 0 // We can't ship this since it changes the size of DTVariant to be 20 bytes instead of 16 and that breaks MODs!!!
       
-    case DPT_Quaternion :
+    case DPT_Quaternion:
       sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f %.3f)",
                  m_Vector[0], m_Vector[1], m_Vector[2], m_Vector[3] );
       break;
 #endif
       
-    case DPT_String :
-      if( m_pString )
+    case DPT_String:
+      if( m_pString ) {
         return m_pString;
-      else
+      } else {
         return "NULL";
-        
+      }
+      
       break;
       
-    case DPT_Array :
+    case DPT_Array:
       sprintf_s( text, sizeof( text ), "Array" );
       break;
       
-    case DPT_DataTable :
+    case DPT_DataTable:
       sprintf_s( text, sizeof( text ), "DataTable" );
       break;
       
-    default :
+    default:
       sprintf_s( text, sizeof( text ), "DVariant type %i unknown", m_Type );
       break;
     }

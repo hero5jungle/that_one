@@ -83,19 +83,23 @@ class BaseControl {
   }
   
   inline void SetWidth( int W ) {
-    if( flags & scale_width )
+    if( flags & scale_width ) {
       w = W;
+    }
   }
   inline void SetHeight( int H ) {
-    if( flags & scale_height )
+    if( flags & scale_height ) {
       h = H;
+    }
   }
   inline void SetScale( int W, int H ) {
-    if( flags & scale_width )
+    if( flags & scale_width ) {
       w = W;
-      
-    if( flags & scale_height )
+    }
+    
+    if( flags & scale_height ) {
       h = H;
+    }
   }
   
   inline void SetChildren( const vector<BaseControl *> &Children ) {
@@ -148,9 +152,10 @@ class TabGroup : public BaseControl {
   Tab *active = nullptr;
   
   void AddTab( Tab *tab ) {
-    if( !tabs.size() )
+    if( !tabs.size() ) {
       active = tab;
-      
+    }
+    
     tabs.push_back( tab );
   }
   
@@ -302,7 +307,7 @@ class KeyBind : public BaseControl {
 };
 
 class func_switch : public BaseControl {
-  void ( *func )( );
+  void( *func )();
  public:
  
   int Draw( bool mouseOver = false );

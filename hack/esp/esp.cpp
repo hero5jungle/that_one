@@ -9,16 +9,18 @@ namespace ESP {
   void Run( CBaseEntity *pLocal ) {
     gInts.Engine->GetScreenSize( iWidth, iHeight );
     
-    if( !gCvars.ESP_enable.value )
+    if( !gCvars.ESP_enable.value ) {
       return;
-      
+    }
+    
     if( gCvars.ESP_fov.value ) {
       int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.Nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * iWidth;
       
-      if( gCvars.ESP_fov.value == 1 )
+      if( gCvars.ESP_fov.value == 1 ) {
         DrawManager::DrawCircle( ( float )iWidth / 2.0f, ( float )iHeight / 2.0f, radius, 16.0f, gCvars.color_fov.get_color() );
-      else if( gCvars.ESP_fov.value == 2 )
+      } else if( gCvars.ESP_fov.value == 2 ) {
         DrawManager::Rotating_Dot_Circle( ( float )iWidth / 2.0f, ( float )iHeight / 2.0f, radius, 7.0f, gCvars.color_fov.get_color() );
+      }
     }
     
     if( ( gCvars.ESP_target.value == 1 || gCvars.ESP_target.value == 3 ) && gCvars.aim_index != -1 ) {
@@ -35,15 +37,18 @@ namespace ESP {
       for( int i = 1; i <= gInts.EntList->GetHighestEntityIndex(); i++ ) {
         CBaseEntity *pEnt = gInts.EntList->GetClientEntity( i );
         
-        if( !pEnt )
+        if( !pEnt ) {
           continue;
-          
-        if( pEnt->IsDormant() )
+        }
+        
+        if( pEnt->IsDormant() ) {
           continue;
-          
-        if( pEnt == pLocal )
+        }
+        
+        if( pEnt == pLocal ) {
           continue;
-          
+        }
+        
         Vector center, pos;
         pEnt->GetWorldSpaceCenter( center );
         string name = pEnt->GetClientClass()->chName;
@@ -56,12 +61,14 @@ namespace ESP {
             if( id == 86 ) {
               CObjectDispenser *pDispenser = ( CObjectDispenser * )( pEnt );
               
-              if( pDispenser == nullptr )
+              if( pDispenser == nullptr ) {
                 return;
-                
-              if( !pDispenser->GetLevel() )
+              }
+              
+              if( !pDispenser->GetLevel() ) {
                 return;
-                
+              }
+              
               if( gCvars.ESP_build_text.value ) {
                 DrawManager::DrawString( pos.x, pos.y, team, "Dispenser: " + to_string( pDispenser->GetLevel() ), gFonts.anon );
                 pos.y += 11;
@@ -81,12 +88,14 @@ namespace ESP {
             } else if( id == 88 ) {
               CObjectSentryGun *pSentryGun = ( CObjectSentryGun * )( pEnt );
               
-              if( pSentryGun == nullptr )
+              if( pSentryGun == nullptr ) {
                 return;
-                
-              if( !pSentryGun->GetLevel() )
+              }
+              
+              if( !pSentryGun->GetLevel() ) {
                 return;
-                
+              }
+              
               if( gCvars.ESP_build_text.value ) {
                 DrawManager::DrawString( pos.x, pos.y, team, "Sentry: " + to_string( pSentryGun->GetLevel() ), gFonts.anon );
                 pos.y += 11;
@@ -110,12 +119,14 @@ namespace ESP {
             } else if( id == 89 ) {
               CObjectTeleporter *pTeleporter = ( CObjectTeleporter * )( pEnt );
               
-              if( pTeleporter == nullptr )
+              if( pTeleporter == nullptr ) {
                 return;
-                
-              if( !pTeleporter->GetLevel() )
+              }
+              
+              if( !pTeleporter->GetLevel() ) {
                 return;
-                
+              }
+              
               if( gCvars.ESP_build_text.value ) {
                 DrawManager::DrawString( pos.x, pos.y, team, "Teleporter: " + to_string( pTeleporter->GetLevel() ), gFonts.anon );
                 pos.y += 11;

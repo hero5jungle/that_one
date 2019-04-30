@@ -11,9 +11,8 @@ namespace Log {
       size_t slash = -1;
       
       for( size_t i = 0; i < strlen( g_logFile ); i++ ) {
-        if( g_logFile[i] == '/' || g_logFile[i] == '\\' ) {
+        if( g_logFile[i] == '/' || g_logFile[i] == '\\' )
           slash = i;
-        }
       }
       
       if( slash != -1 ) {

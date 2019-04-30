@@ -10,9 +10,10 @@ bool CBaseEntity::CanSee( CBaseEntity *pEntity, const Vector &pos ) {
   gInts.EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
   
   if( tr.m_pEnt == nullptr )
-    if( tr.fraction == 1.0f )
+    if( tr.fraction == 1.0f ) {
       return true;
-      
+    }
+    
   return ( tr.m_pEnt->GetIndex() == pEntity->GetIndex() );
 }
 
@@ -104,29 +105,34 @@ Vector CBaseEntity::GetAbsEyePosition() {
 Vector CBaseEntity::GetHitboxPosition( int iHitbox ) {
   DWORD *model = GetModel();
   
-  if( !model )
+  if( !model ) {
     return Vector();
-    
+  }
+  
   studiohdr_t *hdr = gInts.ModelInfo->GetStudiomodel( model );
   
-  if( !hdr )
+  if( !hdr ) {
     return Vector();
-    
+  }
+  
   matrix3x4 matrix[128];
   
-  if( !SetupBones( matrix, 128, 0x100, gInts.globals->curtime ) )
+  if( !SetupBones( matrix, 128, 0x100, gInts.globals->curtime ) ) {
     return Vector();
-    
+  }
+  
   mstudiohitboxset_t *set = hdr->GetHitboxSet( GetHitboxSet() );
   
-  if( !set )
+  if( !set ) {
     return Vector();
-    
+  }
+  
   mstudiobbox_t *box = set->pHitbox( iHitbox );
   
-  if( !box )
+  if( !box ) {
     return Vector();
-    
+  }
+  
   Vector center = ( box->bbmin + box->bbmax ) * 0.5f;
   Vector vHitbox;
   Util::vector_transform( center, matrix[box->bone], vHitbox );

@@ -1,92 +1,86 @@
 #include "backtrack.h"
 #include "../../tools/util/Util.h"
 std::deque<LagRecord> BacktrackData[64];
-
+#define BONE_USED_BY_HITBOX 0x100
 namespace Backtrack {
-
-
-  void Run( CUserCmd *cmd ) {
-    int iBestTarget = -1;
-    float bestFov = 99999;
-    gCvars.backtrack_tick = 0;
-    CBaseEntity *pLocal = gInts.EntList->GetClientEntity( me );
+  void collect_tick() {
+    CBaseEntity *pLocal = GetBaseEntity( me );
     
-    if( !pLocal ) return;
-    
-    if( !gCvars.Backtrack.value ) return;
-    
-    if( pLocal->GetLifeState() != LIFE_ALIVE || pLocal->GetHealth() == 1 ) {
-      return;
-    }
-    
-    int iBestHitbox = gCvars.hitbox != -1 ? gCvars.hitbox : 0;
-    Vector vLocal = pLocal->GetEyePosition();
-    
-    for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
-      CBaseEntity *pEntity = GetBaseEntity( i );
-      
-      if( !pEntity )
-        continue;
+    if( pLocal ) {
+      for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
+        CBaseEntity *pEntity = GetBaseEntity( i );
         
-      if( pEntity->IsDormant() )
-        continue;
-        
-      if( pEntity->GetLifeState() != LIFE_ALIVE )
-        continue;
-        
-      if( pEntity->GetTeamNum() == pLocal->GetTeamNum() )
-        continue;
-        
-      CBaseCombatWeapon *wpn = pLocal->GetActiveWeapon();
-      
-      if( !wpn )
-        continue;
-        
-      Vector hitbox = pEntity->GetHitboxPosition( iBestHitbox );
-      BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ).Length(), hitbox } );
-      BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, 128, 256, gInts.globals->curtime );
-      
-      if( BacktrackData[i].size() > 64 )  {
-        BacktrackData[i].pop_back();
-      }
-      
-      Vector angle = Util::CalcAngle( vLocal, hitbox );
-      float FOVDistance = Util::GetFOV( cmd->viewangles, angle );
-      float dist = Util::Distance( hitbox, vLocal );
-      
-      if( wpn->GetSlot() == 2 ) {
-        if( dist < bestFov ) {
-          bestFov = FOVDistance;
-          iBestTarget = i;
+        if( !pEntity ) {
+          continue;
         }
-      } else if( bestFov > FOVDistance ) {
-        bestFov = FOVDistance;
-        iBestTarget = i;
-      }
-    }
-    
-    if( iBestTarget != -1 && BacktrackData[iBestTarget].size() ) {
-      CBaseEntity *entity = GetBaseEntity( iBestTarget );
-      float bestTargetSimTime = -1;
-      float minFov = FLT_MAX;
-      
-      for( int t = 0; t < ( int )BacktrackData[iBestTarget].size(); t++ ) {
-        if( !BacktrackData[iBestTarget][t].valid || !is_tick_valid( BacktrackData[iBestTarget][t].simtime ) ) continue;
         
-        Vector angle = Util::CalcAngle( vLocal, BacktrackData[iBestTarget][t].hitbox );
-        float tempFOVDistance = Util::GetFOV( cmd->viewangles, angle );
+        if( pEntity->IsDormant() ) {
+          continue;
+        }
         
-        if( minFov > tempFOVDistance && BacktrackData[iBestTarget][t].simtime > ( pLocal->flSimulationTime() - 1 ) ) {
-          if( pLocal->CanSee( entity, BacktrackData[iBestTarget][t].hitbox ) ) {
-            minFov = tempFOVDistance;
-            bestTargetSimTime = BacktrackData[iBestTarget][t].simtime;
-            gCvars.backtrack_arr = t;
-          }
+        if( pEntity->GetLifeState() != LIFE_ALIVE ) {
+          continue;
+        }
+        
+        if( pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
+          continue;
+        }
+        
+        Vector hitbox = pEntity->GetHitboxPosition( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
+        BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ).Length(), hitbox } );
+        BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, BONE_USED_BY_HITBOX, 256, gInts.globals->curtime );
+        
+        if( BacktrackData[i].size() > 70 ) {
+          BacktrackData[i].pop_back();
         }
       }
-      
-      if( bestTargetSimTime >= 0 )
-        gCvars.backtrack_tick = TIME_TO_TICKS( bestTargetSimTime );
     }
+  }
+  float lerp_time() {
+    static ConVar *c_updaterate = gInts.cvar->FindVar( "cl_updaterate" );
+    static ConVar *c_minupdate = gInts.cvar->FindVar( "sv_minupdaterate" );
+    static ConVar *c_maxupdate = gInts.cvar->FindVar( "sv_maxupdaterate" );
+    static ConVar *c_lerp = gInts.cvar->FindVar( "cl_interp" );
+    static ConVar *c_cmin = gInts.cvar->FindVar( "sv_client_min_interp_ratio" );
+    static ConVar *c_cmax = gInts.cvar->FindVar( "sv_client_max_interp_ratio" );
+    static ConVar *c_ratio = gInts.cvar->FindVar( "cl_interp_ratio" );
+    float lerp = c_lerp->GetFloat();
+    float maxupdate = c_maxupdate->GetFloat();
+    int updaterate = c_updaterate->GetInt();
+    float ratio = c_ratio->GetFloat();
+    int sv_maxupdaterate = c_maxupdate->GetInt();
+    int sv_minupdaterate = c_minupdate->GetInt();
+    float cmin = c_cmin->GetFloat();
+    float cmax = c_cmax->GetFloat();
+    
+    if( sv_maxupdaterate && sv_minupdaterate ) {
+      updaterate = maxupdate;
+    }
+    
+    if( ratio == 0 ) {
+      ratio = 1.0f;
+    }
+    
+    if( cmin && cmax && cmin != 1 ) {
+      ratio = clamp( ratio, cmin, cmax );
+    }
+    
+    return fmax( lerp, ratio / updaterate );
+  }
+  
+  bool is_tick_valid( float simtime ) {
+    float correct = 0;
+    INetChannel *ch = gInts.Engine->GetNetChannelInfo();
+    correct += ch->GetAvgLatency( FLOW_INCOMING );
+    correct += ch->GetAvgLatency( FLOW_OUTGOING );
+    correct += lerp_time();
+    
+    if( gCvars.latency.value ) {
+      correct += ( gCvars.latency_amount.value + gCvars.ping_diff.value ) / 1000.0f;
+    }
+    
+    correct = clamp( correct, 0.0f, 1.0f );
+    float deltaTime = correct - ( gInts.globals->curtime - simtime );
+    return fabs( deltaTime ) <= 0.2f;
   }
 }

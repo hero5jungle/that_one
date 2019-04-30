@@ -42,7 +42,7 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     gInts.cvar = ( ICvar * )( CvarFactory( "VEngineCvar004", nullptr ) );
     XASSERT( gInts.cvar );
     CreateInterface_t MatSysFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "materialsystem.dll" ), "CreateInterface" ) );
-    gInts.MatSystem    = ( CMaterialSystem * )( MatSysFactory( "VMaterialSystem081", nullptr ) );
+    gInts.MatSystem = ( CMaterialSystem * )( MatSysFactory( "VMaterialSystem081", nullptr ) );
     XASSERT( gInts.MatSystem );
     
     if( !gInts.Panels ) {
@@ -85,12 +85,14 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     HWND thisWindow;
     
     while( true ) {
-      if( ( thisWindow = FindWindow( "Valve001", nullptr ) ) )
+      if( ( thisWindow = FindWindow( "Valve001", nullptr ) ) ) {
         break;
+      }
     }
     
-    if( thisWindow )
+    if( thisWindow ) {
       gMenu.windowProc = ( WNDPROC )( SetWindowLongPtr( thisWindow, GWLP_WNDPROC, ( LONG_PTR )( &Hooked_WndProc ) ) );
+    }
   }
   
   return 0;

@@ -43,9 +43,10 @@ namespace Materials {
     keyValues->LoadFromBuffer( keyValues, name, material );
     IMaterial *createdMaterial = gInts.MatSystem->CreateMaterial( name, keyValues );
     
-    if( !createdMaterial )
+    if( !createdMaterial ) {
       return nullptr;
-      
+    }
+    
     createdMaterial->IncrementReferenceCount();
     return createdMaterial;
   }

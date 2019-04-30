@@ -7,56 +7,69 @@ namespace DemoSticky {
     Vector sticky_loc;
     float closest_dist = 0;
     
-    if( !gCvars.auto_sticky.value )
+    if( !gCvars.auto_sticky.value ) {
       return;
-      
-    if( pLocal->GetLifeState() != LIFE_ALIVE )
+    }
+    
+    if( pLocal->GetLifeState() != LIFE_ALIVE ) {
       return;
-      
-    if( strcmp( pLocal->szGetClass(), "Demoman" ) != 0 )
+    }
+    
+    if( pLocal->GetClassNum() != TF2_Demoman ) {
       return;
-      
+    }
+    
     for( int i = 0; i < gInts.EntList->GetHighestEntityIndex(); i++ ) {
       CBaseEntity *sticky = gInts.EntList->GetClientEntity( i );
       
-      if( !sticky )
+      if( !sticky ) {
         continue;
-        
-      if( sticky->GetTeamNum() != pLocal->GetTeamNum() )
+      }
+      
+      if( sticky->GetTeamNum() != pLocal->GetTeamNum() ) {
         continue;
-        
+      }
+      
       if( strstr( gInts.ModelInfo->GetModelName( sticky->GetModel() ), "sticky" ) ) {
-        if( sticky->GetOwner() != -1 )
+        if( sticky->GetOwner() != -1 ) {
           continue;
-          
+        }
+        
         sticky->GetWorldSpaceCenter( sticky_loc );
         
         for( int j = 1; j < gInts.Engine->GetMaxClients(); j++ ) {
-          if( j == me )
+          if( j == me ) {
             continue;
-            
+          }
+          
           CBaseEntity *pEntity = GetBaseEntity( j );
           
-          if( !pEntity )
+          if( !pEntity ) {
             continue;
-            
-          if( pEntity == pLocal )
+          }
+          
+          if( pEntity == pLocal ) {
             continue;
-            
-          if( pEntity->IsDormant() )
+          }
+          
+          if( pEntity->IsDormant() ) {
             continue;
-            
-          if( pEntity->GetLifeState() != LIFE_ALIVE )
+          }
+          
+          if( pEntity->GetLifeState() != LIFE_ALIVE ) {
             continue;
-            
-          if( pEntity->GetTeamNum() == pLocal->GetTeamNum() )
+          }
+          
+          if( pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
             continue;
-            
+          }
+          
           if( pEntity->GetCond() & TFCond_Ubercharged ||
               pEntity->GetCond() & TFCond_UberchargeFading ||
-              pEntity->GetCond() & TFCond_Bonked )
+              pEntity->GetCond() & TFCond_Bonked ) {
             continue;
-            
+          }
+          
           Vector vent = pEntity->GetHitboxPosition( 4 );
           float dist = Util::Distance( sticky_loc, vent );
           
@@ -67,9 +80,10 @@ namespace DemoSticky {
       }
     }
     
-    if( closest_dist == 0 || closest_dist > 12.0f )
+    if( closest_dist == 0 || closest_dist > 12.0f ) {
       return;
-      
+    }
+    
     pUserCmd->buttons |= IN_ATTACK2;
   }
   

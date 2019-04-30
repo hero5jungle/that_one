@@ -70,7 +70,7 @@
 
 #define CONTENTS_MONSTER 0x2000000 // should never be on a brush, only in game
 #define CONTENTS_DEBRIS 0x4000000
-#define CONTENTS_DETAIL 0x8000000		// brushes to be added after vis leafs
+#define CONTENTS_DETAIL 0x8000000   // brushes to be added after vis leafs
 #define CONTENTS_TRANSLUCENT 0x10000000 // auto set if any surface has trans
 #define CONTENTS_LADDER 0x20000000
 #define CONTENTS_HITBOX 0x40000000 // use accurate hitboxes on trace
@@ -87,13 +87,13 @@
 
 #define SURF_HINT 0x0100 // make a primary bsp splitter
 
-#define SURF_SKIP 0x0200	  // completely ignore, allowing non-closed brushes
+#define SURF_SKIP 0x0200    // completely ignore, allowing non-closed brushes
 #define SURF_NOLIGHT 0x0400   // Don't calculate light
 #define SURF_BUMPLIGHT 0x0800 // calculate three lightmaps for the surface for bumpmapping
 #define SURF_NOSHADOWS 0x1000 // Don't receive shadows
 #define SURF_NODECALS 0x2000  // Don't receive decals
-#define SURF_NOCHOP 0x4000	// Don't subdivide patches on this surface
-#define SURF_HITBOX 0x8000	// surface is part of a hitbox
+#define SURF_NOCHOP 0x4000  // Don't subdivide patches on this surface
+#define SURF_HITBOX 0x8000  // surface is part of a hitbox
 
 // -----------------------------------------------------
 // spatial content masks - used for spatial queries (traceline,etc.)

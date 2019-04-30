@@ -42,18 +42,18 @@ struct Color {
     rgba[0] = ( input >> 24 ) & 0xFF;
     rgba[1] = ( input >> 16 ) & 0xFF;
     rgba[2] = ( input >> 8 ) & 0xFF;
-    rgba[3] =  input & 0xFF;
+    rgba[3] = input & 0xFF;
   }
 };
 namespace Colors {
-const Color White = Color( 255, 255, 255, 255 );
-const Color Black = Color( 0, 0, 0, 255 );
-const Color Red = Color( 255, 0, 0, 255 );
-const Color Orange = Color( 255, 165, 0, 255 );
-const Color Yellow = Color( 255, 255, 0, 255 );
-const Color Green = Color( 0, 255, 0, 255 );
-const Color Blue = Color( 0, 0, 255, 255 );
-const Color Indigo = Color( 75, 0, 130, 255 );
-const Color Violet = Color( 128, 66, 244, 255 );
-const Color Pink = Color( 255, 192, 203, 255 );
+  const Color White = Color( 255, 255, 255, 255 );
+  const Color Black = Color( 0, 0, 0, 255 );
+  const Color Red = Color( 255, 0, 0, 255 );
+  const Color Orange = Color( 255, 165, 0, 255 );
+  const Color Yellow = Color( 255, 255, 0, 255 );
+  const Color Green = Color( 0, 255, 0, 255 );
+  const Color Blue = Color( 0, 0, 255, 255 );
+  const Color Indigo = Color( 75, 0, 130, 255 );
+  const Color Violet = Color( 128, 66, 244, 255 );
+  const Color Pink = Color( 255, 192, 203, 255 );
 }

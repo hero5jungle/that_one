@@ -19,7 +19,7 @@ struct CGlobalVariables {
   Checkbox Aimbot_proj{ "Loose fov for proj", true };
   Listbox  Aimbot_hitbox{ "Hitbox", { "nearest mouse", "first visible", "head", "body" }, 1, 130 };
   Checkbox Aimbot_silent{ "Silent", true };
-  Slider   Aimbot_smooth{ "Smooth", 0, 0, 4, 1 };
+  Slider Aimbot_smooth{ "Smooting", 0, 0, 4, 1 };
   Checkbox Aimbot_range{ "range check", true };
   Slider   Aimbot_ranges{ "shotgun wpn range", 26, 1, 100, 1, 160 };
   Checkbox Backtrack{ "backtrack", true };
@@ -29,7 +29,8 @@ struct CGlobalVariables {
   
   Tab Aimbot{ "Aimbot", {
       &Aimbot_enable,
-      &Aimbot_fov, &Aimbot_proj, &Aimbot_hitbox, &Aimbot_silent, &Aimbot_smooth,
+      &Aimbot_fov, &Aimbot_proj, &Aimbot_hitbox,
+      &Aimbot_silent, &Aimbot_smooth,
       &Aimbot_range, &Aimbot_ranges,
       &Backtrack,
       &Aimbot_melee,
@@ -80,19 +81,19 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox ESP_enable    { "Enable ESP", true };
-  Checkbox ESP_enemy     { "Enemy only" };
+  Checkbox ESP_enable{ "Enable ESP", true };
+  Checkbox ESP_enemy{ "Enemy only" };
   Checkbox ESP_build_text{ "building text", true };
-  Checkbox ESP_item_text { "pickup names", true };
-  Listbox  ESP_cham_mat  { "cham material", { "shaded", "glow", "shiny"}, 0 };
-  Checkbox ESP_obj       { "Object cham", true};
-  Checkbox ESP_cham      { "Player cham", true };
-  Checkbox ESP_backtrack { "Backtrack cham", true };
-  Checkbox ESP_proj_cham { "projectile cham", true };
-  Listbox  ESP_fov       { "Fov circle", {"none", "normal", "dotted" }, 2 };
-  Listbox  ESP_target    { "target highlight", { "Off", "line", "color", "both" }, 1 };
-  Checkbox ESP_hat       { "No hats" };
-  Listbox  ESP_hand      { "Hands", { "Normal", "None", "transparent", "fill", "wireframe" }, 0 };
+  Checkbox ESP_item_text{ "pickup names", true };
+  Listbox  ESP_cham_mat{ "cham material", { "shaded", "glow", "shiny"}, 0 };
+  Checkbox ESP_obj{ "Object cham", true };
+  Checkbox ESP_cham{ "Player cham", true };
+  Checkbox ESP_backtrack{ "Backtrack cham", true };
+  Checkbox ESP_proj_cham{ "projectile cham", true };
+  Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
+  Listbox  ESP_target{ "target highlight", { "Off", "line", "color", "both" }, 1 };
+  Checkbox ESP_hat{ "No hats" };
+  Listbox  ESP_hand{ "Hands", { "Normal", "None", "transparent", "fill", "wireframe" }, 0 };
   
   Tab ESP{ "ESP", {
       &ESP_enable,
@@ -111,22 +112,22 @@ struct CGlobalVariables {
     }
   };
   
-  ColorPicker color_pickup        { "pickups", Colors::Green };
-  ColorPicker color_building      { "buildings", Colors::White };
-  Listbox     color_type          { "cham color type", { "red/blue", "enemy/ally" } };
-  ColorPicker color_red           { "red", Colors::Red };
-  ColorPicker color_blue          { "blue", Colors::Blue };
-  ColorPicker color_enemy         { "enemy", Colors::Orange };
-  ColorPicker color_ally          { "ally", Colors::Indigo };
-  ColorPicker color_cham_history  { "backtrack history", Colors::White };
-  ColorPicker color_cham_tick     { "backtrack tick", Colors::Green };
-  ColorPicker color_aim           { "target color", Colors::Violet };
-  ColorPicker color_fov           { "fov circle", Colors::Yellow, true };
-  Checkbox    world_enabled       { "world/sky color" };
-  ColorPicker world_clr           { "World color", Color( 200 ) };
-  ColorPicker sky_clr             { "Sky color", Color( 200 ) };
+  ColorPicker color_pickup{ "pickups", Colors::Green };
+  ColorPicker color_building{ "buildings", Colors::White };
+  Listbox     color_type{ "cham color type", { "red/blue", "enemy/ally" } };
+  ColorPicker color_red{ "red", Colors::Red };
+  ColorPicker color_blue{ "blue", Colors::Blue };
+  ColorPicker color_enemy{ "enemy", Colors::Orange };
+  ColorPicker color_ally{ "ally", Colors::Indigo };
+  ColorPicker color_cham_history{ "backtrack history", Colors::White };
+  ColorPicker color_cham_tick{ "backtrack tick", Colors::Green };
+  ColorPicker color_aim{ "target color", Colors::Violet };
+  ColorPicker color_fov{ "fov circle", Colors::Yellow, true };
+  Checkbox    world_enabled{ "world/sky color" };
+  ColorPicker world_clr{ "World color", Color( 200 ) };
+  ColorPicker sky_clr{ "Sky color", Color( 200 ) };
   
-  Tab Colors { "Color", {
+  Tab Colors{ "Color", {
       &color_pickup,
       &color_building,
       &color_type,
@@ -175,7 +176,7 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox loadbyclass{ "load based on class"};
+  Checkbox loadbyclass{ "load based on class" };
   func_switch savejson{ "save to json", SaveToJson };
   func_switch loadjson{ "load from json", LoadFromJson };
   
@@ -190,7 +191,7 @@ struct CGlobalVariables {
   Checkbox Thirdperson{ "Third person" };
   Checkbox latency{ "latency test" };
   Slider latency_amount{ "added latency", 0, 0, 800, 10, 120 };
-  Slider ping_diff{ "ping diffrence", 0, -100, 100, 10  };
+  Slider ping_diff{ "ping diffrence", 0, -100, 100, 10 };
   Tab Testing{ "Testing", {
       &Sv_cheat,
       &Thirdperson,

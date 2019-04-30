@@ -20,8 +20,9 @@ namespace Latency {
         sequences.push_front( CIncomingSequence( netchan->m_nInReliableState, netchan->m_nOutReliableState, netchan->m_nInSequenceNr, gInts.globals->realtime ) );
       }
       
-      if( sequences.size() > 2048 )
+      if( sequences.size() > 2048 ) {
         sequences.pop_back();
+      }
     }
   }
   

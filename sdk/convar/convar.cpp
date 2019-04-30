@@ -18,9 +18,10 @@ static CDefaultAccessor s_DefaultAccessor;
 IConCommandBaseAccessor *ConCommandBase::s_pAccessor = &s_DefaultAccessor;
 
 void ConVar_Register( int nCVarFlag, IConCommandBaseAccessor *pAccessor ) {
-  if( s_bRegistered )
+  if( s_bRegistered ) {
     return;
-    
+  }
+  
   s_bRegistered = true;
   s_nCVarFlag = nCVarFlag;
   s_nDLLIdentifier = gInts.cvar->AllocateDLLIdentifier();
@@ -156,9 +157,10 @@ bool ConVar::ClampValue( float &value ) {
   return false;
 }
 void ConVar::InternalSetFloatValue( float fNewValue ) {
-  if( fNewValue == m_Value.m_fValue )
+  if( fNewValue == m_Value.m_fValue ) {
     return;
-    
+  }
+  
   // Check bounds
   ClampValue( fNewValue );
   // Redetermine value
@@ -172,9 +174,10 @@ void ConVar::InternalSetFloatValue( float fNewValue ) {
   }
 }
 void ConVar::InternalSetIntValue( int nValue ) {
-  if( nValue == m_Value.m_nValue )
+  if( nValue == m_Value.m_nValue ) {
     return;
-    
+  }
+  
   float fValue = ( float )nValue;
   
   if( ClampValue( fValue ) ) {

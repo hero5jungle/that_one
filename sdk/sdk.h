@@ -121,12 +121,12 @@ enum MoveType_t {
   /**< no clip to world, push and crush */
   MOVETYPE_NOCLIP,
   /**< No gravity, no collisions, still do velocity/avelocity
-                       */
+       */
   MOVETYPE_LADDER,
   /**< Used by players only when going onto a ladder */
   MOVETYPE_OBSERVER,
   /**< Observer movement, depends on player's observer mode
-                       */
+       */
   MOVETYPE_CUSTOM,
   /**< Allows the entity to describe its own physics */
   
@@ -249,7 +249,7 @@ class CBaseEntity {
   }
   
   bool IsBaseCombatWeapon() {
-    typedef bool ( __thiscall * OriginalFn )( PVOID );
+    typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 137 )( this );
   }
   
@@ -322,7 +322,7 @@ class CBaseEntity {
   bool SetupBones( matrix3x4 *pBoneToWorldOut, int nMaxBones, int boneMask,
                    float currentTime ) {
     PVOID pRenderable = ( PVOID )( this + 0x4 );
-    typedef bool ( __thiscall * OriginalFn )( PVOID, matrix3x4 *, int, int, float );
+    typedef bool( __thiscall * OriginalFn )( PVOID, matrix3x4 *, int, int, float );
     return getvfunc<OriginalFn>( pRenderable, 16 )(
              pRenderable, pBoneToWorldOut, nMaxBones, boneMask, currentTime );
   }
@@ -335,19 +335,19 @@ class CBaseEntity {
   
   bool IsDormant() {
     PVOID pNetworkable = ( PVOID )( this + 0x8 );
-    typedef bool ( __thiscall * OriginalFn )( PVOID );
+    typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( pNetworkable, 8 )( pNetworkable );
   }
   
   int GetIndex() {
     PVOID pNetworkable = ( PVOID )( this + 0x8 );
-    typedef int ( __thiscall * OriginalFn )( PVOID );
+    typedef int( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( pNetworkable, 9 )( pNetworkable );
   }
   
   void GetRenderBounds( Vector &mins, Vector &maxs ) {
     PVOID pRenderable = ( PVOID )( this + 0x4 );
-    typedef void ( __thiscall * OriginalFn )( PVOID, Vector &, Vector & );
+    typedef void( __thiscall * OriginalFn )( PVOID, Vector &, Vector & );
     getvfunc<OriginalFn>( pRenderable, 20 )( pRenderable, mins, maxs );
   }
   
@@ -358,7 +358,7 @@ class CBaseEntity {
   }
   
   int GetMaxHealth() {
-    typedef int ( __thiscall * OriginalFn )( void * );
+    typedef int( __thiscall * OriginalFn )( void * );
     return getvfunc<OriginalFn>( this, 107 )( this );
   }
   // Some stuff later defined in CBaseEntity.cpp
@@ -650,7 +650,7 @@ class CObjectTeleporter : public CObject {
 class CBaseCombatWeapon : public CBaseEntity {
  public:
   int GetSlot() {
-    typedef int ( __thiscall * OriginalFn )( PVOID );
+    typedef int( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 327 )( this );
   }
   
@@ -674,14 +674,22 @@ class CBaseCombatWeapon : public CBaseEntity {
                    "m_flChargedDamage" );
   }
   
-  int GetItemDefinitionIndex() {
-    DYNVAR_RETURN( int, this, "DT_EconEntity", "m_AttributeManager", "m_Item",
+  weaponid GetItemDefinitionIndex() {
+    DYNVAR_RETURN( weaponid, this, "DT_EconEntity", "m_AttributeManager", "m_Item",
                    "m_iItemDefinitionIndex" );
   }
   
   float m_flLastFireTime() {
     DYNVAR_RETURN( float, this, "DT_TFWeaponBase", "LocalActiveTFWeaponData",
                    "m_flLastFireTime" );
+  }
+  int GetSwingRange( CBaseEntity *pLocal ) {
+    typedef int( __thiscall * OriginalFn )( CBaseEntity * );
+    return getvfunc<OriginalFn>( this, 451 )( pLocal );
+  }
+  bool DoSwingTrace( CBaseEntity *pLocal, trace_t *trace ) {
+    typedef int( __thiscall * OriginalFn )( CBaseEntity *, trace_t * );
+    return getvfunc<OriginalFn>( this, 453 )( pLocal, trace );
   }
 };
 
@@ -1333,8 +1341,8 @@ typedef struct netadr_s {
   
   void SetFromString( const char *pch,
                       bool bUseDNS = false ); // if bUseDNS is true then do a DNS
-  // lookup if needed
-  
+// lookup if needed
+
   bool CompareAdr( const netadr_s &a, bool onlyBase = false ) const;
   bool CompareClassBAdr( const netadr_s &a ) const;
   bool CompareClassCAdr( const netadr_s &a ) const;
@@ -1363,7 +1371,7 @@ typedef struct netadr_s {
   bool operator<( const netadr_s &netadr ) const;
   
  public: // members are public to avoid to much changes
-  // netadrtype_t type;
+// netadrtype_t type;
   unsigned char ip[4];
   unsigned short port;
 } netadr_t;
@@ -1787,57 +1795,57 @@ class EngineClient {
   }
   
   void GetScreenSize( int &width, int &height ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, int &, int & );
+    typedef void( __thiscall * OriginalFn )( PVOID, int &, int & );
     return getvfunc<OriginalFn>( this, 5 )( this, width, height );
   }
   
   bool GetPlayerInfo( int ent_num, player_info_t *pinfo ) {
-    typedef bool ( __thiscall * OriginalFn )( PVOID, int, player_info_t * );
+    typedef bool( __thiscall * OriginalFn )( PVOID, int, player_info_t * );
     return getvfunc<OriginalFn>( this, 8 )( this, ent_num, pinfo );
   }
   
   bool Con_IsVisible( void ) {
-    typedef bool ( __thiscall * OriginalFn )( PVOID );
+    typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 11 )( this );
   }
   
   int GetLocalPlayer( void ) {
-    typedef int ( __thiscall * OriginalFn )( PVOID );
+    typedef int( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 12 )( this );
   }
   
   float Time( void ) {
-    typedef float ( __thiscall * OriginalFn )( PVOID );
+    typedef float( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 14 )( this );
   }
   
   void GetViewAngles( Vector &va ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, Vector & va );
+    typedef void( __thiscall * OriginalFn )( PVOID, Vector & va );
     return getvfunc<OriginalFn>( this, 19 )( this, va );
   }
   
   void SetViewAngles( Vector &va ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, Vector & va );
+    typedef void( __thiscall * OriginalFn )( PVOID, Vector & va );
     return getvfunc<OriginalFn>( this, 20 )( this, va );
   }
   
   int GetMaxClients( void ) {
-    typedef int ( __thiscall * OriginalFn )( PVOID );
+    typedef int( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 21 )( this );
   }
   
   bool IsInGame( void ) {
-    typedef bool ( __thiscall * OriginalFn )( PVOID );
+    typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 26 )( this );
   }
   
   bool IsConnected( void ) {
-    typedef bool ( __thiscall * OriginalFn )( PVOID );
+    typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 27 )( this );
   }
   
   bool IsDrawingLoadingImage( void ) {
-    typedef bool ( __thiscall * OriginalFn )( PVOID );
+    typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 28 )( this );
   }
   
@@ -1847,7 +1855,7 @@ class EngineClient {
   }
   
   bool IsTakingScreenshot( void ) {
-    typedef bool ( __thiscall * OriginalFn )( PVOID );
+    typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 85 )( this );
   }
   
@@ -1858,17 +1866,17 @@ class EngineClient {
   }
   */
   void ClientCmd( const char *szCommandString ) {
-    typedef void ( __thiscall * ClientCmdFn )( void *, const char * );
+    typedef void( __thiscall * ClientCmdFn )( void *, const char * );
     return getvfunc<ClientCmdFn>( this, 7 )( this, szCommandString );
   }
   
   void ClientCmd_Unrestricted( const char *chCommandString ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, const char * );
+    typedef void( __thiscall * OriginalFn )( PVOID, const char * );
     return getvfunc<OriginalFn>( this, 106 )( this, chCommandString );
   }
   
   void ServerCmdKeyValues( PVOID kv ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, PVOID );
+    typedef void( __thiscall * OriginalFn )( PVOID, PVOID );
     getvfunc<OriginalFn>( this, 127 )( this, kv );
   }
   
@@ -1901,45 +1909,45 @@ class IPanel {
 class ISurface {
  public:
   void DrawSetColor( int r, int g, int b, int a ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+    typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
     getvfunc<OriginalFn>( this, 11 )( this, r, g, b, a );
   }
   
   void DrawFilledRect( int x0, int y0, int x1, int y1 ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+    typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
     getvfunc<OriginalFn>( this, 12 )( this, x0, y0, x1, y1 );
   }
   
   void DrawOutlinedRect( int x0, int y0, int x1, int y1 ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+    typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
     getvfunc<OriginalFn>( this, 14 )( this, x0, y0, x1, y1 );
   }
   
   int CreateNewTextureID( bool procedural = true ) {
-    typedef int ( __thiscall * OriginalFn )( void *, bool );
+    typedef int( __thiscall * OriginalFn )( void *, bool );
     return getvfunc<OriginalFn>( this, 37 )( this, procedural );
   }
   
   void DrawSetTextureRGBA( int id, unsigned char const *rgba, int wide, int tall,
                            int hardwareFilter = 0, bool forceReload = false ) {
-    typedef void ( __thiscall * OriginalFn )( void *, int, unsigned char const *,
+    typedef void( __thiscall * OriginalFn )( void *, int, unsigned char const *,
         int, int, int, bool );
     return getvfunc<OriginalFn>( this, 31 )( this, id, rgba, wide, tall,
            hardwareFilter, forceReload );
   }
   
   void DrawSetTexture( int id ) {
-    typedef void ( __thiscall * OriginalFn )( void *, int );
+    typedef void( __thiscall * OriginalFn )( void *, int );
     return getvfunc<OriginalFn>( this, 32 )( this, id );
   }
   
   bool IsTextureIDValid( int id ) {
-    typedef bool ( __thiscall * OriginalFn )( void *, int );
+    typedef bool( __thiscall * OriginalFn )( void *, int );
     return getvfunc<OriginalFn>( this, 35 )( this, id );
   }
   
   void DrawTexturedRect( int x, int y, int width, int height ) {
-    typedef void ( __thiscall * OriginalFn )( void *, int, int, int, int );
+    typedef void( __thiscall * OriginalFn )( void *, int, int, int, int );
     return getvfunc<OriginalFn>( this, 34 )( this, x, y, width, height );
   }
   
@@ -1949,39 +1957,39 @@ class ISurface {
   }
   
   void DrawLine( int x0, int y0, int x1, int y1 ) {
-    typedef void ( __thiscall * DrawLineFn )( void *, int, int, int, int );
+    typedef void( __thiscall * DrawLineFn )( void *, int, int, int, int );
     getvfunc<DrawLineFn>( this, 15 )( this, x0, y0, x1, y1 );
   }
   
   void DrawSetTextFont( unsigned long font ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, unsigned long );
+    typedef void( __thiscall * OriginalFn )( PVOID, unsigned long );
     getvfunc<OriginalFn>( this, 17 )( this, font );
   }
   
   void DrawSetTextColor( int r, int g, int b, int a ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+    typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
     getvfunc<OriginalFn>( this, 19 )( this, r, g, b, a );
   }
   
   void DrawSetTextPos( int x, int y ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, int, int );
+    typedef void( __thiscall * OriginalFn )( PVOID, int, int );
     getvfunc<OriginalFn>( this, 20 )( this, x, y );
   }
   
   void DrawPrintText( const wchar_t *text, int textLen ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, const wchar_t *, int, int );
+    typedef void( __thiscall * OriginalFn )( PVOID, const wchar_t *, int, int );
     return getvfunc<OriginalFn>( this, 22 )( this, text, textLen, 0 );
   }
   
   unsigned long CreateFont() {
-    typedef unsigned int ( __thiscall * OriginalFn )( PVOID );
+    typedef unsigned int( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 66 )( this );
   }
   
   void SetFontGlyphSet( unsigned long &font, const char *windowsFontName,
                         int tall, int weight, int blur, int scanlines,
                         int flags ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, unsigned long, const char *,
+    typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const char *,
         int, int, int, int, int, int, int );
     getvfunc<OriginalFn>( this, 67 )( this, font, windowsFontName, tall, weight,
                                       blur, scanlines, flags, 0, 0 );
@@ -1989,7 +1997,7 @@ class ISurface {
   
   void GetTextSize( unsigned long font, const wchar_t *text, int &wide,
                     int &tall ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, unsigned long, const wchar_t *,
+    typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const wchar_t *,
         int &, int & );
     getvfunc<OriginalFn>( this, 75 )( this, font, text, wide, tall );
   }
@@ -2008,7 +2016,7 @@ class CEntList {
   }
   
   int GetHighestEntityIndex( void ) {
-    typedef int ( __thiscall * OriginalFn )( PVOID );
+    typedef int( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 6 )( this );
   }
 };
@@ -2205,7 +2213,7 @@ class IEngineTrace {
   void TraceRay( const Ray_t &ray, unsigned int fMask,
                  ITraceFilter *pTraceFilter, trace_t *pTrace ) {
     // 5
-    typedef void ( __thiscall * TraceRayFn )( void *, const Ray_t &, unsigned int,
+    typedef void( __thiscall * TraceRayFn )( void *, const Ray_t &, unsigned int,
         ITraceFilter *, trace_t * );
     return getvfunc<TraceRayFn>( this, 4 )( this, ray, fMask, pTraceFilter,
                                             pTrace );
@@ -2220,7 +2228,7 @@ class IVModelInfo {
   }
   
   int GetModelIndex( const char *name ) {
-    typedef int ( __thiscall * GetModelIndexFn )( void *, const char * );
+    typedef int( __thiscall * GetModelIndexFn )( void *, const char * );
     return getvfunc<GetModelIndexFn>( this, 2 )( this, name );
   }
   
@@ -2479,7 +2487,7 @@ class IGameEventManager2 {
  public:
   bool AddListener( IGameEventListener2 *listener, const char *name,
                     bool bServerSide ) {
-    typedef bool ( __thiscall * OriginalFn )( PVOID, IGameEventListener2 *,
+    typedef bool( __thiscall * OriginalFn )( PVOID, IGameEventListener2 *,
         const char *, bool );
     return getvfunc<OriginalFn>( this, 3 )( this, listener, name, bServerSide );
   }
@@ -2808,20 +2816,20 @@ class CModelRender {
  public:
   void ForcedMaterialOverride(
     IMaterial *mat, OverrideType_t type = OVERRIDE_NORMAL ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, IMaterial *, OverrideType_t );
+    typedef void( __thiscall * OriginalFn )( PVOID, IMaterial *, OverrideType_t );
     return getvfunc<OriginalFn>( this, 1 )( this, mat, type );
   }
   
   void DrawModelExecute( void *state, ModelRenderInfo_t &pInfo,
                          matrix3x4 *pCustomBoneToWorld ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, void *, ModelRenderInfo_t &,
+    typedef void( __thiscall * OriginalFn )( PVOID, void *, ModelRenderInfo_t &,
         matrix3x4 * );
     return getvfunc<OriginalFn>( this, 19 )( this, state, pInfo,
            pCustomBoneToWorld );
   }
   
   void SuppressEngineLighting( bool t ) {
-    typedef void ( __thiscall * OriginalFn )( PVOID, bool );
+    typedef void( __thiscall * OriginalFn )( PVOID, bool );
     return getvfunc<OriginalFn>( this, 22 )( this, t );
   }
 };

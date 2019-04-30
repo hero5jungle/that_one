@@ -89,7 +89,7 @@ class CDynamicNetvar {
     return *reinterpret_cast<T *>( ( DWORD )base + ( DWORD )off );
   }
   void SetValue( PVOID base, T val ) {
-    *reinterpret_cast<T * >( ( DWORD )( base ) + ( ( DWORD )( off ) ) ) = val;
+    *reinterpret_cast<T *>( ( DWORD )( base ) + ( ( DWORD )( off ) ) ) = val;
   }
 };
 

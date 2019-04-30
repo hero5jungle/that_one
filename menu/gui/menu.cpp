@@ -9,7 +9,7 @@ CKey gKey;
 #define GROUP_WIDTH 180
 
 void Menu::CreateGUI() {
-  Tabs = gCvars.tf2 ;
+  Tabs = gCvars.tf2;
 }
 
 #define TAB_WIDTH 150
@@ -24,23 +24,26 @@ void Menu::Draw() {
     }
     
     if( !enabled ) {
-      if( gCvars.loadbyclass.value )
+      if( gCvars.loadbyclass.value ) {
         LoadFromJson();
+      }
     }
     
     enabled = !enabled;
   }
   
-  if( !enabled )
+  if( !enabled ) {
     return;
-    
+  }
+  
   static bool dragging = false;
   
-  if( mb == e_mb::lclick && mouseOver( pos.x, pos.y, scale.x, MENU_TOPBAR ) )
+  if( mb == e_mb::lclick && mouseOver( pos.x, pos.y, scale.x, MENU_TOPBAR ) ) {
     dragging = true;
-  else if( mb != e_mb::ldown )
+  } else if( mb != e_mb::ldown ) {
     dragging = false;
-    
+  }
+  
   if( dragging && focus == 0 ) {
     pos.x += mouse.x - pmouse.x;
     pos.y += mouse.y - pmouse.y;
@@ -74,22 +77,26 @@ void Menu::Draw() {
     vector<BaseControl *> controls = Tabs.active->GetChildren();
     
     for( auto &control : controls ) {
-      if( control->flags & nodraw )
+      if( control->flags & nodraw ) {
         continue;
-        
-      if( cy + control->GetHeight() > scale.y + _pos.y - 12 )
+      }
+      
+      if( cy + control->GetHeight() > scale.y + _pos.y - 12 ) {
         cy = _pos.y + 12, cx += 13 + maxWidth + 10, maxWidth = 0;
-        
-      if( control->GetWidth() > maxWidth )
+      }
+      
+      if( control->GetWidth() > maxWidth ) {
         maxWidth = control->GetWidth();
-        
+      }
+      
       control->SetPos( cx, cy );
       bool over = mouseOver( cx, cy, control->GetWidth(), control->GetHeight() );
       bool getInput = !( control->flags & noinput ) && over && !IsDialogOpen();
       
-      if( getInput )
+      if( getInput ) {
         control->HandleInput();
-        
+      }
+      
       control->Draw( getInput );
       cy += control->GetHeight() + SPACING;
     }
@@ -107,20 +114,23 @@ void Menu::Draw() {
     mb = e_mb::null, mw = e_mw::null, mouse = pmouse = { 0, 0 };
     
     for( size_t i = 0; i < last; i++ ) {
-      if( dialogs[i] == nullptr )
+      if( dialogs[i] == nullptr ) {
         continue;
-        
+      }
+      
       dialogs[i]->Draw( dialogs[i]->data, i + 1 );
     }
     
     mb = new_mb, mw = new_mw, mouse = new_mouse, pmouse = new_pmouse;
     dialogs[last]->Draw( dialogs[last]->data, last + 1 );
-  } else if( !last )
+  } else if( !last ) {
     dialogs[last]->Draw( dialogs[last]->data, last + 1 );
-    
-  if( key == VK_ESCAPE && dialogs.size() )
+  }
+  
+  if( key == VK_ESCAPE && dialogs.size() ) {
     dialogs.pop_back();
-    
+  }
+  
   #pragma endregion
 }
 bool Menu::mouseOver( int x, int y, int w, int h ) {
@@ -133,17 +143,20 @@ void Menu::GetInput() {
   mouse = { mx, my };
   
   if( GetAsyncKeyState( VK_LBUTTON ) ) {
-    if( mb == e_mb::lclick || mb == e_mb::ldown )
+    if( mb == e_mb::lclick || mb == e_mb::ldown ) {
       mb = e_mb::ldown;
-    else
+    } else {
       mb = e_mb::lclick;
+    }
   } else if( GetAsyncKeyState( VK_RBUTTON ) ) {
-    if( mb == e_mb::rclick || mb == e_mb::rdown )
+    if( mb == e_mb::rclick || mb == e_mb::rdown ) {
       mb = e_mb::rdown;
-    else
+    } else {
       mb = e_mb::rclick;
-  } else
+    }
+  } else {
     mb = e_mb::null;
+  }
 }
 void Menu::EndInput() {
   // Reseting Window message variables so they won't stick
@@ -153,29 +166,33 @@ void Menu::EndInput() {
 LRESULT __stdcall Hooked_WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
   switch( uMsg ) {
   case WM_MOUSEWHEEL:
-    if( ( int )wParam < 0 )
+    if( ( int )wParam < 0 ) {
       gMenu.mw = e_mw::up;
-    else
+    } else {
       gMenu.mw = e_mw::down;
-      
+    }
+    
     break;
     
   case WM_KEYDOWN:
-    if( wParam > 255 )
+    if( wParam > 255 ) {
       break;
-      
+    }
+    
     gMenu.keys[wParam] = true, gMenu.last_key = wParam, gMenu.key = wParam;
     break;
     
   case WM_KEYUP:
-    if( wParam > 255 )
+    if( wParam > 255 ) {
       break;
-      
+    }
+    
     gMenu.keys[wParam] = false;
     
-    if( gMenu.last_key == wParam )
+    if( gMenu.last_key == wParam ) {
       gMenu.last_key = NULL;
-      
+    }
+    
   default:
     break;
     /*break;
@@ -201,14 +218,16 @@ void Menu::OpenDialog( Dialog &dlg ) {
   focus = dialogs.size();
 }
 void Menu::CloseDialog( size_t Index ) {
-  if( Index == 0 )
+  if( Index == 0 ) {
     return;
-    
+  }
+  
   Index--;
   
-  if( Index >= dialogs.size() )
+  if( Index >= dialogs.size() ) {
     return;
-    
+  }
+  
   dialogs.erase( dialogs.begin() + Index );
   focus = dialogs.size();
 }

@@ -41,13 +41,13 @@ class CRecvProxyData {
 //
 // Convert the network-standard-type value in m_Value into your own format in pStruct/pOut.
 //-----------------------------------------------------------------------------
-typedef void ( *RecvVarProxyFn )( const CRecvProxyData *pData, void *pStruct, void *pOut );
+typedef void( *RecvVarProxyFn )( const CRecvProxyData *pData, void *pStruct, void *pOut );
 
 // ------------------------------------------------------------------------ //
 // ArrayLengthRecvProxies are optionally used to get the length of the
 // incoming array when it changes.
 // ------------------------------------------------------------------------ //
-typedef void ( *ArrayLengthRecvProxyFn )( void *pStruct, int objectID, int currentArrayLength );
+typedef void( *ArrayLengthRecvProxyFn )( void *pStruct, int objectID, int currentArrayLength );
 
 
 // NOTE: DataTable receive proxies work differently than the other proxies.
@@ -56,7 +56,7 @@ typedef void ( *ArrayLengthRecvProxyFn )( void *pStruct, int objectID, int curre
 // If the parent object just contains the child object, the default proxy just does *pOut = pData.
 // If the parent object points at the child object, you need to dereference the pointer here.
 // NOTE: don't ever return null from a DataTable receive proxy function. Bad things will happen.
-typedef void ( *DataTableRecvVarProxyFn )( const RecvProp *pProp, void **pOut, void *pData, int objectID );
+typedef void( *DataTableRecvVarProxyFn )( const RecvProp *pProp, void **pOut, void *pData, int objectID );
 
 
 // This is used to fork over the standard proxy functions to the engine so it can
@@ -78,7 +78,7 @@ class CRecvDecoder;
 
 
 class RecvProp {
-// This info comes from the receive data table.
+  // This info comes from the receive data table.
  public:
   RecvProp();
   

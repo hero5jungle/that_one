@@ -11,18 +11,15 @@
 #include <unordered_map>
 #include "../../tools/log/log.h"
 #include "../../tools/util/util.h"
-/*
-   internet points to anyone who can tell me what i'm doing wrong
-   since it ain't working
-*/
 
 int __fastcall hkSendDatagram( CNetChan *netchan, PVOID, bf_write *datagram ) {
   VMTManager &hook = VMTManager::GetHook( netchan );
   auto orig = hook.GetMethod<int( __thiscall * )( CNetChan *, bf_write * ) >( 46 );
   
-  if( !gCvars.latency.value || datagram )
+  if( !gCvars.latency.value || datagram ) {
     return orig( netchan, datagram );
-    
+  }
+  
   int instate = netchan->m_nInReliableState;
   int insequencenr = netchan->m_nInSequenceNr;
   Latency::AddLatencyToNetchan( netchan, gCvars.latency_amount.value / 1000.0f );
@@ -42,9 +39,10 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
   //bool *send_packet = ( bool * )( * **( uintptr_t ** * )_bp - 1 );
   Latency::UpdateIncomingSequences();
   
-  if( !pCommand->command_number )
+  if( !pCommand->command_number ) {
     return false;
-    
+  }
+  
   INetChannel *ch = gInts.Engine->GetNetChannelInfo();
   
   if( ch ) {
@@ -58,13 +56,14 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
   
   CBaseEntity *pLocal = GetBaseEntity( me );
   
-  if( !pLocal )
+  if( !pLocal ) {
     return bReturn;
-    
+  }
+  
   if( !pLocal->IsDormant() )
     if( pLocal->GetLifeState() == LIFE_ALIVE ) {
       try {
-        Backtrack::Run( pCommand );
+        Backtrack::collect_tick();
         Misc::Run( pLocal, pCommand );
         Aimbot::Run( pLocal, pCommand );
         Triggerbot::Run( pLocal, pCommand );
@@ -87,18 +86,18 @@ void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrame
   }
   
   if( gInts.Engine->IsInGame() && Stage == FRAME_RENDER_START ) {
-    CBaseEntity *pLocal = gInts.EntList->GetClientEntity( gInts.Engine->GetLocalPlayer() );
+    CBaseEntity *pLocal = GetBaseEntity( me );
     int m_flFOVRate = 0xE5C;// Broken: nv.get_offset("DT_BasePlayer", "localdata", "m_flFOVRate");
-    int &fovPtr = * ( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iFOV" ) );
-    int defaultFov = * ( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iDefaultFOV" ) );
+    int &fovPtr = *( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iFOV" ) );
+    int defaultFov = *( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iDefaultFOV" ) );
     
     if( gCvars.Nozoom.value ) {
       fovPtr = defaultFov;
-      * ( float * )( pLocal + m_flFOVRate ) = 0;
+      *( float * )( pLocal + m_flFOVRate ) = 0;
     }
     
     if( gCvars.Norecoil.value ) {
-      * ( Vector * )( pLocal + 0xE8C ) = Vector();
+      *( Vector * )( pLocal + 0xE8C ) = Vector();
     }
     
     static bool Thirdperson_enabled = false;
@@ -124,14 +123,15 @@ void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrame
   
   if( bReset && worldmats_old.size() ) {
     if( gInts.Engine->IsInGame() ) {
-      for( auto &hMat : worldmats_old ) {  // Reset the material colors
+      for( auto &hMat : worldmats_old ) { // Reset the material colors
         IMaterial *mat = gInts.MatSystem->GetMaterial( hMat.first );
         
-        if( !mat )
+        if( !mat ) {
           continue;
-          
+        }
+        
         Color color = hMat.second;
-        float blend[4] = { ( float ) color[0] / 255.f, ( float ) color[1] / 255.f, ( float ) color[2] / 255.f, ( float ) color[3] / 255.f };
+        float blend[4] = { ( float )color[0] / 255.f, ( float )color[1] / 255.f, ( float )color[2] / 255.f, ( float )color[3] / 255.f };
         mat->ColorModulate( blend[0], blend[1], blend[2] );
         mat->AlphaModulate( blend[3] );
       }
@@ -147,14 +147,16 @@ void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrame
     for( MaterialHandle_t i = gInts.MatSystem->FirstMaterial(); i != gInts.MatSystem->InvalidMaterial(); i = gInts.MatSystem->NextMaterial( i ) ) {
       IMaterial *mat = gInts.MatSystem->GetMaterial( i );
       
-      if( !mat )
+      if( !mat ) {
         continue;
-        
+      }
+      
       bool bIsSkybox = !strcmp( mat->GetTextureGroupName(), "SkyBox textures" );
       
-      if( !bIsSkybox && strcmp( mat->GetTextureGroupName(), "World textures" ) != 0 )
+      if( !bIsSkybox && strcmp( mat->GetTextureGroupName(), "World textures" ) != 0 ) {
         continue;
-        
+      }
+      
       if( worldmats_new.find( i ) == worldmats_new.end() ) {
         float r, g, b, a = mat->GetAlphaModulation();
         mat->GetColorModulation( &r, &g, &b );
@@ -165,11 +167,12 @@ void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrame
       
       Color color = worldmats_old.at( i );
       
-      if( bIsSkybox )
+      if( bIsSkybox ) {
         color = gCvars.sky_clr.bDef ? Color( 255 ) : gCvars.sky_clr.get_color();
-      else
+      } else {
         color = gCvars.world_clr.bDef ? Color( 255 ) : gCvars.world_clr.get_color();
-        
+      }
+      
       if( worldmats_new.at( i ) != color ) {
         float blend[4] = { ( float )color[0] / 255.f, ( float )color[1] / 255.f, ( float )color[2] / 255.f, ( float )color[3] / 255.f };
         mat->ColorModulate( blend[0], blend[1], blend[2] );
@@ -184,7 +187,7 @@ void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrame
   }
   
   VMTManager &FrameStageNotifyThunk = VMTManager::GetHook( CHLClient );
-  return FrameStageNotifyThunk.GetMethod<void ( __fastcall * )( PVOID, void *, ClientFrameStage_t ) > ( 35 )( CHLClient, _this, Stage );
+  return FrameStageNotifyThunk.GetMethod<void( __fastcall * )( PVOID, void *, ClientFrameStage_t ) >( 35 )( CHLClient, _this, Stage );
 }
 void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, matrix3x4 *pCustomBoneToWorld ) {
   VMTManager &hook = VMTManager::GetHook( gInts.MdlRender );
@@ -206,21 +209,21 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
     return;
   }
   
-  IMaterial *wanted = nullptr;
+  IMaterial *wanted_material = nullptr;
   
   switch( gCvars.ESP_cham_mat.value ) {
   case 0: {
-    wanted = Materials::shaded;
+    wanted_material = Materials::shaded;
     break;
   }
   
   case 1: {
-    wanted = Materials::glow;
+    wanted_material = Materials::glow;
     break;
   }
   
   case 2: {
-    wanted = Materials::shiny;
+    wanted_material = Materials::shiny;
     break;
   }
   
@@ -228,132 +231,134 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
     break;
   }
   
-  if( wanted ) {
+  if( wanted_material ) {
     if( gCvars.ESP_cham.value ) {
-      if( pEntity && !pEntity->IsDormant() ) {
+      if( pEntity && !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE ) {
         if( strstr( pszModelName, "models/player" ) || strstr( pszModelName, "models/bots" ) ) {
           if( !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum() ) {
-            if( pEntity->GetLifeState() == LIFE_ALIVE && pEntity->GetHealth() > 0 ) {
-              if( gCvars.ESP_backtrack.value == 1 && gCvars.Backtrack.value ) {
-                if( gCvars.aim_index == pInfo.entity_index ) {
-                  if( BacktrackData[gCvars.aim_index].size() ) {
-                    for( int i = 0; i < ( int )BacktrackData[gCvars.aim_index].size(); i++ ) {
-                      if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][i].simtime ) )
-                        if( BacktrackData[gCvars.aim_index][i].valid && BacktrackData[gCvars.aim_index][i].movement > 45 ) {
-                          Color tick = i == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
-                          //Hidden
-                          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-                          Materials::ForceMaterial( wanted, tick );
-                          gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
-                          //Visible
-                          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-                          Materials::ForceMaterial( wanted, tick );
-                          gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
-                        }
+            if( gCvars.ESP_backtrack.value && gCvars.Backtrack.value ) {
+              if( gCvars.aim_index == pInfo.entity_index ) {
+                int ticks = 0;
+                
+                for( int i = 0; i < ( int )BacktrackData[gCvars.aim_index].size() && ticks < 12; i++ ) {
+                  if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][i].simtime ) ) {
+                    ticks++;
+                    
+                    if( BacktrackData[gCvars.aim_index][i].valid && BacktrackData[gCvars.aim_index][i].movement > 45.0f ) {
+                      Color tick = i == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
+                      //Hidden
+                      wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+                      Materials::ForceMaterial( wanted_material, tick );
+                      gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
+                      //Visible
+                      wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+                      Materials::ForceMaterial( wanted_material, tick );
+                      gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][i].boneMatrix );
                     }
                   }
                 }
-                
-                //Hidden
-                wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-                Materials::ForceMaterial( wanted, team_color );
-                gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-                //Visible
-                wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-                Materials::ForceMaterial( wanted, team_color );
               }
-            } else {
-              gInts.MdlRender->ForcedMaterialOverride( nullptr );
             }
-          }
-        }
-      }
-      
-      if( gCvars.ESP_hand.value ) {
-        if( strstr( pszModelName, "arms" ) ) {
-          if( gCvars.ESP_hand.value == 1 ) {
-            gInts.RenderView->SetBlend( 0 );
-          } else if( gCvars.ESP_hand.value == 2 ) {
-            gInts.RenderView->SetBlend( 0.5 );
-          } else if( gCvars.ESP_hand.value == 3 ) {
-            if( pLocal->GetLifeState() == LIFE_ALIVE && pLocal->GetHealth() > 0 && !pLocal->IsDormant() ) {
-              Materials::ForceMaterial( wanted, team_color );
-            }
-          } else if( gCvars.ESP_hand.value == 4 ) {
-            if( pLocal->GetLifeState() == LIFE_ALIVE && pLocal->GetHealth() > 0 && !pLocal->IsDormant() ) {
-              wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-              wanted->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
-              Materials::ForceMaterial( wanted, team_color );
-            } else {
-              gInts.MdlRender->ForcedMaterialOverride( nullptr );
-            }
-          }
-        } else {
-          gInts.MdlRender->ForcedMaterialOverride( nullptr );
-        }
-      }
-      
-      if( pEntity ) {
-        int id = pEntity->GetClientClass()->iClassID;
-        
-        if( ( id == 86 || ( id == 88 && !( strstr( pszModelName, "blueprint" ) ) ) || id == 89 || id == 26 ) && gCvars.ESP_obj.value == 2 ) {
-          if( !pEntity->IsDormant() )
-            if( pEntity->GetLifeState() == LIFE_ALIVE ) {
-              //Hidden UnUnLit
-              wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-              Materials::ForceMaterial( wanted, team_color );
-              gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-              //Visible UnUnLit
-              wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-              Materials::ForceMaterial( wanted, team_color );
-            }
-        }
-      }
-      
-      if( strstr( pszModelName, "models/items/" ) || strstr( pszModelName, "models/props_halloween/" ) ) {
-        if( gCvars.ESP_obj.value != 3 )
-          wanted->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, false );
-          
-        if( gCvars.ESP_obj.value == 2 ) {
-          Color RGBA = gCvars.color_pickup.get_color();
-          //Hidden UnUnLit
-          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-          Materials::ForceMaterial( wanted, RGBA );
-          gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-          //Visible UnUnLit
-          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-          Materials::ForceMaterial( wanted, RGBA );
-        } else if( gCvars.ESP_obj.value == 3 ) {
-          Color RGBA = gCvars.color_pickup.get_color();
-          //Hidden UnUnLit
-          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-          wanted->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
-          Materials::ForceMaterial( wanted, RGBA );
-          gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-          //Visible UnUnLit
-          wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-          wanted->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
-          Materials::ForceMaterial( wanted, RGBA );
-        }
-      }
-      
-      auto should_cham_proj = []( CBaseEntity * ent, int lTeamNum, const char *name ) -> bool {
-        return !strcmp( name, "CTFProjectile_SentryRocket" ) || !strcmp( name, "CTFProjectile_Rocket" ) || !strcmp(
-          name, "CTFGrenadePipebombProjectile" ) && ent->GetTeamNum() != lTeamNum;
-      };
-      
-      if( pEntity ) {
-        if( should_cham_proj( pEntity, pLocal->GetTeamNum(), pEntity->GetClientClass()->chName ) ) {
-          if( gCvars.ESP_proj_cham.value ) {
-            Color RGBA = gCvars.color_pickup.get_color();
-            //Hidden Lit
-            wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-            Materials::ForceMaterial( wanted, RGBA );
+            
+            //Hidden
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+            Materials::ForceMaterial( wanted_material, team_color );
             gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-            //Visible UnLit
-            wanted->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-            Materials::ForceMaterial( wanted, RGBA );
+            //Visible
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+            Materials::ForceMaterial( wanted_material, team_color );
           }
+        }
+      }
+    } else {
+      gInts.MdlRender->ForcedMaterialOverride( nullptr );
+    }
+    
+    if( gCvars.ESP_hand.value ) {
+      if( strstr( pszModelName, "arms" ) ) {
+        if( gCvars.ESP_hand.value == 1 ) {
+          gInts.RenderView->SetBlend( 0 );
+        } else if( gCvars.ESP_hand.value == 2 ) {
+          gInts.RenderView->SetBlend( 0.5 );
+        } else if( gCvars.ESP_hand.value == 3 ) {
+          if( pLocal->GetLifeState() == LIFE_ALIVE && pLocal->GetHealth() > 0 && !pLocal->IsDormant() ) {
+            Materials::ForceMaterial( wanted_material, team_color );
+          }
+        } else if( gCvars.ESP_hand.value == 4 ) {
+          if( pLocal->GetLifeState() == LIFE_ALIVE && pLocal->GetHealth() > 0 && !pLocal->IsDormant() ) {
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
+            Materials::ForceMaterial( wanted_material, team_color );
+          } else {
+            gInts.MdlRender->ForcedMaterialOverride( nullptr );
+          }
+        }
+      } else {
+        gInts.MdlRender->ForcedMaterialOverride( nullptr );
+      }
+    }
+    
+    if( pEntity ) {
+      int id = pEntity->GetClientClass()->iClassID;
+      
+      if( ( id == 86 || ( id == 88 && !( strstr( pszModelName, "blueprint" ) ) ) || id == 89 || id == 26 ) && gCvars.ESP_obj.value == 2 ) {
+        if( !pEntity->IsDormant() )
+          if( pEntity->GetLifeState() == LIFE_ALIVE ) {
+            //Hidden UnUnLit
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+            Materials::ForceMaterial( wanted_material, team_color );
+            gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+            //Visible UnUnLit
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+            Materials::ForceMaterial( wanted_material, team_color );
+          }
+      }
+    }
+    
+    if( strstr( pszModelName, "models/items/" ) || strstr( pszModelName, "models/props_halloween/" ) ) {
+      if( gCvars.ESP_obj.value != 3 ) {
+        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, false );
+      }
+      
+      if( gCvars.ESP_obj.value == 2 ) {
+        Color RGBA = gCvars.color_pickup.get_color();
+        //Hidden UnUnLit
+        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+        Materials::ForceMaterial( wanted_material, RGBA );
+        gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+        //Visible UnUnLit
+        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+        Materials::ForceMaterial( wanted_material, RGBA );
+      } else if( gCvars.ESP_obj.value == 3 ) {
+        Color RGBA = gCvars.color_pickup.get_color();
+        //Hidden UnUnLit
+        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
+        Materials::ForceMaterial( wanted_material, RGBA );
+        gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+        //Visible UnUnLit
+        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
+        Materials::ForceMaterial( wanted_material, RGBA );
+      }
+    }
+    
+    auto should_cham_proj = []( CBaseEntity * ent, int lTeamNum, const char *name ) -> bool {
+      return !strcmp( name, "CTFProjectile_SentryRocket" ) || !strcmp( name, "CTFProjectile_Rocket" ) || !strcmp(
+        name, "CTFGrenadePipebombProjectile" ) && ent->GetTeamNum() != lTeamNum;
+    };
+    
+    if( pEntity ) {
+      if( should_cham_proj( pEntity, pLocal->GetTeamNum(), pEntity->GetClientClass()->chName ) ) {
+        if( gCvars.ESP_proj_cham.value ) {
+          Color RGBA = gCvars.color_pickup.get_color();
+          //Hidden Lit
+          wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+          Materials::ForceMaterial( wanted_material, RGBA );
+          gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+          //Visible UnLit
+          wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+          Materials::ForceMaterial( wanted_material, RGBA );
         }
       }
     }

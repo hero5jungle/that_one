@@ -6,6 +6,8 @@
 #include "../../sdk/headers/weaponlist.h"
 #define tick_interval gInts.globals->interval_per_tick
 #define tick_intervalsqr tick_interval * tick_interval
+#define TIME_TO_TICKS( dt )   ( (int)( 0.5f + (float)(dt) / gInts.globals->interval_per_tick  ) )
+
 namespace Aimbot {
 
   void Run( CBaseEntity *pLocal, CUserCmd *pCommand ) {
@@ -15,51 +17,60 @@ namespace Aimbot {
     CBaseCombatWeapon *wpn = pLocal->GetActiveWeapon();
     gCvars.aim_index = -1;
     
-    if( !gCvars.Aimbot_enable.value )
+    if( !gCvars.Aimbot_enable.value ) {
       return;
-      
-    if( !gCvars.Aimbot_auto_aim.KeyDown() )
+    }
+    
+    if( !gCvars.Aimbot_auto_aim.KeyDown() ) {
       return;
-      
-    if( !wpn )
+    }
+    
+    if( !wpn ) {
       return;
-      
+    }
+    
     int wpn_slot = wpn->GetSlot();
+    bool is_melee = ( wpn_slot == 2 );
+    int Class = pLocal->GetClassNum();
     int index = GetBestTarget( pLocal, pCommand );
-    const bool melee = ( wpn_slot == 2 );
-    const char *Class = pLocal->szGetClass();
     
-    if( index == -1 )
+    if( index == -1 ) {
       return;
-      
+    }
+    
     CBaseEntity *pEntity = GetBaseEntity( index );
+    gCvars.aim_index = index;
     
-    if( !pEntity )
+    if( !pEntity ) {
       return;
-      
-    if( pEntity->IsDormant() )
+    }
+    
+    if( pEntity->IsDormant() ) {
       return;
-      
-    if( pEntity->GetLifeState() != LIFE_ALIVE )
+    }
+    
+    if( pEntity->GetLifeState() != LIFE_ALIVE ) {
       return;
-      
+    }
+    
     Vector vLocal = pLocal->GetEyePosition();
     int iBestHitbox = -1;
     
-    if( melee ) {
+    if( is_melee ) {
       iBestHitbox = 4;
-    } else if( !gCvars.Aimbot_hitbox.value || gCvars.Aimbot_hitbox.value == 1 ) {
+    } else if( gCvars.Aimbot_hitbox.value == 0 || gCvars.Aimbot_hitbox.value == 1 ) {
       float last = FLT_MAX;
       bool head = Util::IsHeadshotWeapon( Class, wpn );
       
       if( gCvars.head_body.value )
-        if( strcmp( Class, "Sniper" ) == 0 )
+        if( Class == TF2_Sniper ) {
           head = head && pEntity->GetHealth() > 50;
-          
+        }
+        
       for( int box = head ? 0 : 4; box < 17; box++ ) {
         Vector temp = pEntity->GetHitboxPosition( box );
         Vector angle = Util::CalcAngle( vLocal, temp );
-        float fov = Util::GetFOV( pCommand->viewangles,  angle );
+        float fov = Util::GetFOV( pCommand->viewangles, angle );
         
         if( pLocal->CanSee( pEntity, temp ) ) {
           if( gCvars.Aimbot_hitbox.value == 1 ) {
@@ -84,30 +95,30 @@ namespace Aimbot {
     }
     
     gCvars.hitbox = iBestHitbox;
-    Vector vEntity = Vector();
-    float distance = Util::Distance( pEntity->GetHitboxPosition( iBestHitbox ), vLocal );
-    weaponid id = ( weaponid )wpn->GetItemDefinitionIndex();
+    Vector vEntity;
+    weaponid id = wpn->GetItemDefinitionIndex();
     float speed = -1;
     float chargetime = 0;
     float gravity = 0;
     bool quick_release = false;
     
-    if( !Util::projSetup( speed, chargetime, gravity, quick_release, id, wpn ) )
+    if( !Util::projSetup( speed, chargetime, gravity, quick_release, id, wpn ) ) {
       return;
-      
+    }
+    
     if( speed != -1 ) {
-      bool isonGround = pEntity->GetFlags() & FL_ONGROUND;
+      bool is_on_ground = pEntity->GetFlags() & FL_ONGROUND;
       
       if( id == weaponid::Soldier_s_TheRighteousBison || id == weaponid::Demoman_m_TheLooseCannon ) {
         vEntity = pEntity->GetHitboxPosition( gCvars.hitbox );
-      } else if( strcmp( Class, "Demoman" ) == 0 || strcmp( Class, "Soldier" ) == 0 ) {
+      } else if( Class == TF2_Demoman || Class == TF2_Soldier ) {
         vEntity = pEntity->GetAbsOrigin();
-        vEntity[2] += 10.0f;
+        vEntity[2] += 15.0f;
       } else {
         vEntity = pEntity->GetHitboxPosition( gCvars.hitbox );
       }
       
-      auto hitbox_pred = [&vLocal, &pEntity, &isonGround]( Vector hitbox, float speed, float gravity, float distance_to_ground ) -> Vector {
+      vEntity = [&vLocal, &pEntity, &is_on_ground]( Vector hitbox, float speed, float gravity, float distance_to_ground ) -> Vector {
         float predicted_time = ( ( vLocal.DistTo( hitbox ) / speed ) + tick_interval );
         float server_gravity = gInts.cvar->FindVar( "sv_gravity" )->GetFloat();
         
@@ -116,19 +127,21 @@ namespace Aimbot {
         
         hitbox[0] += ( vec_velocity[0] * predicted_time ) + tick_interval;
         hitbox[1] += ( vec_velocity[1] * predicted_time ) + tick_interval;
-        hitbox[2] += ( isonGround ? ( vec_velocity[2] * predicted_time ) + tick_interval :
+        hitbox[2] += ( is_on_ground ? ( vec_velocity[2] * predicted_time ) + tick_interval :
                        ( 0.5 * ( -server_gravity + gravity ) * pow( predicted_time, 2 ) + vec_velocity[2] * predicted_time ) ) + tick_interval;
                        
         if( distance_to_ground > 0.0f )
-          if( hitbox[2] < hitbox[2] - distance_to_ground )
+          if( hitbox[2] < hitbox[2] - distance_to_ground ) {
             hitbox[2] = hitbox[2] - distance_to_ground;
-            
+          }
+          
         return hitbox;
-      };
-      vEntity = hitbox_pred( vEntity, speed, gravity, Util::DistanceToGround( pEntity ) );
+      }( vEntity, speed, gravity, Util::DistanceToGround( pEntity ) );
     } else {
-      if( index != -1 && gCvars.backtrack_arr != 0 && BacktrackData[index].size() > gCvars.backtrack_arr  && Backtrack::is_tick_valid( BacktrackData[index][gCvars.backtrack_arr].simtime ) ) {
-        vEntity = BacktrackData[index][gCvars.backtrack_arr].hitbox;
+      if( gCvars.backtrack_arr != -1 && ( int )BacktrackData[index].size() > gCvars.backtrack_arr ) {
+        if( Backtrack::is_tick_valid( BacktrackData[index][gCvars.backtrack_arr].simtime ) ) {
+          vEntity = BacktrackData[index][gCvars.backtrack_arr].hitbox;
+        }
       } else if( !gCvars.latency.value ) {
         vEntity = pEntity->GetHitboxPosition( gCvars.hitbox );
       }
@@ -136,20 +149,23 @@ namespace Aimbot {
     
     gCvars.aim = vEntity;
     
-    if( vEntity.IsZero() || !pLocal->CanSee( pEntity, vEntity ) )
+    if( vEntity.IsZero() || !pLocal->CanSee( pEntity, vEntity ) ) {
       return;
-      
-    distance = Util::Distance( vLocal, vEntity );
-    float minimalDistance = -1;
+    }
     
-    if( melee )
-      minimalDistance = 8.4f;
-      
-    Util::minDist( id, minimalDistance );
+    float distance = Util::Distance( vLocal, vEntity );
+    float minimalDistance = 9999.0f;
     
-    if( distance > minimalDistance && minimalDistance != -1 )
+    if( is_melee ) {
+      minimalDistance = 4.0f + wpn->GetSwingRange( pLocal ) / 10.0f;
+    } else {
+      Util::minDist( id, minimalDistance );
+    }
+    
+    if( distance > minimalDistance ) {
       return;
-      
+    }
+    
     static bool dunk = false;
     
     if( id == weaponid::Demoman_m_TheLooseCannon ) {
@@ -192,17 +208,15 @@ namespace Aimbot {
     
     Vector angle_fov = Util::CalcAngle( vLocal, vEntity );
     Vector angle_proj = Util::CalcAngle( vLocal, pEntity->GetHitboxPosition( 4 ) );
-    const bool fov = ( Util::GetFOV( pCommand->viewangles, angle_fov ) < gCvars.Aimbot_fov.value );
-    const bool pyro = ( gCvars.Aimbot_pyro.value && strcmp( Class, "Pyro" ) == 0 && wpn_slot == 0 && !( wpn->GetItemDefinitionIndex() == weaponid::Pyro_m_DragonsFury ) );
-    const bool proj = ( speed != -1 && gCvars.Aimbot_proj.value && ( Util::GetFOV( pCommand->viewangles, angle_proj ) < gCvars.Aimbot_fov.value ) );
-    const bool lazy_melee = melee && gCvars.Aimbot_melee.value;
+    bool fov = ( Util::GetFOV( pCommand->viewangles, angle_fov ) < gCvars.Aimbot_fov.value );
+    bool pyro = ( gCvars.Aimbot_pyro.value && Class == TF2_Pyro && wpn_slot == 0 && !( wpn->GetItemDefinitionIndex() == weaponid::Pyro_m_DragonsFury ) );
+    bool proj = ( speed != -1 && gCvars.Aimbot_proj.value && ( Util::GetFOV( pCommand->viewangles, angle_proj ) < gCvars.Aimbot_fov.value ) );
+    bool lazy_melee = is_melee && gCvars.Aimbot_melee.value;
     
     if( fov || lazy_melee || pyro || proj ) {
       Util::lookAt( gCvars.Aimbot_silent.value, vAngs, pCommand );
       
-      if( ( gCvars.backtrack_tick > 0 && gCvars.backtrack_arr > 0 ) &&
-          ( int )BacktrackData[index].size() > gCvars.backtrack_arr &&
-          BacktrackData[index][gCvars.backtrack_arr].valid ) {
+      if( gCvars.backtrack_tick != -1 && gCvars.backtrack_arr != -1 ) {
         pCommand->tick_count = gCvars.backtrack_tick;
       }
       
@@ -222,26 +236,32 @@ namespace Aimbot {
         }
         
         if( quick_release ) {
-          if( dunk )
+          if( dunk ) {
             pCommand->buttons &= ~IN_ATTACK;
-        } else if( strcmp( Class, "Heavy" ) == 0 ) {
+          }
+        } else if( Class == TF2_Heavy ) {
           //minigun
-          if( wpn_slot == 0 && pCommand->buttons & IN_ATTACK2 )
+          if( wpn_slot == 0 && pCommand->buttons & IN_ATTACK2 ) {
             pCommand->buttons |= IN_ATTACK;
-          else if( wpn_slot != 0 )
+          } else if( wpn_slot != 0 ) {
             pCommand->buttons |= IN_ATTACK;
-        } else if( strcmp( Class, "Sniper" ) == 0 && wpn_slot == 0 ) {
+          }
+        } else if( Class == TF2_Sniper && wpn_slot == 0 ) {
           if( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && gCvars.Aimbot_zoom.value ) || !gCvars.Aimbot_zoom.value ) {
             pCommand->buttons |= IN_ATTACK;
           }
-        } else if( strcmp( Class, "Spy" ) == 0 ) {
-          if( Util::IsHeadshotWeapon( Class, wpn ) )
-            if( Util::CanAmbassadorHeadshot( wpn ) )
+        } else if( Class == TF2_Spy ) {
+          if( Util::IsHeadshotWeapon( Class, wpn ) ) {
+            if( Util::CanAmbassadorHeadshot( wpn ) ) {
               pCommand->buttons |= IN_ATTACK;
-              
-          if( melee )
-            if( Util::canBackstab( pLocal, pEntity, vAngs ) )
+            }
+          } else if( is_melee ) {
+            if( Util::canBackstab( pLocal, pEntity, vAngs ) ) {
               pCommand->buttons |= IN_ATTACK;
+            }
+          } else {
+            pCommand->buttons |= IN_ATTACK;
+          }
         } else {
           pCommand->buttons |= IN_ATTACK;
         }
@@ -252,86 +272,75 @@ namespace Aimbot {
   }
   
   int GetBestTarget( CBaseEntity *pLocal, CUserCmd *pCommand ) {
-    int bestTarget = -1;           //this num could be smaller
-    float flDistToBest = FLT_MAX;
-    Vector vLocal = pLocal->GetEyePosition();
+    int best_target = -1;
+    float best_score = FLT_MAX;
+    Vector local_pos = pLocal->GetEyePosition();
     CBaseCombatWeapon *wpn = pLocal->GetActiveWeapon();
+    gCvars.backtrack_arr = -1;
+    gCvars.backtrack_tick = -1;
     
-    if( !wpn )
+    if( !wpn ) {
       return -1;
-      
-    int wpn_slot = wpn->GetSlot();
-    const bool melee = wpn_slot == 2;
+    }
     
-    if( !gCvars.Aimbot_melee.value && melee )
+    bool melee = wpn->GetSlot() == 2;
+    
+    if( !gCvars.Aimbot_melee.value && melee ) {
       return -1;
-      
+    }
+    
     for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
-      if( i == me )
+      if( i == me ) {
         continue;
-        
+      }
+      
       CBaseEntity *pEntity = GetBaseEntity( i );
       
-      if( !pEntity )
+      if( !pEntity ) {
         continue;
-        
-      if( pEntity->IsDormant() )
+      }
+      
+      if( pEntity->IsDormant() ) {
         continue;
-        
-      if( pEntity->GetLifeState() != LIFE_ALIVE )
+      }
+      
+      if( pEntity->GetLifeState() != LIFE_ALIVE ) {
         continue;
-        
+      }
+      
       if( pEntity->GetCond() & TFCond_Ubercharged ||
           pEntity->GetCond() & TFCond_UberchargeFading ||
-          pEntity->GetCond() & TFCond_Bonked )
+          pEntity->GetCond() & TFCond_Bonked ) {
         continue;
-        
-      if( pEntity->GetCond() & TFCond_Cloaked && gCvars.Ignore_A_cloak.value )
+      }
+      
+      if( pEntity->GetCond() & TFCond_Cloaked && gCvars.Ignore_A_cloak.value ) {
         continue;
-        
-      if( pEntity->GetCond() & TFCond_Taunting && gCvars.Ignore_A_taunt.value )
+      }
+      
+      if( pEntity->GetCond() & TFCond_Taunting && gCvars.Ignore_A_taunt.value ) {
         continue;
-        
-      if( pEntity->GetCond() & TFCond_Disguised && gCvars.Ignore_A_disguise.value )
+      }
+      
+      if( pEntity->GetCond() & TFCond_Disguised && gCvars.Ignore_A_disguise.value ) {
         continue;
-        
+      }
+      
       static ConVar *mp_friendlyfire = gInts.cvar->FindVar( "mp_friendlyfire" );
       
-      if( mp_friendlyfire->GetInt() == 0 && pEntity->GetTeamNum() == pLocal->GetTeamNum() )
+      if( mp_friendlyfire->GetInt() == 0 && pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
         continue;
-        
-      if( gCvars.latency.value ) {
-        for( int t = 0; t < ( int )BacktrackData[i].size(); t++ ) {
-          if( !BacktrackData[i][t].valid || !Backtrack::is_tick_valid( BacktrackData[i][t].simtime ) ) continue;
-          
-          Vector vEntity = BacktrackData[i][t].hitbox;
-          Vector angle = Util::CalcAngle( vLocal, vEntity );
-          float flFOV = Util::GetFOV( pCommand->viewangles, angle );
-          float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
-          
-          if( melee ) {
-            if( distance < flDistToBest ) {
-              flDistToBest = distance;
-              gCvars.aim_index = i;
-              bestTarget = i;
-            }
-          } else {
-            if( flFOV < flDistToBest ) {
-              flDistToBest = flFOV;
-              gCvars.aim_index = i;
-              bestTarget = i;
-            }
-          }
-        }
-      } else {
+      }
+      
+      if( !gCvars.latency.value ) {
         int iBestHitbox = -1;
         
         if( melee ) {
           iBestHitbox = 4;
         } else if( !gCvars.Aimbot_hitbox.value ) {
-          if( Util::IsHeadshotWeapon( pEntity->szGetClass(), wpn ) )
+          if( Util::IsHeadshotWeapon( pEntity->GetClassNum(), wpn ) ) {
             iBestHitbox = 0;
-          else {
+          } else {
             iBestHitbox = 4;
           }
         } else if( gCvars.Aimbot_hitbox.value == 1 ) {
@@ -342,30 +351,45 @@ namespace Aimbot {
         
         Vector vEntity = pEntity->GetHitboxPosition( iBestHitbox );
         
-        if( vEntity.IsZero() )
+        if( vEntity.IsZero() ) {
           continue;
-          
-        Vector angle = Util::CalcAngle( vLocal, vEntity );
-        float flFOV = Util::GetFOV( pCommand->viewangles, angle );
+        }
+        
+        Vector angle = Util::CalcAngle( local_pos, vEntity );
+        float fov = Util::GetFOV( pCommand->viewangles, angle );
         float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
         
-        if( melee ) {
-          if( distance < flDistToBest ) {
-            flDistToBest = distance;
-            gCvars.aim_index = i;
-            bestTarget = i;
-          }
-        } else {
-          if( flFOV < flDistToBest ) {
-            flDistToBest = flFOV;
-            gCvars.aim_index = i;
-            bestTarget = i;
+        if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
+          best_target = i;
+          best_score = melee ? distance : fov;
+        }
+      }
+      
+      if( gCvars.Backtrack.value ) {
+        int ticks = 0;
+        
+        for( int t = 0; t < ( int )BacktrackData[i].size() && ticks < 12; t++ ) {
+          if( BacktrackData[i][t].valid && Backtrack::is_tick_valid( BacktrackData[i][t].simtime ) ) {
+            ticks++;
+            Vector vEntity = BacktrackData[i][t].hitbox;
+            Vector angle = Util::CalcAngle( local_pos, vEntity );
+            float fov = Util::GetFOV( pCommand->viewangles, angle );
+            float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
+            
+            if( BacktrackData[i][t].simtime > ( pLocal->flSimulationTime() - 1.0f ) ) {
+              if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
+                best_score = melee ? distance : fov;
+                best_target = i;
+                gCvars.backtrack_arr = t;
+                gCvars.backtrack_tick = TIME_TO_TICKS( BacktrackData[i][t].simtime );
+              }
+            }
           }
         }
       }
     }
     
-    return bestTarget;
+    return best_target;
   }
   
 }

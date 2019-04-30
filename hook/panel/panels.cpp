@@ -25,24 +25,28 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
         FocusOverlay = vguiPanel;
         Intro();
       }
-    } else
+    } else {
       gInts.Panels->SetTopmostPopup( FocusOverlay, true );
-      
-    if( FocusOverlay != vguiPanel || gInts.Engine->IsDrawingLoadingImage() )
+    }
+    
+    if( FocusOverlay != vguiPanel || gInts.Engine->IsDrawingLoadingImage() ) {
       return;
-      
+    }
+    
     CScreenSize newSize;
     gInts.Engine->GetScreenSize( newSize.iScreenWidth, newSize.iScreenHeight );
     
-    if( newSize.iScreenWidth != gScreenSize.iScreenWidth || newSize.iScreenHeight != gScreenSize.iScreenHeight )
+    if( newSize.iScreenWidth != gScreenSize.iScreenWidth || newSize.iScreenHeight != gScreenSize.iScreenHeight ) {
       DrawManager::Reload();
-      
+    }
+    
     CBaseEntity *pLocal = gInts.EntList->GetClientEntity( me );
     
     if( pLocal ) {
       if( !pLocal->IsDormant() )
-        if( pLocal->GetLifeState() == LIFE_ALIVE )
+        if( pLocal->GetLifeState() == LIFE_ALIVE ) {
           ESP::Run( pLocal );
+        }
     }
     
     // ========== Update your input FIRST to enable usage throughout your program ========== //
@@ -62,7 +66,7 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
 // !! Do NOT forget to initialize your menu, fonts, textures, etc.  !!
 // !! This is required for the menu to work                         !!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-void Intro( ) {
+void Intro() {
   try {
     DrawManager::Initialize(); //Initalize the drawing class.
     gMenu.CreateGUI();

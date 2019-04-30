@@ -10,15 +10,20 @@ namespace Signatures {
     DWORD firstMatch = NULL;
     
     for( DWORD pCur = dwAddress; pCur < dwLength; pCur++ ) {
-      if( !*pat ) return firstMatch;
-      
+      if( !*pat )
+        return firstMatch;
+        
       if( *( PBYTE )pat == '\?' || *( BYTE * )pCur == getByte( pat ) ) {
-        if( !firstMatch ) firstMatch = pCur;
-        
-        if( !pat[2] ) return firstMatch;
-        
-        if( *( PWORD )pat == '\?\?' || *( PBYTE )pat != '\?' ) pat += 3;
-        else pat += 2;
+        if( !firstMatch )
+          firstMatch = pCur;
+          
+        if( !pat[2] )
+          return firstMatch;
+          
+        if( *( PWORD )pat == '\?\?' || *( PBYTE )pat != '\?' )
+          pat += 3;
+        else
+          pat += 2;
       } else {
         pat = szPattern;
         firstMatch = 0;

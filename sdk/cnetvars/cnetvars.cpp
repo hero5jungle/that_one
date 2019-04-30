@@ -35,9 +35,10 @@ void CNetVars::populate_nodes( RecvTable *recv_table, map_type *map ) {
     const auto *prop = recv_table->GetProp( i );
     const auto prop_info = std::make_shared<node>( prop->GetOffset() );
     
-    if( prop->GetType() == DPT_DataTable )
+    if( prop->GetType() == DPT_DataTable ) {
       populate_nodes( prop->GetDataTable(), &prop_info->nodes );
-      
+    }
+    
     map->emplace( prop->GetName(), prop_info );
   }
 }
