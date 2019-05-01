@@ -12,26 +12,21 @@
 #include "headers/dt_recv2.h"
 #include "headers/studio.h"
 #include "headers/weaponlist.h"
+#include "headers/bspflags.h"
 using namespace std;
 
-typedef void *( __cdecl *CreateInterface_t )( const char *, int * );
-typedef void *( *CreateInterfaceFn )( const char *pName, int *pReturnCode );
-
-#define VMTManager toolkit::VMTManager
-#define VMTBaseManager toolkit::VMTBaseManager
-
 #define WIN32_LEAN_AND_MEAN
-#pragma optimize("gsy", on)
-#pragma warning(disable : 4244)  // Possible loss of data
-
+#pragma warning(disable : 4244)  // casting big ints to small ints may result in data loss 
+using CreateInterface_t = void *( __cdecl * )( const char *, int * );
+using CreateInterfaceFn = void *( * )( const char *pName, int *pReturnCode );
+using VMTBaseManager = toolkit::VMTBaseManager;
+using VMTManager = toolkit::VMTManager;
 
 using VertexFormat_t = unsigned __int64;
 class CGameTrace;
-
 using trace_t = CGameTrace;
 using matrix3x4 = float[3][4];
 using ModelInstanceHandle_t = int;
-
 class CUtil;
 class CNetVars;
 class CBaseCombatWeapon;
@@ -77,6 +72,11 @@ class IMaterialSystemHardwareConfig;
 class CShadowMgr;
 class IMaterial;
 class KeyValues;
+class InputEvent_t;
+class INetMessage;
+class INetChannelHandler;
+using FileHandle_t = void *;
+using MaterialHandle_t = unsigned short ;
 
 #define me gInts.Engine->GetLocalPlayer()
 #define GetBaseEntity gInts.EntList->GetClientEntity
@@ -90,6 +90,14 @@ inline wstring ToWchar( const char *text ) {
   mbstowcs( &wc[0], text, length );
   return wc;
 }
+
+#define XASSERT( x ) if( !(x) ) Fatal( #x );
+
+inline void Fatal( const char *fault ) {
+  MessageBoxA( nullptr, fault, "FATAL ERROR", MB_ICONERROR );
+  ExitProcess( 0 );
+}
+
 typedef struct player_info_s {
   char name[32];
   int userID;
@@ -257,9 +265,8 @@ class CBaseEntity {
     DYNVAR_RETURN( int, this, "DT_BaseAnimating", "m_nHitboxSet" );
   }
   
-  void SetGlowEnabled( bool t ) {
-    DYNVAR( n, bool, "DT_TFPlayer", "m_bGlowEnabled" );
-    return n.SetValue( this, t );
+  int  GetTickBase( ) {
+    DYNVAR_RETURN( int, this, "DT_BasePlayer", "localdata", "m_nTickBase" );
   }
   
   float flSimulationTime() {
@@ -1096,8 +1103,6 @@ enum AnalogCode_t {
   // needed but not rly
 };
 
-class InputEvent_t;
-
 class IInputSystem : public IAppSystem {
  public:
   // Attach, detach input system from a particular window
@@ -1156,7 +1161,6 @@ class IInputSystem : public IAppSystem {
   // Sample the joystick and append events to the input queue
   virtual void SampleDevices( void ) = 0;
   
-  // FIXME: Currently force-feedback is only supported on the Xbox 360
   virtual void SetRumble( float fLeftMotor, float fRightMotor,
                           int userId = -1 ) = 0;
   virtual void StopRumble( void ) = 0;
@@ -1380,9 +1384,6 @@ typedef struct netadr_s {
 #define MAX_STREAMS 2
 #define MAX_OSPATH 260
 #define SUBCHANNEL_FREE 0  // subchannel is free to use
-
-class INetMessage;
-class INetChannelHandler;
 
 class INetChannelInfo {
  public:
@@ -1615,8 +1616,6 @@ class INetChannelHandler {
   virtual void FileSent( const char *fileName,
                          unsigned int transferID ) = 0; // we sent a file
 };
-
-typedef void *FileHandle_t;
 
 class CNetChan : public INetChannel {
  public: // netchan structurs
@@ -1903,8 +1902,6 @@ class IPanel {
         state );
   }
 };
-
-//struct Vertex_t;
 
 class ISurface {
  public:
@@ -2777,8 +2774,6 @@ class IMaterial {
   virtual int GetReferenceCount() const = 0;
 };
 
-typedef unsigned short MaterialHandle_t;
-
 class CMaterialSystem {
  public:
   IMaterial *FindMaterial( char const *pMaterialName, const char *pTextureGroupName, bool complain = true, const char *pComplainPrefix = NULL ) {
@@ -2845,7 +2840,7 @@ class CRenderView {
                                
   // Draw brush model that has no origin/angles change ( uses identity transform
   // )
-  // FIXME, Material proxy IClientEntity *baseentity is unused right now, use
+  // FIXME, Material proxy CBaseEntity *baseentity is unused right now, use
   // DrawBrushModel for brushes with
   //  proxies for now.
   virtual void DrawIdentityBrushModel( IWorldRenderList *pList,
@@ -2955,8 +2950,7 @@ class CRenderView {
   virtual void VGui_Paint( int mode ) = 0;
 };
 
-class CInterfaces {
- public:
+struct CInterfaces {
   CEntList *EntList;
   EngineClient *Engine;
   IPanel *Panels;
@@ -2975,6 +2969,14 @@ class CInterfaces {
   PVOID *ClientState;
 };
 
+struct CHooks {
+  VMTBaseManager *FrameStageNotifyThink = new VMTBaseManager;
+  VMTBaseManager *CreateMove = new VMTBaseManager;
+  VMTBaseManager *panelHook = new VMTBaseManager;
+  VMTBaseManager *DrawModelExucute = new VMTBaseManager;
+  VMTBaseManager *SendDatagram = new VMTBaseManager;
+};
+
 struct CIncomingSequence {
   CIncomingSequence( int instate, int outstate, int seqnr, float time ) {
     inreliablestate = instate;
@@ -2990,4 +2992,4 @@ struct CIncomingSequence {
 
 extern CInterfaces gInts;
 extern CGlobalVariables gCvars;
-
+extern CHooks gHooks;

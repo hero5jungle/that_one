@@ -1,7 +1,6 @@
 #include "esp.h"
 #include "../../tools/draw/cdrawmanager.h"
 #include "../../tools/util/Util.h"
-#include "../../sdk/headers/bspflags.h"
 
 namespace ESP {
   int iWidth, iHeight;
@@ -52,13 +51,13 @@ namespace ESP {
         Vector center, pos;
         pEnt->GetWorldSpaceCenter( center );
         string name = pEnt->GetClientClass()->chName;
-        int id = pEnt->GetClientClass()->iClassID;
+        classId id = ( classId )pEnt->GetClientClass()->iClassID;
         float distance = Util::Distance( pLocal->GetEyePosition(), center );
         Color team = Util::team_color( pLocal, pEnt );
         
         if( distance < 100 )
           if( DrawManager::WorldToScreen( center, pos ) ) {
-            if( id == 86 ) {
+            if( id == classId::CObjectDispenser ) {
               CObjectDispenser *pDispenser = ( CObjectDispenser * )( pEnt );
               
               if( pDispenser == nullptr ) {
@@ -85,7 +84,7 @@ namespace ESP {
               }
               
               continue;
-            } else if( id == 88 ) {
+            } else if( id == classId::CObjectSentrygun ) {
               CObjectSentryGun *pSentryGun = ( CObjectSentryGun * )( pEnt );
               
               if( pSentryGun == nullptr ) {
@@ -116,7 +115,7 @@ namespace ESP {
               }
               
               continue;
-            } else if( id == 89 ) {
+            } else if( id == classId::CObjectTeleporter ) {
               CObjectTeleporter *pTeleporter = ( CObjectTeleporter * )( pEnt );
               
               if( pTeleporter == nullptr ) {
@@ -141,7 +140,7 @@ namespace ESP {
               }
               
               continue;
-            } else if( id == 26 ) {
+            } else if( id == classId::CCaptureFlag ) {
               if( gCvars.ESP_item_text.value ) {
                 DrawManager::DrawString( pos.x, pos.y, team, "intel", gFonts.anon, true );
               }

@@ -1,7 +1,5 @@
 #include "trigger.h"
 #include "../../tools/util/Util.h"
-#include "../../sdk/headers/weaponList.h"
-#include "../../sdk/headers/bspflags.h"
 
 namespace Triggerbot {
 

@@ -1,8 +1,6 @@
 #include "airblast.h"
 #include "../../tools/util/Util.h"
 #include "../../sdk/sdk.h"
-#include "../../sdk/headers/bspflags.h"
-#include "../../sdk/headers/weaponlist.h"
 
 namespace Airblast {
 

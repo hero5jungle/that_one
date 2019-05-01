@@ -2,6 +2,7 @@
 #include "../../tools/util/Util.h"
 std::deque<LagRecord> BacktrackData[64];
 #define BONE_USED_BY_HITBOX 0x100
+#define BONE_USED_BY_ANYTHING 0x7FF00
 namespace Backtrack {
   void collect_tick() {
     CBaseEntity *pLocal = GetBaseEntity( me );
@@ -28,7 +29,7 @@ namespace Backtrack {
         
         Vector hitbox = pEntity->GetHitboxPosition( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
         BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ).Length(), hitbox } );
-        BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, BONE_USED_BY_HITBOX, 256, gInts.globals->curtime );
+        BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, BONE_USED_BY_HITBOX | BONE_USED_BY_ANYTHING, 256, gInts.globals->curtime );
         
         if( BacktrackData[i].size() > 70 ) {
           BacktrackData[i].pop_back();
@@ -67,13 +68,15 @@ namespace Backtrack {
     
     return fmax( lerp, ratio / updaterate );
   }
-  
+  CachedINetChannel INetChannel_cache;
+  void cache_INetChannel( INetChannel *ch ) {
+    INetChannel_cache = CachedINetChannel( ch );
+  }
   bool is_tick_valid( float simtime ) {
     float correct = 0;
-    INetChannel *ch = gInts.Engine->GetNetChannelInfo();
-    correct += ch->GetAvgLatency( FLOW_INCOMING );
-    correct += ch->GetAvgLatency( FLOW_OUTGOING );
-    correct += lerp_time();
+    correct += INetChannel_cache.flow_incoming;
+    correct += INetChannel_cache.flow_outgoing;
+    correct += INetChannel_cache.lerptime;
     
     if( gCvars.latency.value ) {
       correct += ( gCvars.latency_amount.value + gCvars.ping_diff.value ) / 1000.0f;

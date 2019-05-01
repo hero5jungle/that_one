@@ -1,6 +1,5 @@
 #include "sdk.h"
 #include "../tools/util/Util.h"
-#include "headers/bspflags.h"
 
 bool CBaseEntity::CanSee( CBaseEntity *pEntity, const Vector &pos ) {
   trace_t tr;

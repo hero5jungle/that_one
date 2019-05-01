@@ -2,8 +2,6 @@
 #include "../../tools/util/Util.h"
 #include "../backtrack/backtrack.h"
 #include "../event/event.h"
-#include "../../sdk/headers/bspflags.h"
-#include "../../sdk/headers/weaponlist.h"
 #define tick_interval gInts.globals->interval_per_tick
 #define tick_intervalsqr tick_interval * tick_interval
 #define TIME_TO_TICKS( dt )   ( (int)( 0.5f + (float)(dt) / gInts.globals->interval_per_tick  ) )

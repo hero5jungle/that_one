@@ -1,7 +1,6 @@
 #include "latency.h"
 
 INetChannel *old_ch = nullptr;
-VMTBaseManager *datagramHook = new VMTBaseManager();
 std::deque<CIncomingSequence>sequences;
 int lastincomingsequencenumber = 0;
 

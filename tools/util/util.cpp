@@ -1,5 +1,4 @@
 #include "Util.h"
-#include "../../sdk/headers/bspflags.h"
 #include "../signature/csignature.h"
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -8,16 +7,18 @@ namespace Util {
     Vector Delta = vOrigin - vLocalOrigin;
     float Dist = sqrt( Delta.Length() );
     
-    if( Dist < 1.0f )
+    if( Dist < 1.0f ) {
       return 1.0f;
-      
+    }
+    
     return Dist;
   }
   
   void vector_transform( const Vector &vSome, const matrix3x4 vMatrix, Vector &vOut ) {
-    if( &vMatrix == nullptr )
+    if( &vMatrix == nullptr ) {
       return;
-      
+    }
+    
     Vector xm = ( Vector & )vMatrix[0];
     Vector ym = ( Vector & )vMatrix[1];
     Vector zm = ( Vector & )vMatrix[2];
@@ -36,9 +37,10 @@ namespace Util {
     return 8192.0f * ground_trace->fraction;
   }
   float DistanceToGround( CBaseEntity *ent ) {
-    if( ent->GetFlags() & FL_ONGROUND )
+    if( ent->GetFlags() & FL_ONGROUND ) {
       return 0;
-      
+    }
+    
     Vector origin = ent->GetVecOrigin();
     float v1 = VectorialDistanceToGround( origin + Vector( 10.0f, 10.0f, 0.0f ) );
     float v2 = VectorialDistanceToGround( origin + Vector( -10.0f, 10.0f, 0.0f ) );
@@ -52,29 +54,32 @@ namespace Util {
     float f1;
     float f2;
     
-    if( m_vOldAngles.y < 0.f )
+    if( m_vOldAngles.y < 0.f ) {
       f1 = 360.0f + m_vOldAngles.y;
-    else
+    } else {
       f1 = m_vOldAngles.y;
-      
-    if( pCmd->viewangles.y < 0.0f )
+    }
+    
+    if( pCmd->viewangles.y < 0.0f ) {
       f2 = 360.0f + pCmd->viewangles.y;
-    else
+    } else {
       f2 = pCmd->viewangles.y;
-      
-    if( f2 < f1 )
+    }
+    
+    if( f2 < f1 ) {
       deltaView = abs( f2 - f1 );
-    else
+    } else {
       deltaView = 360.0f - abs( f1 - f2 );
-      
+    }
+    
     deltaView = 360.0f - deltaView;
     pCmd->forwardmove = cos( DEG2RAD( deltaView ) ) * m_fOldForward + cos( DEG2RAD( deltaView + 90.f ) ) * m_fOldSidemove;
     pCmd->sidemove = sin( DEG2RAD( deltaView ) ) * m_fOldForward + sin( DEG2RAD( deltaView + 90.f ) ) * m_fOldSidemove;
   }
   void lookAt( const bool silent, Vector vAngs, CUserCmd *pCommand ) {
-    if( silent )
+    if( silent ) {
       pCommand->viewangles = vAngs;
-    else {
+    } else {
       pCommand->viewangles = vAngs;
       gInts.Engine->SetViewAngles( pCommand->viewangles );
     }
@@ -99,9 +104,10 @@ namespace Util {
     vAngle.y = float( atanf( float( delta.y / delta.x ) ) * 57.295779513082f );
     vAngle.z = 0.0f;
     
-    if( delta.x >= 0.0 )
+    if( delta.x >= 0.0 ) {
       vAngle.y += 180.0f;
-      
+    }
+    
     return vAngle;
   }
   float GetFOV( Vector viewAngle, const Vector &aimAngle ) {
@@ -126,12 +132,14 @@ namespace Util {
       auto wep = pWep->GetItemDefinitionIndex();
       
       if( Class == TF2_Sniper )
-        if( wep != weaponid::Sniper_m_TheHuntsman && wep != weaponid::Sniper_m_FestiveHuntsman && wep != weaponid::Sniper_m_TheFortifiedCompound )
+        if( wep != weaponid::Sniper_m_TheHuntsman && wep != weaponid::Sniper_m_FestiveHuntsman && wep != weaponid::Sniper_m_TheFortifiedCompound ) {
           return true;
-          
+        }
+        
       if( Class == TF2_Spy )
-        if( wep == weaponid::Spy_m_TheAmbassador || wep == weaponid::Spy_m_FestiveAmbassador )
+        if( wep == weaponid::Spy_m_TheAmbassador || wep == weaponid::Spy_m_FestiveAmbassador ) {
           return true;
+        }
     }
     
     return false;
@@ -154,15 +162,18 @@ namespace Util {
     eye_victim.z = 0;
     eye_victim.NormalizeInPlace();
     
-    if( Dot( wsc_spy_to_victim, eye_victim ) <= 0.0f )
+    if( Dot( wsc_spy_to_victim, eye_victim ) <= 0.0f ) {
       return false;
-      
-    if( Dot( wsc_spy_to_victim, eye_spy ) <= 0.5f )
+    }
+    
+    if( Dot( wsc_spy_to_victim, eye_spy ) <= 0.5f ) {
       return false;
-      
-    if( Dot( eye_spy, eye_victim ) <= -0.3f )
+    }
+    
+    if( Dot( eye_spy, eye_victim ) <= -0.3f ) {
       return false;
-      
+    }
+    
     return true;
   }
   void minDist( weaponid id, float &dist ) {
@@ -594,22 +605,24 @@ namespace Util {
   
   Color team_color( CBaseEntity *pLocal, CBaseEntity *pEntity ) {
     if( gCvars.color_type.value == 0 ) { //red/blue
-      if( gCvars.aim_index == pEntity->GetIndex() && ( gCvars.ESP_target.value > 1 ) )
+      if( gCvars.aim_index == pEntity->GetIndex() && ( gCvars.ESP_target.value > 1 ) ) {
         return gCvars.color_aim.get_color();
-      else if( pEntity->GetTeamNum() == 2 || ( pEntity->GetTeamNum() == 3 && gCvars.Ignore_E_disguise.value &&  pEntity->GetCond() & TFCond_Disguised ) )
+      } else if( pEntity->GetTeamNum() == 2 || ( pEntity->GetTeamNum() == 3 && gCvars.Ignore_E_disguise.value &&  pEntity->GetCond() & TFCond_Disguised ) ) {
         return gCvars.color_red.get_color();
-      else if( pEntity->GetTeamNum() == 3 || ( pEntity->GetTeamNum() == 2 && gCvars.Ignore_E_disguise.value &&  pEntity->GetCond() & TFCond_Disguised ) )
+      } else if( pEntity->GetTeamNum() == 3 || ( pEntity->GetTeamNum() == 2 && gCvars.Ignore_E_disguise.value &&  pEntity->GetCond() & TFCond_Disguised ) ) {
         return gCvars.color_blue.get_color();
-        
+      }
+      
       return Colors::White;
     } else { //ally/enemy
-      if( gCvars.aim_index == pEntity->GetIndex() && ( gCvars.ESP_target.value > 1 ) )
+      if( gCvars.aim_index == pEntity->GetIndex() && ( gCvars.ESP_target.value > 1 ) ) {
         return gCvars.color_aim.get_color();
-      else if( pEntity->GetTeamNum() == pLocal->GetTeamNum() )
+      } else if( pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
         return gCvars.color_ally.get_color();
-      else
+      } else {
         return gCvars.color_enemy.get_color();
-        
+      }
+      
       return Colors::White;
     }
   }

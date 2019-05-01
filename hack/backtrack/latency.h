@@ -3,7 +3,6 @@
 #include <deque>
 
 extern INetChannel *old_ch;
-extern VMTBaseManager *datagramHook;
 extern std::deque<CIncomingSequence>sequences;
 extern int lastincomingsequencenumber;
 

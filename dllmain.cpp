@@ -6,22 +6,20 @@
 #include "hack/event/event.h"
 #include "tools/vmt/vmthooks.h"
 #include "tools/signature/csignature.h"
-#include "tools/log/log.h"
 #include "sdk/cmat/keyvalues.h"
 CGlobalVariables gCvars;
 CInterfaces gInts;
+CHooks gHooks;
 
 DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
   if( gInts.Client == nullptr ) {
-    VMTBaseManager *clientHook = new VMTBaseManager();
-    VMTBaseManager *clientModeHook = new VMTBaseManager();
-    VMTBaseManager *panelHook = new VMTBaseManager();
-    VMTBaseManager *mdlRenderHook = new VMTBaseManager();
+    //Client
     CreateInterface_t ClientFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "client.dll" ), "CreateInterface" ) );
     gInts.Client = ( CHLClient * )( ClientFactory( "VClient017", nullptr ) );
     gInts.EntList = ( CEntList * )( ClientFactory( "VClientEntityList003", nullptr ) );
     XASSERT( gInts.Client );
     XASSERT( gInts.EntList );
+    //Engine
     CreateInterface_t EngineFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "engine.dll" ), "CreateInterface" ) );
     gInts.Engine = ( EngineClient * )( EngineFactory( "VEngineClient013", nullptr ) );
     gInts.EngineTrace = ( IEngineTrace * )( EngineFactory( "EngineTraceClient003", nullptr ) );
@@ -35,12 +33,15 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     XASSERT( gInts.EventManager );
     XASSERT( gInts.RenderView );
     XASSERT( gInts.MdlRender );
+    //Surface
     CreateInterface_t VGUIFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "vguimatsurface.dll" ), "CreateInterface" ) );
     gInts.Surface = ( ISurface * )( VGUIFactory( "VGUI_Surface030", nullptr ) );
     XASSERT( gInts.Surface );
+    //Cvar
     CreateInterface_t CvarFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "vstdlib.dll" ), "CreateInterface" ) );
     gInts.cvar = ( ICvar * )( CvarFactory( "VEngineCvar004", nullptr ) );
     XASSERT( gInts.cvar );
+    //Materials
     CreateInterface_t MatSysFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "materialsystem.dll" ), "CreateInterface" ) );
     gInts.MatSystem = ( CMaterialSystem * )( MatSysFactory( "VMaterialSystem081", nullptr ) );
     XASSERT( gInts.MatSystem );
@@ -52,12 +53,13 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
       XASSERT( gInts.Panels );
       
       if( gInts.Panels ) {
-        panelHook->Init( gInts.Panels );
-        panelHook->HookMethod( &Hooked_PaintTraverse, 41 );
-        panelHook->Rehook();
+        gHooks.panelHook->Init( gInts.Panels );
+        gHooks.panelHook->HookMethod( &Hooked_PaintTraverse, 41 );
+        gHooks.panelHook->Rehook();
       }
     }
     
+    //globals
     gInts.globals = *( CGlobals ** )( Signatures::GetEngineSignature( "A1 ? ? ? ? 8B 11 68" ) + 8 );
     XASSERT( gInts.globals );
     //
@@ -65,21 +67,21 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     XASSERT( dwClientModeAddress );
     //
     gInts.ClientMode = **( ClientModeShared ** * )( dwClientModeAddress + 2 );
-    LOGDEBUG( "g_pClientModeShared_ptr client.dll+0x%X", ( DWORD )gInts.ClientMode - dwClientBase );
+    XASSERT( gInts.ClientMode );
     // material stuff
     Keyvalues::GetOffsets();
     //
-    clientHook->Init( gInts.Client );
-    clientHook->HookMethod( &FrameStageNotifyThink, 35 );
-    clientHook->Rehook();
+    gHooks.FrameStageNotifyThink->Init( gInts.Client );
+    gHooks.FrameStageNotifyThink->HookMethod( &FrameStageNotifyThink, 35 );
+    gHooks.FrameStageNotifyThink->Rehook();
     //
-    clientModeHook->Init( gInts.ClientMode );
-    clientModeHook->HookMethod( &Hooked_CreateMove, 21 );
-    clientModeHook->Rehook();
+    gHooks.CreateMove->Init( gInts.ClientMode );
+    gHooks.CreateMove->HookMethod( &Hooked_CreateMove, 21 );
+    gHooks.CreateMove->Rehook();
     //
-    mdlRenderHook->Init( gInts.MdlRender );
-    mdlRenderHook->HookMethod( &Hooked_DrawModelExecute, 19 );
-    mdlRenderHook->Rehook();
+    gHooks.DrawModelExucute->Init( gInts.MdlRender );
+    gHooks.DrawModelExucute->HookMethod( &Hooked_DrawModelExecute, 19 );
+    gHooks.DrawModelExucute->Rehook();
     //
     gEvents.InitEvents();
     HWND thisWindow;
@@ -100,7 +102,6 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
 
 BOOL APIENTRY DllMain( HMODULE hInstance, DWORD dwReason, LPVOID lpReserved ) {
   if( dwReason == DLL_PROCESS_ATTACH ) {
-    Log::Init( hInstance );
     DisableThreadLibraryCalls( hInstance );
     CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE )( dwMainThread ), nullptr, 0, nullptr );
   }
