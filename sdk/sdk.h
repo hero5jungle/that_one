@@ -94,7 +94,7 @@ inline wstring ToWchar( const char *text ) {
 #define XASSERT( x ) if( !(x) ) Fatal( #x );
 
 inline void Fatal( const char *fault ) {
-  MessageBoxA( nullptr, fault, "FATAL ERROR", MB_ICONERROR );
+  MessageBoxA( nullptr, fault, "FATAL ERROR", MB_ICONERROR | MB_TOPMOST );
   ExitProcess( 0 );
 }
 
@@ -385,9 +385,6 @@ class CBaseEntity {
   Vector GetAbsEyePosition();
   Vector GetHitboxPosition( int iHitbox );
   
-  int GetOwner() {
-    DYNVAR_RETURN( int, this, "DT_BaseEntity", "m_hOwnerEntity" );
-  }
   
 };
 
@@ -463,22 +460,22 @@ class CObjectSentryGun : public CObject {
     DYNVAR_RETURN( bool, this, "DT_ObjectSentrygun", "m_bPlayerControlled" );
   }
   
-  char *GetStateString() {
+  wchar_t *GetStateString() {
     switch( GetState() ) {
     case 1: {
-      return "Idle";
+      return L"Idle";
     }
     
     case 2: {
-      return "Attacking";
+      return L"Attacking";
     }
     
     case 3: {
-      return "Upgrading";
+      return L"Upgrading";
     }
     
     default:
-      return "Building";
+      return L"Building";
     }
   }
 };

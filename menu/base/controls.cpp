@@ -309,7 +309,7 @@ int Slider::Draw( bool mouseOver ) {
     DrawManager::DrawRect( x, y + 17, percent, 4, Color( 85, 85, 95 ) );
   }
   
-  DrawManager::DrawString( x + nw + 3, y + 9, Color( 125, 125, 130 ), to_string( value ), gFonts.verdana_bold );
+  DrawManager::DrawString( x + nw + 3, y + 9, Color( 125, 125, 130 ), to_wstring( value ), gFonts.verdana_bold );
   return h;
 }
 
@@ -593,7 +593,7 @@ void DrawKeyBindBox( void *data, size_t Index ) {
   
   DrawManager::OutlineRect( x + 6, y + 6, w - 12, 18, Color( 80 ) );
   DrawManager::DrawRect( x + 7, y + 7, w - 14, 16, Color( hover_setkey ? 65 : 40 ) );
-  DrawManager::DrawString( x + 9, y + 8, Color( 200 ), bWait ? "Select a key (or Escape)" : gKey.KeyToString( kb->key ), gFonts.verdana_bold );
+  DrawManager::DrawString( x + 9, y + 8, Color( 200 ), bWait ? L"Select a key (or Escape)" : gKey.KeyToString( kb->key ), gFonts.verdana_bold );
   static Listbox list( "Setting", { "Disabled", "Always on", "Hold key", "Toggle with key" } );
   list.SetPos( x + 6, y + 30 ), list.SetWidth( w - 12 );
   static bool list_open = false;

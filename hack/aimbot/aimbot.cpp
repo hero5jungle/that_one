@@ -330,7 +330,7 @@ namespace Aimbot {
         continue;
       }
       
-      if( !gCvars.latency.value ) {
+      if( !gCvars.latency.value || ( gCvars.latency_amount.value + gCvars.ping_diff.value ) < 200 ) {
         int iBestHitbox = -1;
         
         if( melee ) {

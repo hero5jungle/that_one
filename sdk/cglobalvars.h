@@ -83,28 +83,37 @@ struct CGlobalVariables {
   
   Checkbox ESP_enable{ "Enable ESP", true };
   Checkbox ESP_enemy{ "Enemy only" };
-  Checkbox ESP_build_text{ "building text", true };
+  Checkbox ESP_text{ "text esp", true };
+  Checkbox ESP_building_text{ "building text", true };
   Checkbox ESP_item_text{ "pickup names", true };
+  Checkbox ESP_cham{ "chams", true };
   Listbox  ESP_cham_mat{ "cham material", { "shaded", "glow", "shiny"}, 0 };
-  Checkbox ESP_obj{ "Object cham", true };
-  Checkbox ESP_cham{ "Player cham", true };
+  Checkbox ESP_object_cham{ "Object cham", true };
+  Checkbox ESP_building_cham{ "Building cham", true };
+  Checkbox ESP_player_cham{ "Player cham", true };
   Checkbox ESP_backtrack{ "Backtrack cham", true };
   Checkbox ESP_proj_cham{ "projectile cham", true };
+  Checkbox ESP_hat{ "No player items" };
+  Listbox  ESP_hand{ "Hands", { "Normal", "None", "transparent", "mat" }, 0 };
+  Checkbox ESP_misc{ "misc", true };
   Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
   Listbox  ESP_target{ "target highlight", { "Off", "line", "color", "both" }, 1 };
-  Checkbox ESP_hat{ "No hats" };
-  Listbox  ESP_hand{ "Hands", { "Normal", "None", "transparent", "fill", "wireframe" }, 0 };
+  
   
   Tab ESP{ "ESP", {
       &ESP_enable,
       &ESP_enemy,
-      &ESP_build_text,
+      &ESP_text,
+      &ESP_building_text,
       &ESP_item_text,
-      &ESP_cham_mat,
-      &ESP_obj,
       &ESP_cham,
+      &ESP_cham_mat,
+      &ESP_object_cham,
+      &ESP_building_cham,
+      &ESP_player_cham,
       &ESP_backtrack,
       &ESP_proj_cham,
+      &ESP_misc,
       &ESP_fov,
       &ESP_target,
       &ESP_hat,

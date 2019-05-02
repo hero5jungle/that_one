@@ -31,10 +31,6 @@ namespace DemoSticky {
       }
       
       if( strstr( gInts.ModelInfo->GetModelName( sticky->GetModel() ), "sticky" ) ) {
-        if( sticky->GetOwner() != -1 ) {
-          continue;
-        }
-        
         sticky->GetWorldSpaceCenter( sticky_loc );
         
         for( int j = 1; j < gInts.Engine->GetMaxClients(); j++ ) {

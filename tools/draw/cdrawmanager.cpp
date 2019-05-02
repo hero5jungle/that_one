@@ -4,134 +4,74 @@
 
 namespace DrawManager {
   unsigned long m_Font;
-#define ESP_HEIGHT 14
   
   void Initialize() {
-    if( gInts.Surface == nullptr )
+    if( gInts.Surface == nullptr ) {
       return;
-      
+    }
+    
     gFonts.Initialize();
     gTex.Initialize();
     Reload();
   }
   
   void Reload() {
-    if( gInts.Surface == nullptr )
+    if( gInts.Surface == nullptr ) {
       return;
-      
+    }
+    
     gInts.Engine->GetScreenSize( gScreenSize.iScreenWidth, gScreenSize.iScreenHeight );
     gFonts.Reload();
     gTex.Reload();
   }
   
+  void DrawString( int x, int y, Color color, wstring text, HFont font, bool center ) {
+    DrawString( x, y, color, text.c_str(), font, center );
+  }
   
   void DrawString( int x, int y, Color color, string text, HFont font, bool center ) {
     DrawString( x, y, color, text.c_str(), font, center );
   }
   
-  void DrawString( int x, int y, Color color, const char *pszText, HFont font, bool center ) {
-    if( pszText == nullptr )
+  void DrawString( int x, int y, Color color, const char *text, HFont font, bool center ) {
+    DrawString( x, y, color, ToWchar( text ).c_str(), font, center );
+  }
+  
+  void DrawString( int x, int y, Color Color, const wchar_t *text, HFont font, bool center ) {
+    if( text == nullptr ) {
       return;
-      
-    va_list va_alist = nullptr;
-    int Wide = 0, Tall = 0;
-    char szBuffer[256] = { '\0' };
-    wchar_t szString[128] = { '\0' };
-    va_start( va_alist, pszText );
-    vsprintf_s( szBuffer, pszText, va_alist );
-    va_end( va_alist );
-    MultiByteToWideChar( CP_UTF8, 0, szBuffer, -1, szString, 128 );
+    }
     
     if( center ) {
-      gInts.Surface->GetTextSize( font, szString, Wide, Tall );
+      int Wide = 0, Tall = 0;
+      gInts.Surface->GetTextSize( font, text, Wide, Tall );
       x -= Wide / 2;
     }
     
     gInts.Surface->DrawSetTextPos( x, y );
     gInts.Surface->DrawSetTextFont( font );
-    gInts.Surface->DrawSetTextColor( color[0], color[1], color[2], color[3] );
-    gInts.Surface->DrawPrintText( szString, wcslen( szString ) );
+    gInts.Surface->DrawSetTextColor( Color[0], Color[1], Color[2], Color[3] );
+    gInts.Surface->DrawPrintText( text, wcslen( text ) );
   }
   
-  void DrawBox( Vector vOrigin, Color color, int box_width, int radius ) {
-    Vector vScreen;
-    
-    if( !WorldToScreen( vOrigin, vScreen ) )
-      return;
-      
-    int radius2 = radius << 1;
-    OutlineRect( vScreen.x - radius + box_width, vScreen.y - radius + box_width, radius2 - box_width, radius2 - box_width, 0x000000FF );
-    OutlineRect( vScreen.x - radius - 1, vScreen.y - radius - 1, radius2 + ( box_width + 2 ), radius2 + ( box_width + 2 ), 0x000000FF );
-    DrawRect( vScreen.x - radius + box_width, vScreen.y - radius, radius2 - box_width, box_width, color );
-    DrawRect( vScreen.x - radius, vScreen.y + radius, radius2, box_width, color );
-    DrawRect( vScreen.x - radius, vScreen.y - radius, box_width, radius2, color );
-    DrawRect( vScreen.x + radius, vScreen.y - radius, box_width, radius2 + box_width, color );
-  }
-  
-  void DrawString( int x, int y, Color clrColor, const wchar_t *pszText ) {
-    if( pszText == nullptr )
-      return;
-      
-    gInts.Surface->DrawSetTextPos( x, y );
-    gInts.Surface->DrawSetTextFont( m_Font );
-    gInts.Surface->DrawSetTextColor( clrColor[0], clrColor[1], clrColor[2], clrColor[3] );
-    gInts.Surface->DrawPrintText( pszText, wcslen( pszText ) );
-  }
-  
-  void DrawString( int x, int y, Color clrColor, const char *pszText, ... ) {
-    if( pszText == nullptr )
-      return;
-      
-    va_list va_alist;
-    char szBuffer[1024] = { '\0' };
-    wchar_t szString[1024] = { '\0' };
-    va_start( va_alist, pszText );
-    vsprintf_s( szBuffer, pszText, va_alist );
-    va_end( va_alist );
-    wsprintfW( szString, L"%S", szBuffer );
-    gInts.Surface->DrawSetTextPos( x, y );
-    gInts.Surface->DrawSetTextFont( m_Font );
-    gInts.Surface->DrawSetTextColor( clrColor[0], clrColor[1], clrColor[2], clrColor[3] );
-    gInts.Surface->DrawPrintText( szString, wcslen( szString ) );
-  }
-  
-  byte GetESPHeight() {
-    return ESP_HEIGHT;
-  }
-  
-  void DrawLine( int x, int y, int x1, int y1, Color clrColor ) {
-    gInts.Surface->DrawSetColor( clrColor[0], clrColor[1], clrColor[2], clrColor[3] );
+  void DrawLine( int x, int y, int x1, int y1, Color color ) {
+    gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
     gInts.Surface->DrawLine( x, y, x1, y1 );
   }
   
-  void DrawLineEx( int x, int y, int w, int h, Color clrColor ) {
-    gInts.Surface->DrawSetColor( clrColor[0], clrColor[1], clrColor[2], clrColor[3] );
+  void DrawLineEx( int x, int y, int w, int h, Color color ) {
+    gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
     gInts.Surface->DrawLine( x, y, x + w, y + h );
   }
   
-  void DrawRect( int x, int y, int w, int h, Color clrColor ) {
-    gInts.Surface->DrawSetColor( clrColor[0], clrColor[1], clrColor[2], clrColor[3] );
+  void DrawRect( int x, int y, int w, int h, Color color ) {
+    gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
     gInts.Surface->DrawFilledRect( x, y, x + w, y + h );
   }
   
-  void OutlineRect( int x, int y, int w, int h, Color clrColor ) {
-    gInts.Surface->DrawSetColor( clrColor[0], clrColor[1], clrColor[2], clrColor[3] );
+  void OutlineRect( int x, int y, int w, int h, Color color ) {
+    gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
     gInts.Surface->DrawOutlinedRect( x, y, x + w, y + h );
-  }
-  
-  void DrawBox( Vector vOrigin, int r, int g, int b, int alpha, int box_width, int radius ) {
-    Vector vScreen;
-    
-    if( !WorldToScreen( vOrigin, vScreen ) )
-      return;
-      
-    int radius2 = radius << 1;
-    OutlineRect( vScreen.x - radius + box_width, vScreen.y - radius + box_width, radius2 - box_width, radius2 - box_width, Colors::Black );
-    OutlineRect( vScreen.x - radius - 1, vScreen.y - radius - 1, radius2 + ( box_width + 2 ), radius2 + ( box_width + 2 ), Colors::Black );
-    DrawRect( vScreen.x - radius + box_width, vScreen.y - radius, radius2 - box_width, box_width, Color( r, g, b, alpha ) );
-    DrawRect( vScreen.x - radius, vScreen.y + radius, radius2, box_width, Color( r, g, b, alpha ) );
-    DrawRect( vScreen.x - radius, vScreen.y - radius, box_width, radius2, Color( r, g, b, alpha ) );
-    DrawRect( vScreen.x + radius, vScreen.y - radius, box_width, radius2 + box_width, Color( r, g, b, alpha ) );
   }
   
   bool WorldToScreen( Vector &vOrigin, Vector &vScreen ) {
@@ -161,7 +101,6 @@ namespace DrawManager {
     }
   }
   
-  //(0,2pi),(0,-2pi),(-2pi,0),(0,2pi)
   void DrawCircle( float x, float y, float r, float start, float end, float s, Color color ) {
     float Step = 3.141 * 2.0 / s;
     
@@ -174,6 +113,7 @@ namespace DrawManager {
       DrawLine( x1, y1, x2, y2, color );
     }
   }
+  
   void Rotating_Dot_Circle( float x, float y, float r, float s, Color color ) {
     float Step = 3.141 / s;
     float timer = gInts.globals->curtime;

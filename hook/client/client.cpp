@@ -186,179 +186,175 @@ void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrame
   return gHooks.FrameStageNotifyThink.GetMethod<FrameStageNotifyThinkFn>( 35 )( CHLClient, _this, Stage );
 }
 void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, matrix3x4 *pCustomBoneToWorld ) {
-  const char *pszModelName = gInts.ModelInfo->GetModelName( pInfo.pModel );
+  const char *model_name = gInts.ModelInfo->GetModelName( pInfo.pModel );
   gHooks.DrawModelExucute.Unhook();
-  CBaseEntity *pEntity = ( CBaseEntity * )gInts.EntList->GetClientEntity( pInfo.entity_index );
-  CBaseEntity *pLocal = ( CBaseEntity * )gInts.EntList->GetClientEntity( gInts.Engine->GetLocalPlayer() );
   
-  if( !pEntity || !pLocal ) {
-    gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-    gHooks.DrawModelExucute.Rehook();
-    return;
-  }
-  
-  Color team_color = Util::team_color( pLocal, pEntity );
-  
-  if( gCvars.ESP_hat.value && strstr( pszModelName, "player/items" ) ) {
-    gHooks.DrawModelExucute.Rehook();
-    return;
-  }
-  
-  IMaterial *wanted_material = nullptr;
-  
-  switch( gCvars.ESP_cham_mat.value ) {
-  case 0: {
-    wanted_material = Materials::shaded;
-    break;
-  }
-  
-  case 1: {
-    wanted_material = Materials::glow;
-    break;
-  }
-  
-  case 2: {
-    wanted_material = Materials::shiny;
-    break;
-  }
-  
-  default:
-    break;
-  }
-  
-  const auto player_check = []( CBaseEntity * pLocal, CBaseEntity * pEntity, const char *model_name ) {
-    bool entity = pEntity && !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE;
-    bool model = entity && ( strstr( model_name, "models/player" ) || strstr( model_name, "models/bots" ) );
-    bool team = model && ( !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum() );
-    return team;
-  };
-  
-  if( wanted_material ) {
-    if( gCvars.ESP_cham.value ) {
-      if( player_check( pLocal, pEntity, pszModelName ) ) {
-        //backtrack
-        if( gCvars.ESP_backtrack.value && gCvars.Backtrack.value ) {
-          if( gCvars.aim_index == pInfo.entity_index ) {
-            int ticks = 0;
-            
-            for( int tick = 0; tick < ( int )BacktrackData[gCvars.aim_index].size() && ticks < 12; tick++ ) {
-              if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][tick].simtime ) ) {
-                ticks++;
-                
-                if( BacktrackData[gCvars.aim_index][tick].valid && BacktrackData[gCvars.aim_index][tick].movement > 45.0f ) {
-                  Color tick_color = tick == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
-                  //Hidden
-                  wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-                  Materials::ForceMaterial( wanted_material, tick_color );
-                  gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
-                  //Visible
-                  wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-                  Materials::ForceMaterial( wanted_material, tick_color );
-                  gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+  if( gCvars.ESP_cham.value ) {
+    CBaseEntity *pEntity = ( CBaseEntity * )gInts.EntList->GetClientEntity( pInfo.entity_index );
+    CBaseEntity *pLocal = ( CBaseEntity * )gInts.EntList->GetClientEntity( gInts.Engine->GetLocalPlayer() );
+    
+    if( !pEntity || !pLocal ) {
+      gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+      gHooks.DrawModelExucute.Rehook();
+      return;
+    }
+    
+    Color team_color = Util::team_color( pLocal, pEntity );
+    
+    if( gCvars.ESP_hat.value && strstr( model_name, "player/items" ) ) {
+      gHooks.DrawModelExucute.Rehook();
+      return;
+    }
+    
+    IMaterial *wanted_material = nullptr;
+    
+    switch( gCvars.ESP_cham_mat.value ) {
+    case 0: {
+      wanted_material = Materials::shaded;
+      break;
+    }
+    
+    case 1: {
+      wanted_material = Materials::glow;
+      break;
+    }
+    
+    case 2: {
+      wanted_material = Materials::shiny;
+      break;
+    }
+    
+    default:
+      break;
+    }
+    
+    if( wanted_material ) {
+      const auto player_check = []( CBaseEntity * pLocal, CBaseEntity * pEntity, const char *model_name ) {
+        bool entity = pEntity && !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE;
+        bool model = entity && ( strstr( model_name, "models/player" ) || strstr( model_name, "models/bots" ) );
+        bool team = model && ( !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum() );
+        return team;
+      };
+      
+      if( gCvars.ESP_player_cham.value ) {
+        if( player_check( pLocal, pEntity, model_name ) ) {
+          //backtrack
+          if( gCvars.ESP_backtrack.value && gCvars.Backtrack.value ) {
+            if( gCvars.aim_index == pInfo.entity_index ) {
+              int ticks = 0;
+              
+              for( int tick = 0; tick < ( int )BacktrackData[gCvars.aim_index].size() && ticks < 12; tick++ ) {
+                if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][tick].simtime ) ) {
+                  ticks++;
+                  
+                  if( BacktrackData[gCvars.aim_index][tick].valid && BacktrackData[gCvars.aim_index][tick].movement > 45.0f ) {
+                    Color tick_color = tick == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
+                    //Hidden
+                    wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+                    Materials::ForceMaterial( wanted_material, tick_color );
+                    gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+                    //Visible
+                    wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+                    Materials::ForceMaterial( wanted_material, tick_color );
+                    gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+                  }
                 }
               }
             }
           }
-        }
-        
-        //player
-        //Hidden
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-        Materials::ForceMaterial( wanted_material, team_color );
-        gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-        //Visible
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-        Materials::ForceMaterial( wanted_material, team_color );
-      }
-    } else {
-      gInts.MdlRender->ForcedMaterialOverride( nullptr );
-    }
-    
-    if( gCvars.ESP_hand.value ) {
-      if( strstr( pszModelName, "arms" ) ) {
-        if( gCvars.ESP_hand.value == 1 ) {
-          gInts.RenderView->SetBlend( 0 );
-        } else if( gCvars.ESP_hand.value == 2 ) {
-          gInts.RenderView->SetBlend( 0.5 );
-        } else if( gCvars.ESP_hand.value == 3 ) {
-          if( pLocal->GetLifeState() == LIFE_ALIVE && pLocal->GetHealth() > 0 && !pLocal->IsDormant() ) {
-            Materials::ForceMaterial( wanted_material, team_color );
-          }
-        } else if( gCvars.ESP_hand.value == 4 ) {
-          if( pLocal->GetLifeState() == LIFE_ALIVE && pLocal->GetHealth() > 0 && !pLocal->IsDormant() ) {
-            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
-            Materials::ForceMaterial( wanted_material, team_color );
-          } else {
-            gInts.MdlRender->ForcedMaterialOverride( nullptr );
-          }
+          
+          //player
+          //Hidden
+          wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+          Materials::ForceMaterial( wanted_material, team_color );
+          gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+          //Visible
+          wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+          Materials::ForceMaterial( wanted_material, team_color );
         }
       } else {
         gInts.MdlRender->ForcedMaterialOverride( nullptr );
       }
-    }
-    
-    if( pEntity ) {
-      classId id = ( classId )pEntity->GetClientClass()->iClassID;
       
-      if( ( id == classId::CObjectDispenser || ( id == classId::CObjectSentrygun && !( strstr( pszModelName, "blueprint" ) ) ) || id == classId::CObjectTeleporter || id == classId::CCaptureFlag ) && gCvars.ESP_obj.value == 2 ) {
-        if( !pEntity->IsDormant() )
-          if( pEntity->GetLifeState() == LIFE_ALIVE ) {
-            //Hidden UnUnLit
-            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+      if( gCvars.ESP_hand.value ) {
+        if( strstr( model_name, "arms" ) ) {
+          if( gCvars.ESP_hand.value == 1 ) {
+            gInts.RenderView->SetBlend( 0 );
+          } else if( gCvars.ESP_hand.value == 2 ) {
+            gInts.RenderView->SetBlend( 0.5 );
+          } else if( gCvars.ESP_hand.value == 3 ) {
             Materials::ForceMaterial( wanted_material, team_color );
-            gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-            //Visible UnUnLit
-            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-            Materials::ForceMaterial( wanted_material, team_color );
+          } else {
+            gInts.MdlRender->ForcedMaterialOverride( nullptr );
           }
-      }
-    }
-    
-    if( strstr( pszModelName, "models/items/" ) || strstr( pszModelName, "models/props_halloween/" ) ) {
-      if( gCvars.ESP_obj.value != 3 ) {
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, false );
+        } else {
+          gInts.MdlRender->ForcedMaterialOverride( nullptr );
+        }
       }
       
-      if( gCvars.ESP_obj.value == 2 ) {
-        Color RGBA = gCvars.color_pickup.get_color();
-        //Hidden UnUnLit
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-        Materials::ForceMaterial( wanted_material, RGBA );
-        gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-        //Visible UnUnLit
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-        Materials::ForceMaterial( wanted_material, RGBA );
-      } else if( gCvars.ESP_obj.value == 3 ) {
-        Color RGBA = gCvars.color_pickup.get_color();
-        //Hidden UnUnLit
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
-        Materials::ForceMaterial( wanted_material, RGBA );
-        gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-        //Visible UnUnLit
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-        wanted_material->SetMaterialVarFlag( MATERIAL_VAR_WIREFRAME, true );
-        Materials::ForceMaterial( wanted_material, RGBA );
+      if( gCvars.ESP_building_cham.value ) {
+        if( pEntity ) {
+          const auto is_building = []( const classId id, const char *model_name ) {
+            bool dispenser = id == classId::CObjectDispenser;
+            bool sentry = id == classId::CObjectSentrygun && !strstr( model_name, "blueprint" );
+            bool teleporter = id == classId::CObjectTeleporter;
+            bool intel = id == classId::CCaptureFlag;
+            return dispenser || sentry || teleporter || intel;
+          };
+          
+          if( is_building( ( classId )pEntity->GetClientClass()->iClassID, model_name ) ) {
+            if( !pEntity->IsDormant() )
+              if( pEntity->GetLifeState() == LIFE_ALIVE ) {
+                //Hidden UnUnLit
+                wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+                Materials::ForceMaterial( wanted_material, team_color );
+                gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+                //Visible UnUnLit
+                wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+                Materials::ForceMaterial( wanted_material, team_color );
+              }
+          }
+        }
       }
-    }
-    
-    auto should_cham_proj = []( CBaseEntity * ent, int lTeamNum, const char *name ) -> bool {
-      return !strcmp( name, "CTFProjectile_SentryRocket" ) || !strcmp( name, "CTFProjectile_Rocket" ) || !strcmp(
-        name, "CTFGrenadePipebombProjectile" ) && ent->GetTeamNum() != lTeamNum;
-    };
-    
-    if( pEntity ) {
-      if( should_cham_proj( pEntity, pLocal->GetTeamNum(), pEntity->GetClientClass()->chName ) ) {
-        if( gCvars.ESP_proj_cham.value ) {
+      
+      if( gCvars.ESP_object_cham.value ) {
+        const auto is_object = []( const char *name ) {
+          bool item = strstr( name, "models/items/" );
+          bool halloween = strstr( name, "models/props_halloween/" );
+          bool pickup = strstr( name, "models/pickups" );
+          bool medieval = strstr( name, "models/props_medieval" );
+          return item || halloween || pickup || medieval;
+        };
+        
+        if( is_object( model_name ) ) {
           Color RGBA = gCvars.color_pickup.get_color();
-          //Hidden Lit
+          //Hidden UnUnLit
           wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
           Materials::ForceMaterial( wanted_material, RGBA );
           gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-          //Visible UnLit
+          //Visible UnUnLit
           wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
           Materials::ForceMaterial( wanted_material, RGBA );
+        }
+      }
+      
+      if( pEntity ) {
+        if( gCvars.ESP_proj_cham.value ) {
+          const auto should_cham_proj = []( CBaseEntity * ent, int lTeamNum, const char *name ) -> bool {
+            return !strcmp( name, "CTFProjectile_SentryRocket" ) || !strcmp( name, "CTFProjectile_Rocket" ) || !strcmp(
+              name, "CTFGrenadePipebombProjectile" ) && ent->GetTeamNum() != lTeamNum;
+          };
+          
+          if( should_cham_proj( pEntity, pLocal->GetTeamNum(), pEntity->GetClientClass()->chName ) ) {
+            Color RGBA = gCvars.color_pickup.get_color();
+            //Hidden Lit
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+            Materials::ForceMaterial( wanted_material, RGBA );
+            gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+            //Visible UnLit
+            wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+            Materials::ForceMaterial( wanted_material, RGBA );
+          }
         }
       }
     }
