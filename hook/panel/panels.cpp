@@ -11,7 +11,7 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
   try {
     const char *szName = gInts.Panels->GetName( vguiPanel );
     
-    if( !strcmp( "HudScope", szName ) && gCvars.Noscope.value ) {
+    if( strstr( "HudScope", szName ) && gCvars.Noscope.value ) {
       return;
     }
     
@@ -20,7 +20,7 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
     static unsigned int FocusOverlay;
     
     if( !FocusOverlay ) {
-      if( strcmp( szName, "FocusOverlayPanel" ) == 0 ) {
+      if( strstr( szName, "FocusOverlayPanel" ) ) {
         FocusOverlay = vguiPanel;
         Intro();
       }

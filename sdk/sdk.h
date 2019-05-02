@@ -2970,11 +2970,11 @@ struct CInterfaces {
 };
 
 struct CHooks {
-  VMTBaseManager *FrameStageNotifyThink = new VMTBaseManager;
-  VMTBaseManager *CreateMove = new VMTBaseManager;
-  VMTBaseManager *panelHook = new VMTBaseManager;
-  VMTBaseManager *DrawModelExucute = new VMTBaseManager;
-  VMTBaseManager *SendDatagram = new VMTBaseManager;
+  VMTBaseManager FrameStageNotifyThink;
+  VMTBaseManager CreateMove;
+  VMTBaseManager panelHook;
+  VMTBaseManager DrawModelExucute;
+  VMTBaseManager SendDatagram;
 };
 
 struct CIncomingSequence {

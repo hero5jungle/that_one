@@ -53,9 +53,9 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
       XASSERT( gInts.Panels );
       
       if( gInts.Panels ) {
-        gHooks.panelHook->Init( gInts.Panels );
-        gHooks.panelHook->HookMethod( &Hooked_PaintTraverse, 41 );
-        gHooks.panelHook->Rehook();
+        gHooks.panelHook.Init( gInts.Panels );
+        gHooks.panelHook.HookMethod( &Hooked_PaintTraverse, 41 );
+        gHooks.panelHook.Rehook();
       }
     }
     
@@ -71,17 +71,17 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     // material stuff
     Keyvalues::GetOffsets();
     //
-    gHooks.FrameStageNotifyThink->Init( gInts.Client );
-    gHooks.FrameStageNotifyThink->HookMethod( &FrameStageNotifyThink, 35 );
-    gHooks.FrameStageNotifyThink->Rehook();
+    gHooks.FrameStageNotifyThink.Init( gInts.Client );
+    gHooks.FrameStageNotifyThink.HookMethod( &FrameStageNotifyThink, 35 );
+    gHooks.FrameStageNotifyThink.Rehook();
     //
-    gHooks.CreateMove->Init( gInts.ClientMode );
-    gHooks.CreateMove->HookMethod( &Hooked_CreateMove, 21 );
-    gHooks.CreateMove->Rehook();
+    gHooks.CreateMove.Init( gInts.ClientMode );
+    gHooks.CreateMove.HookMethod( &Hooked_CreateMove, 21 );
+    gHooks.CreateMove.Rehook();
     //
-    gHooks.DrawModelExucute->Init( gInts.MdlRender );
-    gHooks.DrawModelExucute->HookMethod( &Hooked_DrawModelExecute, 19 );
-    gHooks.DrawModelExucute->Rehook();
+    gHooks.DrawModelExucute.Init( gInts.MdlRender );
+    gHooks.DrawModelExucute.HookMethod( &Hooked_DrawModelExecute, 19 );
+    gHooks.DrawModelExucute.Rehook();
     //
     gEvents.InitEvents();
     HWND thisWindow;
