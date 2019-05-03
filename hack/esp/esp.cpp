@@ -163,19 +163,19 @@ namespace ESP {
             continue;
           } else if( model_name.rfind( "models/props_halloween", 0 ) == 0 ) {
             if( gCvars.ESP_item_text.value ) {
-              DrawManager::DrawString( pos.x, pos.y, Colors::White, ToWchar( model_orig ).substr( 23, model_name.size() - 17 ), gFonts.anon, true );
+              DrawManager::DrawString( pos.x, pos.y, Colors::White, ToWchar( model_orig ).substr( 23, model_name.size() - 27 ), gFonts.anon, true );
             }
             
             continue;
           } else if( model_name.rfind( "models/props_medieval", 0 ) == 0 ) {
             if( gCvars.ESP_item_text.value ) {
-              DrawManager::DrawString( pos.x, pos.y, Colors::White, ToWchar( model_orig ).substr( 22, model_name.size() - 17 ), gFonts.anon, true );
+              DrawManager::DrawString( pos.x, pos.y, Colors::White, ToWchar( model_orig ).substr( 22, model_name.size() - 26 ), gFonts.anon, true );
             }
             
             continue;
           } else if( model_name.rfind( "models/pickups", 0 ) == 0 ) {
             if( gCvars.ESP_item_text.value ) {
-              DrawManager::DrawString( pos.x, pos.y, Colors::White, ToWchar( model_orig ).substr( 15, model_name.size() - 17 ), gFonts.anon, true );
+              DrawManager::DrawString( pos.x, pos.y, Colors::White, ToWchar( model_orig ).substr( 15, model_name.size() - 19 ), gFonts.anon, true );
             }
             
             continue;
