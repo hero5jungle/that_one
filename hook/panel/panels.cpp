@@ -4,53 +4,58 @@
 #include "../../menu/gui/menu.h"
 #include "../../sdk/cmat/cmat.h"
 #include "../../tools/signature/csignature.h"
-#include <cstdio>
 CScreenSize gScreenSize;
 
 void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiPanel, bool forceRepaint, bool allowForce ) {
   try {
-    const char *szName = gInts.Panels->GetName( vguiPanel );
+    const char *panel_name = gInts.Panels->GetName( vguiPanel );
     
-    if( strstr( "HudScope", szName ) && gCvars.Noscope.value ) {
+    if( !strcmp( "HudScope", panel_name ) && gCvars.Noscope.value ) {
       return;
     }
     
-    gHooks.PaintTraverse.get_original( )( pPanels, vguiPanel, forceRepaint, allowForce );
-    static unsigned int FocusOverlay;
+    gHooks.PaintTraverse.get_original()( pPanels, vguiPanel, forceRepaint, allowForce );
+    static unsigned int FocusOverlayPanel = 0;
     
-    if( !FocusOverlay ) {
-      if( strstr( szName, "FocusOverlayPanel" ) ) {
-        FocusOverlay = vguiPanel;
+    if( !FocusOverlayPanel ) {
+      if( strstr( panel_name, "FocusOverlayPanel" ) ) {
+        FocusOverlayPanel = vguiPanel;
         Intro();
       }
-    } else {
-      gInts.Panels->SetTopmostPopup( FocusOverlay, true );
     }
     
-    if( FocusOverlay != vguiPanel || gInts.Engine->IsDrawingLoadingImage() ) {
-      return;
-    }
-    
-    CScreenSize newSize;
-    gInts.Engine->GetScreenSize( newSize.iScreenWidth, newSize.iScreenHeight );
-    
-    if( newSize.iScreenWidth != gScreenSize.iScreenWidth || newSize.iScreenHeight != gScreenSize.iScreenHeight ) {
-      DrawManager::Reload();
-    }
-    
-    CBaseEntity *pLocal = gInts.EntList->GetClientEntity( me );
-    
-    if( pLocal ) {
-      if( !pLocal->IsDormant() )
-        if( pLocal->GetLifeState() == LIFE_ALIVE ) {
-          ESP::Run( pLocal );
+    if( FocusOverlayPanel == vguiPanel ) {
+      if( gInts.Engine->IsDrawingLoadingImage() ) {
+        return;
+      }
+      
+      gInts.Panels->SetTopmostPopup( vguiPanel, true );
+      //resolution change fix
+      CScreenSize newSize;
+      gInts.Engine->GetScreenSize( newSize.iScreenWidth, newSize.iScreenHeight );
+      
+      if( newSize.iScreenWidth != gScreenSize.iScreenWidth || newSize.iScreenHeight != gScreenSize.iScreenHeight ) {
+        DrawManager::Reload();
+      }
+      
+      //esp
+      if( gInts.Engine->IsInGame() ) {
+        CBaseEntity *pLocal = gInts.EntList->GetClientEntity( me );
+        
+        if( pLocal ) {
+          if( !pLocal->IsDormant() )
+            if( pLocal->GetLifeState() == LIFE_ALIVE ) {
+              ESP::Run( pLocal );
+            }
         }
+      }
+      
+      //menu
+      gMenu.GetInput();
+      gMenu.Draw();
+      gInts.Panels->SetMouseInputEnabled( vguiPanel, gMenu.enabled );
+      gMenu.EndInput();
     }
-    
-    gMenu.GetInput();
-    gMenu.Draw();
-    gInts.Panels->SetMouseInputEnabled( vguiPanel, gMenu.enabled );
-    gMenu.EndInput();
   } catch( ... ) {
     Fatal( "Failed PaintTraverse" );
   }
@@ -73,7 +78,7 @@ void Intro() {
         rename( "that_one.json", "that_one.backup" );
       }
       
-      Fatal( "An update changed the config order\r\nfind your old config renamed as that_one.backup" );
+      Fatal( "An update changed the config\r\nfind your old config renamed as that_one.backup" );
     }
     
     gNetVars.Initialize();
