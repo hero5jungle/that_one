@@ -1,5 +1,6 @@
 
 #pragma once
+#include <cmath>
 
 #define CHECK_VALID( _v ) 0
 #define Assert( _exp ) ((void)0)
@@ -66,18 +67,22 @@ class Vector {
 };
 
 inline void fClampAngle( Vector &qaAng ) {
-  while( qaAng[0] > 89 )
+  while( qaAng[0] > 89 ) {
     qaAng[0] -= 180;
-    
-  while( qaAng[0] < -89 )
+  }
+  
+  while( qaAng[0] < -89 ) {
     qaAng[0] += 180;
-    
-  while( qaAng[1] > 180 )
+  }
+  
+  while( qaAng[1] > 180 ) {
     qaAng[1] -= 360;
-    
-  while( qaAng[1] < -180 )
+  }
+  
+  while( qaAng[1] < -180 ) {
     qaAng[1] += 360;
-    
+  }
+  
   qaAng.z = 0;
 }
 //===============================================
@@ -214,24 +219,12 @@ __forceinline  Vector &Vector::operator/=( const Vector &v ) {
 //===============================================
 inline float Vector::Length( ) const {
   CHECK_VALID( *this );
-  float root = 0.0f;
-  float sqsr = x * x + y * y + z * z;
-  __asm {
-    sqrtss xmm0, sqsr
-    movss root, xmm0
-  }
-  return root;
+  return sqrt( x * x + y * y );
 }
 //===============================================
 inline float Vector::Length2D( ) const {
   CHECK_VALID( *this );
-  float root = 0.0f;
-  float sqst = x * x + y * y;
-  __asm {
-    sqrtss xmm0, sqst
-    movss root, xmm0
-  }
-  return root;
+  return sqrt( x * x + y * y );
 }
 //===============================================
 inline float Vector::Length2DSqr( ) const {
@@ -310,16 +303,8 @@ inline float Vector::Dot( const Vector &vOther ) const {
   return( a.x * vOther.x + a.y * vOther.y + a.z * vOther.z );
 }
 inline void SinCos( float radians, float *sine, float *cosine ) {
-  _asm {
-    fld   DWORD PTR[radians]
-    fsincos
-    
-    mov edx, DWORD PTR[cosine]
-    mov eax, DWORD PTR[sine]
-    
-    fstp DWORD PTR[edx]
-    fstp DWORD PTR[eax]
-  }
+  *sine = sin( radians );
+  *cosine = cos( radians );
 }
 
 inline void AngleVectors( const Vector &angles, Vector *forward, Vector *right, Vector *up ) {
@@ -352,21 +337,24 @@ inline void VectorAngles( Vector forward, Vector &angles ) {
   if( forward.y == 0 && forward.x == 0 ) {
     yaw = 0;
     
-    if( forward.z > 0 )
+    if( forward.z > 0 ) {
       pitch = 270;
-    else
+    } else {
       pitch = 90;
+    }
   } else {
     yaw = RAD2DEG( atan2f( forward.y, forward.x ) );
     
-    if( yaw < 0 )
+    if( yaw < 0 ) {
       yaw += 360;
-      
+    }
+    
     float tmp = forward.Length2D();
     pitch = RAD2DEG( atan2f( -forward.z, tmp ) );
     
-    if( pitch < 0 )
+    if( pitch < 0 ) {
       pitch += 360;
+    }
   }
   
   angles[0] = pitch;
@@ -375,20 +363,25 @@ inline void VectorAngles( Vector forward, Vector &angles ) {
 }
 
 inline void ClampAngle( Vector &qaAng ) {
-  while( qaAng.x > 89 )
+  while( qaAng.x > 89 ) {
     qaAng.x -= 180;
-    
-  while( qaAng.x < -89 )
+  }
+  
+  while( qaAng.x < -89 ) {
     qaAng.x += 180;
-    
-  while( qaAng.y > 180 )
+  }
+  
+  while( qaAng.y > 180 ) {
     qaAng.y -= 360;
-    
-  while( qaAng.y < -180 )
+  }
+  
+  while( qaAng.y < -180 ) {
     qaAng.y += 360;
-    
-  while( qaAng.z != 0 )
+  }
+  
+  while( qaAng.z != 0 ) {
     qaAng.z = 0;
+  }
 }
 
 inline void AngleVectors( Vector angles, Vector *forward ) {
@@ -418,9 +411,13 @@ inline Vector AngleVector( const Vector &angles ) {
 
 inline void AngleNormalize( Vector &v ) {
   for( auto i = 0; i < 3; i++ ) {
-    if( v[i] < -180.0f ) v[i] += 360.0f;
+    if( v[i] < -180.0f ) {
+      v[i] += 360.0f;
+    }
     
-    if( v[i] >  180.0f ) v[i] -= 360.0f;
+    if( v[i] >  180.0f ) {
+      v[i] -= 360.0f;
+    }
   }
 }
 

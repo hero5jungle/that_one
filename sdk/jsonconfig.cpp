@@ -44,7 +44,11 @@ void SaveToJson() {
       switch( setting->type ) {
       case e_control::checkbox: {
         auto checkbox = ( Checkbox * )( setting );
-        main[player_class][tab->name][checkbox->name] = checkbox->value;
+        
+        if( checkbox->value != -1 ) {
+          main[player_class][tab->name][checkbox->name] = checkbox->value;
+        }
+        
         break;
       }
       
@@ -119,7 +123,11 @@ void LoadFromJson() {
         switch( setting->type ) {
         case e_control::checkbox: {
           auto checkbox = ( Checkbox * )( setting );
-          checkbox->value = main[player_class][tab->name][checkbox->name];
+          
+          if( checkbox->value != -1 ) {
+            checkbox->value = main[player_class][tab->name][checkbox->name];
+          }
+          
           break;
         }
         

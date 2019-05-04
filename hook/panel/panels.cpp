@@ -15,8 +15,7 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
       return;
     }
     
-    VMTManager &hook = VMTManager::GetHook( pPanels );
-    hook.GetMethod<void( __thiscall * )( PVOID, unsigned int, bool, bool )>( 41 )( pPanels, vguiPanel, forceRepaint, allowForce );
+    gHooks.PaintTraverse.get_original( )( pPanels, vguiPanel, forceRepaint, allowForce );
     static unsigned int FocusOverlay;
     
     if( !FocusOverlay ) {

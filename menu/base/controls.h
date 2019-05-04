@@ -173,7 +173,6 @@ class TabGroup : public BaseControl {
   
   int Draw( bool mouseOver );
   void HandleInput();
-  
   TabGroup( const vector<Tab *> &Tabs, int W = 200, int Spacing = 5 ) {
     type = e_control::tabgroup;
     tabs = Tabs, w = W, h = tabs.size() * GetTabHeight + Spacing * ( tabs.size() - 1 ), spacing = Spacing;

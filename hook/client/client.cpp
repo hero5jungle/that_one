@@ -12,7 +12,7 @@
 #include <unordered_map>
 
 int __fastcall hkSendDatagram( CNetChan *netchan, PVOID, bf_write *datagram ) {
-  auto sendDatagram = gHooks.SendDatagram.GetMethod<SendDatagramFn>( 46 );
+  auto sendDatagram = gHooks.SendDatagram.get_original( );
   
   if( !gCvars.latency.value || datagram ) {
     return sendDatagram( netchan, datagram );
@@ -29,7 +29,7 @@ int __fastcall hkSendDatagram( CNetChan *netchan, PVOID, bf_write *datagram ) {
 
 Vector qLASTTICK;
 bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample_frametime, CUserCmd *cmd ) {
-  bool bReturn = gHooks.CreateMove.GetMethod<CreateMoveFn>( 21 )( ClientMode, input_sample_frametime, cmd );
+  bool bReturn = gHooks.CreateMove.get_original( )( ClientMode, input_sample_frametime, cmd );
   //uintptr_t _bp;
   //__asm mov _bp, ebp;
   //bool *send_packet = ( bool * )( * **( uintptr_t ** * )_bp - 1 );
@@ -43,9 +43,7 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
   
   if( ch ) {
     if( ch != old_ch ) {
-      gHooks.SendDatagram.Init( ch );
-      gHooks.SendDatagram.HookMethod( &hkSendDatagram, 46 );
-      gHooks.SendDatagram.Rehook();
+      gHooks.SendDatagram.setup( ch, gOffsets::SendDatagram, &hkSendDatagram );
       old_ch = ch;
     }
   }
@@ -77,7 +75,7 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
 
 unordered_map<MaterialHandle_t, Color> worldmats_new, worldmats_old;
 
-void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrameStage_t Stage ) {
+void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrameStage_t Stage ) {
   if( Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START ) {
     Latency::UpdateIncomingSequences();
   }
@@ -183,26 +181,25 @@ void __fastcall FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrame
     Latency::ClearIncomingSequences();
   }
   
-  return gHooks.FrameStageNotifyThink.GetMethod<FrameStageNotifyThinkFn>( 35 )( CHLClient, _this, Stage );
+  return gHooks.FrameStageNotifyThink.get_original( )( CHLClient, _this, Stage );
 }
 void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, matrix3x4 *pCustomBoneToWorld ) {
-  const char *model_name = gInts.ModelInfo->GetModelName( pInfo.pModel );
-  gHooks.DrawModelExucute.Unhook();
+  gHooks.DrawModelExecute.unhook( );
   
   if( gCvars.ESP_cham.value ) {
+    const char *model_name = gInts.ModelInfo->GetModelName( pInfo.pModel );
     CBaseEntity *pEntity = ( CBaseEntity * )gInts.EntList->GetClientEntity( pInfo.entity_index );
     CBaseEntity *pLocal = ( CBaseEntity * )gInts.EntList->GetClientEntity( gInts.Engine->GetLocalPlayer() );
     
     if( !pEntity || !pLocal ) {
       gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-      gHooks.DrawModelExucute.Rehook();
+      gHooks.DrawModelExecute.rehook();
       return;
     }
     
     Color team_color = Util::team_color( pLocal, pEntity );
     
     if( gCvars.ESP_hat.value && strstr( model_name, "player/items" ) ) {
-      gHooks.DrawModelExucute.Rehook();
       return;
     }
     
@@ -295,11 +292,12 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
       if( gCvars.ESP_building_cham.value ) {
         if( pEntity ) {
           const auto is_building = []( const classId id, const char *model_name ) {
+            bool blueprint = strstr( model_name, "blueprint" );
             bool dispenser = id == classId::CObjectDispenser;
-            bool sentry = id == classId::CObjectSentrygun && !strstr( model_name, "blueprint" );
+            bool sentry = id == classId::CObjectSentrygun ;
             bool teleporter = id == classId::CObjectTeleporter;
             bool intel = id == classId::CCaptureFlag;
-            return dispenser || sentry || teleporter || intel;
+            return !blueprint && ( dispenser || sentry || teleporter || intel );
           };
           
           if( is_building( ( classId )pEntity->GetClientClass()->iClassID, model_name ) ) {
@@ -362,5 +360,5 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
   
   gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
   Materials::ResetMaterial();
-  gHooks.DrawModelExucute.Rehook();
+  gHooks.DrawModelExecute.rehook();
 }

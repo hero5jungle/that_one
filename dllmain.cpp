@@ -47,15 +47,12 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     XASSERT( gInts.MatSystem );
     
     if( !gInts.Panels ) {
-      CreateInterface_t VGUI2Factory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "vgui2.dll" ), "CreateInterface" )
-                                                            );
+      CreateInterface_t VGUI2Factory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "vgui2.dll" ), "CreateInterface" ) );
       gInts.Panels = ( IPanel * )( VGUI2Factory( "VGUI_Panel009", nullptr ) );
       XASSERT( gInts.Panels );
       
       if( gInts.Panels ) {
-        gHooks.panelHook.Init( gInts.Panels );
-        gHooks.panelHook.HookMethod( &Hooked_PaintTraverse, 41 );
-        gHooks.panelHook.Rehook();
+        gHooks.PaintTraverse.setup( gInts.Panels, gOffsets::PaintTraverse, &Hooked_PaintTraverse );
       }
     }
     
@@ -71,17 +68,11 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     // material stuff
     Keyvalues::GetOffsets();
     //
-    gHooks.FrameStageNotifyThink.Init( gInts.Client );
-    gHooks.FrameStageNotifyThink.HookMethod( &FrameStageNotifyThink, 35 );
-    gHooks.FrameStageNotifyThink.Rehook();
+    gHooks.FrameStageNotifyThink.setup( gInts.Client, gOffsets::FrameStageNotifyThink, &Hooked_FrameStageNotifyThink );
     //
-    gHooks.CreateMove.Init( gInts.ClientMode );
-    gHooks.CreateMove.HookMethod( &Hooked_CreateMove, 21 );
-    gHooks.CreateMove.Rehook();
+    gHooks.CreateMove.setup( gInts.ClientMode, gOffsets::CreateMove, &Hooked_CreateMove );
     //
-    gHooks.DrawModelExucute.Init( gInts.MdlRender );
-    gHooks.DrawModelExucute.HookMethod( &Hooked_DrawModelExecute, 19 );
-    gHooks.DrawModelExucute.Rehook();
+    gHooks.DrawModelExecute.setup( gInts.MdlRender, gOffsets::DrawModelExecute, &Hooked_DrawModelExecute );
     //
     gEvents.InitEvents();
     HWND thisWindow;

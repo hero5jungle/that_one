@@ -1,5 +1,4 @@
 #pragma once
-#pragma warning(disable : 4996)
 #include <cmath>
 #include <Windows.h>
 #include "cglobalvars.h"
@@ -16,11 +15,10 @@
 using namespace std;
 
 #define WIN32_LEAN_AND_MEAN
-#pragma warning(disable : 4244)  // casting big ints to small ints may result in data loss 
+#pragma warning(disable:4996)
+#pragma warning(disable:4244)
 using CreateInterface_t = void *( __cdecl * )( const char *, int * );
 using CreateInterfaceFn = void *( * )( const char *pName, int *pReturnCode );
-using VMTBaseManager = toolkit::VMTBaseManager;
-using VMTManager = toolkit::VMTManager;
 
 using VertexFormat_t = unsigned __int64;
 class CGameTrace;
@@ -83,6 +81,7 @@ using MaterialHandle_t = unsigned short ;
 #define FL_ONGROUND (1 << 0)
 #define FLOW_OUTGOING 0
 #define FLOW_INCOMING 1
+
 
 inline wstring ToWchar( const char *text ) {
   size_t length = strlen( text ) + 1;
@@ -2947,6 +2946,19 @@ class CRenderView {
   virtual void VGui_Paint( int mode ) = 0;
 };
 
+struct CIncomingSequence {
+  CIncomingSequence( int instate, int outstate, int seqnr, float time ) {
+    inreliablestate = instate;
+    outreliablestate = outstate;
+    sequencenr = seqnr;
+    curtime = time;
+  }
+  int inreliablestate;
+  int outreliablestate;
+  int sequencenr;
+  float curtime;
+};
+
 struct CInterfaces {
   CEntList *EntList;
   EngineClient *Engine;
@@ -2967,24 +2979,26 @@ struct CInterfaces {
 };
 
 struct CHooks {
-  VMTBaseManager FrameStageNotifyThink;
-  VMTBaseManager CreateMove;
-  VMTBaseManager panelHook;
-  VMTBaseManager DrawModelExucute;
-  VMTBaseManager SendDatagram;
+  //client
+  using SendDatagramFn = int( __thiscall * )( CNetChan *, bf_write * );
+  using CreateMoveFn = bool( __thiscall * )( PVOID, float, CUserCmd * );
+  using FrameStageNotifyThinkFn = void( __fastcall * )( PVOID, void *, ClientFrameStage_t );
+  using DrawModelExecuteFn = void( __stdcall * )( void *state, ModelRenderInfo_t &pInfo, matrix3x4 *pCustomBoneToWorld );
+  vmt_single<SendDatagramFn> SendDatagram;
+  vmt_single<CreateMoveFn> CreateMove;
+  vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
+  vmt_single<DrawModelExecuteFn> DrawModelExecute;
+  //panel
+  using PaintTraverseFn = void( __thiscall * )( PVOID, unsigned int, bool, bool );
+  vmt_single<PaintTraverseFn> PaintTraverse;
 };
 
-struct CIncomingSequence {
-  CIncomingSequence( int instate, int outstate, int seqnr, float time ) {
-    inreliablestate = instate;
-    outreliablestate = outstate;
-    sequencenr = seqnr;
-    curtime = time;
-  }
-  int inreliablestate;
-  int outreliablestate;
-  int sequencenr;
-  float curtime;
+enum gOffsets : int {
+  DrawModelExecute = 19,
+  CreateMove = 21,
+  FrameStageNotifyThink = 35,
+  PaintTraverse = 41,
+  SendDatagram = 46,
 };
 
 extern CInterfaces gInts;

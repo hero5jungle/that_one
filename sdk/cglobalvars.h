@@ -54,14 +54,14 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox Pyro{ "Pyro", comment };
+  Checkbox Pyro{ "--Pyro--", comment };
   Checkbox Aimbot_pyro{ "lazy pyro primary", true };
   Checkbox Airblast_enable{ "Enable airblast", true };
   Checkbox Airblast_silent{ "Silent aim", true };
   Checkbox Airblast_rage{ "Rage aim" };
-  Checkbox Demoman{ "Demoman", comment };
+  Checkbox Demoman{ "--Demoman--", comment };
   Checkbox auto_sticky{ "auto sticky", true };
-  Checkbox Sniper{ "Sniper", comment };
+  Checkbox Sniper{ "--Sniper--", comment };
   Checkbox Aimbot_zoom{ "Zoomed only", true };
   Checkbox head_body{ "sniper bodyshot if kill", true };
   Checkbox Nozoom{ "No zoom" };
@@ -83,10 +83,10 @@ struct CGlobalVariables {
   
   Checkbox ESP_enable{ "Enable ESP", true };
   Checkbox ESP_enemy{ "Enemy only" };
-  Checkbox ESP_text{ "text esp", true };
+  Checkbox ESP_text{ "--text esp--", true };
   Checkbox ESP_building_text{ "building text", true };
   Checkbox ESP_item_text{ "pickup names", true };
-  Checkbox ESP_cham{ "chams", true };
+  Checkbox ESP_cham{ "--chams--", true };
   Listbox  ESP_cham_mat{ "cham material", { "shaded", "glow", "shiny"}, 0 };
   Checkbox ESP_object_cham{ "Object cham", true };
   Checkbox ESP_building_cham{ "Building cham", true };
@@ -95,7 +95,7 @@ struct CGlobalVariables {
   Checkbox ESP_proj_cham{ "projectile cham", true };
   Checkbox ESP_hat{ "No player items" };
   Listbox  ESP_hand{ "Hands", { "Normal", "None", "transparent", "mat" }, 0 };
-  Checkbox ESP_misc{ "misc", true };
+  Checkbox ESP_misc{ "--misc--", true };
   Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
   Listbox  ESP_target{ "target highlight", { "Off", "line", "color", "both" }, 1 };
   
@@ -154,15 +154,15 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox Ignore_A{ "Aimbot", comment };
+  Checkbox Ignore_A{ "--Aimbot--", comment };
   Checkbox Ignore_A_cloak{ "Aimbot ignores cloak", true };
   Checkbox Ignore_A_disguise{ "Aimbot ignores disguise", true };
   Checkbox Ignore_A_taunt{ "Aimbot ignores taunt" };
-  Checkbox Ignore_T{ "Trigger", comment };
+  Checkbox Ignore_T{ "--Trigger--", comment };
   Checkbox Ignore_T_cloak{ "Trigger ignores cloak", true };
   Checkbox Ignore_T_disguise{ "Trigger ignores disguise", true };
   Checkbox Ignore_T_taunt{ "Trigger ignores taunt" };
-  Checkbox Ignore_E{ "ESP", comment };
+  Checkbox Ignore_E{ "--ESP--", comment };
   Checkbox Ignore_E_cloak{ "ESP ignores cloak", true };
   Checkbox Ignore_E_disguise{ "ESP ignores disguise" };
   
@@ -201,12 +201,16 @@ struct CGlobalVariables {
   Checkbox latency{ "latency test" };
   Slider latency_amount{ "added latency", 0, 0, 800, 10, 120 };
   Slider ping_diff{ "ping diffrence", 0, -100, 100, 10 };
+  Checkbox explanation1{ "200 ping for 400ms backtrack", comment };
+  Checkbox explanation2{ "or 800 ping for the 1 sec backtrack", comment };
   Tab Testing{ "Testing", {
       &Sv_cheat,
       &Thirdperson,
       &latency,
       &latency_amount,
-      &ping_diff
+      &ping_diff,
+      &explanation1,
+      &explanation2
     }
   };
   
