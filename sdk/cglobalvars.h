@@ -200,7 +200,7 @@ struct CGlobalVariables {
   Checkbox Thirdperson{ "Third person" };
   Checkbox latency{ "latency test" };
   Slider latency_amount{ "added latency", 0, 0, 800, 10, 120 };
-  Slider ping_diff{ "ping diffrence", 0, -100, 100, 10 };
+  Slider ping_diff{ "ping difference", 0, -100, 100, 10 };
   Checkbox explanation1{ "200 ping for 400ms backtrack", comment };
   Checkbox explanation2{ "or 800 ping for the 1 sec backtrack", comment };
   Tab Testing{ "Testing", {
