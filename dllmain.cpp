@@ -17,8 +17,12 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     CreateInterface_t ClientFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "client.dll" ), "CreateInterface" ) );
     gInts.Client = ( CHLClient * )( ClientFactory( "VClient017", nullptr ) );
     gInts.EntList = ( CEntList * )( ClientFactory( "VClientEntityList003", nullptr ) );
+    gInts.Prediction = ( IPrediction * )( ClientFactory( "VClientPrediction001", nullptr ) );
+    gInts.GameMovement = ( IGameMovement * )( ClientFactory( "GameMovement001", nullptr ) );
     XASSERT( gInts.Client );
     XASSERT( gInts.EntList );
+    XASSERT( gInts.Prediction );
+    XASSERT( gInts.GameMovement );
     //Engine
     CreateInterface_t EngineFactory = ( CreateInterfaceFn )( GetProcAddress( Signatures::GetModuleHandleSafe( "engine.dll" ), "CreateInterface" ) );
     gInts.Engine = ( EngineClient * )( EngineFactory( "VEngineClient013", nullptr ) );
@@ -62,7 +66,6 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     //
     const DWORD dwClientModeAddress = Signatures::GetClientSignature( "8B 0D ? ? ? ? 8B 02 D9 05" );
     XASSERT( dwClientModeAddress );
-    //
     gInts.ClientMode = **( ClientModeShared ** * )( dwClientModeAddress + 2 );
     XASSERT( gInts.ClientMode );
     // material stuff

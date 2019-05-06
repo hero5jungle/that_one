@@ -172,16 +172,18 @@ struct CGlobalVariables {
       &Ignore_E, &Ignore_E_cloak, &Ignore_E_disguise
     }
   };
-  
+  Checkbox Movement{ "--Movement--", comment };
   Checkbox Bunnyhop{ "Bunny hop", true };
   Checkbox Autostrafe{ "Auto strafe", true };
-  Checkbox Norecoil{ "No recoil", true };
+  Checkbox Random{ "--Random--", comment };
+  Checkbox Norecoil{ "No visual recoil", true };
   Checkbox NoPush{ "No push", true };
-  
+  Checkbox engine{ "--engine pred--", true };
+  Checkbox engine_edge{ "edge jump", true };
   Tab Misc{ "Misc", {
       &Bunnyhop, &Autostrafe,
-      &Norecoil,
-      &NoPush
+      &Norecoil, &NoPush,
+      &engine, &engine_edge
     }
   };
   
@@ -203,6 +205,7 @@ struct CGlobalVariables {
   Slider ping_diff{ "ping difference", 0, -100, 100, 10, 140 };
   Checkbox explanation1{ "200 ping for 400ms backtrack", comment };
   Checkbox explanation2{ "or 800 ping for the 1 sec backtrack", comment };
+  
   Tab Testing{ "Testing", {
       &Sv_cheat,
       &Thirdperson,

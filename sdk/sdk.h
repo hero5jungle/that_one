@@ -235,6 +235,10 @@ class CBaseEntity {
     static CDynamicNetvar<Vector>n( "DT_BasePlayer", "localdata", "m_vecViewOffset[0]" );
     return n.GetValue( this );
   }
+  void SetCurrentCommand( CUserCmd *cmd ) {
+    static CDynamicNetvar<CUserCmd *>n( "DT_BasePlayer", "localdata", "m_hConstraintEntity" );
+    return n.SetValue( this - 4, cmd );
+  }
   
   Vector GetViewPos() {
     return GetAbsOrigin() + GetViewOffset();
@@ -267,13 +271,12 @@ class CBaseEntity {
   int  GetTickBase( ) {
     DYNVAR_RETURN( int, this, "DT_BasePlayer", "localdata", "m_nTickBase" );
   }
-  
+  void UpTickBase() {
+    static CDynamicNetvar<int >n( "DT_BasePlayer", "localdata", "m_nTickBase" );
+    n.SetValue( this, n.GetValue( this ) + 1 );
+  }
   float flSimulationTime() {
     DYNVAR_RETURN( float, this, "DT_BaseEntity", "m_flSimulationTime" );
-  }
-  
-  bool GetGlowEnabled() {
-    DYNVAR_RETURN( bool, this, "DT_TFPlayer", "m_bGlowEnabled" );
   }
   
   MoveType_t GetMoveType() {
@@ -291,6 +294,7 @@ class CBaseEntity {
                         "m_angEyeAngles[1]" );
     return *( Vector * )( this + offset );
   }
+  
   float GetPitch() {
     static int offset = gNetVars.get_offset( "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[0]" );
     return *( float * )( this + offset );
@@ -366,6 +370,9 @@ class CBaseEntity {
   int GetMaxHealth() {
     typedef int( __thiscall * OriginalFn )( void * );
     return getvfunc<OriginalFn>( this, 107 )( this );
+  }
+  int GetGroundEntity() {
+    DYNVAR_RETURN( int, this, "DT_BasePlayer", "localdata", "m_hGroundEntity" );
   }
   // Some stuff later defined in CBaseEntity.cpp
   bool CanSee( CBaseEntity *pEntity, const Vector &pos );
@@ -686,9 +693,9 @@ class CBaseCombatWeapon : public CBaseEntity {
     DYNVAR_RETURN( float, this, "DT_TFWeaponBase", "LocalActiveTFWeaponData",
                    "m_flLastFireTime" );
   }
-  int GetSwingRange( CBaseEntity *pLocal ) {
+  float GetSwingRange( CBaseEntity *pLocal ) {
     typedef int( __thiscall * OriginalFn )( CBaseEntity * );
-    return getvfunc<OriginalFn>( this, 451 )( pLocal );
+    return  4.0f + ( float )getvfunc<OriginalFn>( this, 451 )( pLocal ) / 10.0f;
   }
   bool DoSwingTrace( CBaseEntity *pLocal, trace_t *trace ) {
     typedef int( __thiscall * OriginalFn )( CBaseEntity *, trace_t * );
@@ -2959,6 +2966,83 @@ struct CIncomingSequence {
   float curtime;
 };
 
+using CBaseHandle = unsigned int;
+
+class CMoveData {
+ public:
+  bool m_bFirstRunOfFunctions : 1;
+  bool m_bGameCodeMovedPlayer : 1;
+  
+  CBaseHandle m_nPlayerHandle; // edict index on server, client entity handle
+  // on client
+  
+  int m_nImpulseCommand;     // Impulse command issued.
+  Vector m_vecViewAngles;    // Command view angles (local space)
+  Vector m_vecAbsViewAngles; // Command view angles (world space)
+  int m_nButtons;            // Attack buttons.
+  int m_nOldButtons;         // From host_client->oldbuttons;
+  float m_flForwardMove;
+  float m_flSideMove;
+  float m_flUpMove;
+  
+  float m_flMaxSpeed;
+  float m_flClientMaxSpeed;
+  
+  // Variables from the player edict (sv_player) or entvars on the client.
+  // These are copied in here before calling and copied out after calling.
+  Vector m_vecVelocity; // edict::velocity    // Current movement
+  // direction.
+  Vector m_vecAngles;   // edict::angles
+  Vector m_vecOldAngles;
+  
+  // Output only
+  float m_outStepHeight; // how much you climbed this move
+  Vector m_outWishVel;   // This is where you tried
+  Vector m_outJumpVel;   // This is your jump velocity
+  
+  // Movement constraints (radius 0 means no constraint)
+  Vector m_vecConstraintCenter;
+  float m_flConstraintRadius;
+  float m_flConstraintWidth;
+  float m_flConstraintSpeedFactor;
+  
+  void SetAbsOrigin( const Vector &vec );
+  const Vector &GetAbsOrigin() const;
+  
+ private:
+  Vector m_vecAbsOrigin; // edict::origin
+};
+
+class IGameMovement {
+ public:
+  virtual ~IGameMovement( void ) {
+  }
+  
+  // Process the current movement command
+  virtual void ProcessMovement( CBaseEntity *pPlayer, CMoveData *pMove ) = 0;
+  virtual void StartTrackPredictionErrors( CBaseEntity *pPlayer ) = 0;
+  virtual void FinishTrackPredictionErrors( CBaseEntity *pPlayer ) = 0;
+  virtual void DiffPrint( char const *fmt, ... ) = 0;
+  
+  // Allows other parts of the engine to find out the normal and ducked player
+  // bbox sizes
+  virtual Vector GetPlayerMins( bool ducked ) const = 0;
+  virtual Vector GetPlayerMaxs( bool ducked ) const = 0;
+  virtual Vector GetPlayerViewOffset( bool ducked ) const = 0;
+};
+
+class IPrediction {
+ public:
+  void SetupMove( CBaseEntity *pLocal, CUserCmd *cmd, CMoveData *moveData ) {
+    using oSetupMove = void( __thiscall * )( IPrediction *, CBaseEntity *, CUserCmd *, class IMoveHelper *, CMoveData * );
+    getvfunc<oSetupMove>( this, 18 )( this, pLocal, cmd, nullptr, moveData );
+  }
+  void FinishMove( CBaseEntity *pLocal, CUserCmd *cmd, CMoveData *moveData ) {
+    using oFinishMove = void( __thiscall * )( IPrediction *, CBaseEntity *, CUserCmd *, CMoveData * );
+    getvfunc<oFinishMove>( this, 19 )( this, pLocal, cmd, moveData );
+  }
+};
+
 struct CInterfaces {
   CEntList *EntList;
   EngineClient *Engine;
@@ -2976,6 +3060,8 @@ struct CInterfaces {
   IGameEventManager2 *EventManager;
   IInputSystem *InputSys;
   PVOID *ClientState;
+  IGameMovement *GameMovement;
+  IPrediction *Prediction;
 };
 
 struct CHooks {

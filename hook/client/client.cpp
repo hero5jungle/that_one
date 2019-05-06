@@ -7,6 +7,7 @@
 #include "../../hack/airblast/airblast.h"
 #include "../../hack/backtrack/backtrack.h"
 #include "../../hack/backtrack/latency.h"
+#include "../../hack/engine/engine.h"
 #include "../../sdk/cmat/cmat.h"
 #include "../../tools/util/util.h"
 #include <unordered_map>
@@ -54,27 +55,26 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
     return bReturn;
   }
   
-  if( !pLocal->IsDormant() )
-    if( pLocal->GetLifeState() == LIFE_ALIVE ) {
-      try {
-        Misc::Run( pLocal, cmd );
-        Backtrack::collect_tick();
-        Backtrack::cache_INetChannel( ch );
-        Aimbot::Run( pLocal, cmd );
-        Triggerbot::Run( pLocal, cmd );
-        Airblast::Run( pLocal, cmd );
-        DemoSticky::Run( pLocal, cmd );
-      } catch( ... ) {
-        Fatal( "Failed CreateMove" );
-      }
+  if( !pLocal->IsDormant() && pLocal->GetLifeState() == LIFE_ALIVE ) {
+    try {
+      Misc::Run( pLocal, cmd );
+      EnginePred::Start( pLocal, cmd );
+      Backtrack::Run( ch );
+      Aimbot::Run( pLocal, cmd );
+      Triggerbot::Run( pLocal, cmd );
+      Airblast::Run( pLocal, cmd );
+      DemoSticky::Run( pLocal, cmd );
+      EnginePred::End( pLocal, cmd );
+    } catch( ... ) {
+      Fatal( "Failed CreateMove" );
     }
-    
+  }
+  
   qLASTTICK = cmd->viewangles;
   return false;
 }
 
 unordered_map<MaterialHandle_t, Color> worldmats_new, worldmats_old;
-
 void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void *_this, ClientFrameStage_t Stage ) {
   if( Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START ) {
     Latency::UpdateIncomingSequences();

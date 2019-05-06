@@ -155,7 +155,7 @@ namespace Aimbot {
     float minimalDistance = 9999.0f;
     
     if( is_melee ) {
-      minimalDistance = 4.0f + wpn->GetSwingRange( pLocal ) / 10.0f;
+      minimalDistance = wpn->GetSwingRange( pLocal );
     } else {
       Util::minDist( id, minimalDistance );
     }

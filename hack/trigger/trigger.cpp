@@ -26,7 +26,7 @@ namespace Triggerbot {
     float minimalDistance = 9999.0f;
     
     if( wpn->GetSlot() == 2 ) {
-      minimalDistance = 4.0f + wpn->GetSwingRange( pLocal ) / 10.0f;
+      minimalDistance = wpn->GetSwingRange( pLocal );
     }
     
     Util::minDist( id, minimalDistance );
