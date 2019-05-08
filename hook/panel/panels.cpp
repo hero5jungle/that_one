@@ -10,7 +10,7 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
   try {
     const char *panel_name = gInts.Panels->GetName( vguiPanel );
     
-    if( !strcmp( "HudScope", panel_name ) && gCvars.Noscope.value ) {
+    if( !strcmp( "HudScope", panel_name ) && gCvars.sniper_noscope.value ) {
       return;
     }
     
@@ -78,7 +78,8 @@ void Intro() {
         rename( "that_one.json", "that_one.backup" );
       }
       
-      Fatal( "An update changed the config\r\nfind your old config renamed as that_one.backup" );
+      SaveToJson();
+      MessageBoxA( nullptr, "An update changed the config\r\nfind your old config renamed as that_one.backup", "FATAL ERROR", MB_ICONERROR | MB_TOPMOST );
     }
     
     gNetVars.Initialize();

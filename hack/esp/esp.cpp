@@ -12,7 +12,7 @@ namespace ESP {
       if( gCvars.ESP_fov.value ) {
         int iWidth, iHeight;
         gInts.Engine->GetScreenSize( iWidth, iHeight );
-        int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.Nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * iWidth;
+        int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.sniper_nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * iWidth;
         
         if( gCvars.ESP_fov.value == 1 ) {
           DrawManager::DrawCircle( ( float )iWidth / 2.0f, ( float )iHeight / 2.0f, radius, 16.0f, gCvars.color_fov.get_color() );

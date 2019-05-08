@@ -16,6 +16,20 @@ bool CBaseEntity::CanSee( CBaseEntity *pEntity, const Vector &pos ) {
   return ( tr.m_pEnt->GetIndex() == pEntity->GetIndex() );
 }
 
+int CBaseEntity::GetCanSeeHitbox( CBaseEntity *pEntity, const Vector &pos ) {
+  trace_t tr;
+  Ray_t ray;
+  CTraceFilter filter;
+  ray.Init( this->GetEyePosition(), pos );
+  gInts.EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
+  
+  if( tr.m_pEnt && tr.m_pEnt->GetIndex() == pEntity->GetIndex() ) {
+    return tr.hitbox;
+  }
+  
+  return -1;
+}
+
 int CBaseEntity::GetHealth() {
   DYNVAR_RETURN( int, this, "DT_BasePlayer", "m_iHealth" );
 }

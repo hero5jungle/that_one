@@ -27,9 +27,24 @@ namespace Backtrack {
         }
         
         Vector hitbox = pEntity->GetHitboxPosition( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
-        BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ).Length(), hitbox } );
-        BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, 128, BONE_USED_BY_ANYTHING, gInts.globals->curtime );
         
+        BacktrackData[i].push_front(
+        LagRecord{
+          false,
+          pEntity->flSimulationTime(),
+          Util::EstimateAbsVelocity( pEntity ).Length(),
+          hitbox, pEntity->GetEyeAngles(),
+          pEntity->GetWorldSpaceCenter()
+        }
+        );
+        
+        BacktrackData[i].front().valid = pEntity->SetupBones(
+                                           BacktrackData[i].front().boneMatrix,
+                                           128,
+                                           BONE_USED_BY_ANYTHING,
+                                           gInts.globals->curtime
+                                         );
+                                         
         if( BacktrackData[i].size() > 70 ) {
           BacktrackData[i].pop_back();
         }

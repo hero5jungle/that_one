@@ -19,7 +19,7 @@ struct CGlobalVariables {
   Checkbox Aimbot_proj{ "Loose fov for proj", true };
   Listbox  Aimbot_hitbox{ "Hitbox", { "nearest mouse", "first visible", "head", "body" }, 1, 130 };
   Checkbox Aimbot_silent{ "Silent", true };
-  Slider Aimbot_smooth{ "Smooting", 0, 0, 4, 1 };
+  Slider   Aimbot_smooth{ "Smooting", 0, 0, 16, 1 };
   Checkbox Aimbot_range{ "range check", true };
   Slider   Aimbot_ranges{ "shotgun wpn range", 26, 1, 100, 1, 160 };
   Checkbox Backtrack{ "backtrack", true };
@@ -34,50 +34,53 @@ struct CGlobalVariables {
       &Aimbot_range, &Aimbot_ranges,
       &Backtrack,
       &Aimbot_melee,
-      
       &Aimbot_auto_aim, &Aimbot_auto_shoot,
     }
   };
   
-  Checkbox Trigger_enable{ "Enable triggerbot" };
-  KeyBind  Trigger_key{ "trigger key", VK_SHIFT, e_kbmode::always };
-  Checkbox Trigger_head{ "Head only" };
-  Checkbox Trigger_zoom{ "Zoom only" };
-  Checkbox Trigger_melee{ "Melee", true };
-  
-  Tab Trigger{ "Trigger", {
-      &Trigger_enable,
-      &Trigger_key,
-      &Trigger_head,
-      &Trigger_zoom,
-      &Trigger_melee
-    }
-  };
-  
   Checkbox Pyro{ "--Pyro--", comment };
-  Checkbox Aimbot_pyro{ "lazy pyro primary", true };
+  Checkbox pyro_lazy{ "lazy pyro primary", true };
   Checkbox Airblast_enable{ "Enable airblast", true };
   Checkbox Airblast_silent{ "Silent aim", true };
   Checkbox Airblast_rage{ "Rage aim" };
   Checkbox Demoman{ "--Demoman--", comment };
-  Checkbox auto_sticky{ "auto sticky", true };
+  Checkbox demo_sticky{ "auto sticky", true };
   Checkbox Sniper{ "--Sniper--", comment };
-  Checkbox Aimbot_zoom{ "Zoomed only", true };
-  Checkbox head_body{ "sniper bodyshot if kill", true };
-  Checkbox Nozoom{ "No zoom" };
-  Checkbox Noscope{ "No scope", true };
+  Checkbox sniper_zoomed{ "Zoomed only", true };
+  Checkbox sniper_body{ "sniper bodyshot if kill", true };
+  Checkbox sniper_delay{ "Wait for headshot", true };
+  Checkbox sniper_nozoom{ "No zoom" };
+  Checkbox sniper_noscope{ "No scope", true };
   
   Tab Class{ "Class", {
       &Pyro,
-      &Aimbot_pyro,
+      &pyro_lazy,
       &Airblast_enable, &Airblast_silent, &Airblast_rage,
       &Demoman,
-      &auto_sticky,
+      &demo_sticky,
       &Sniper,
-      &Aimbot_zoom,
-      &head_body,
-      &Nozoom,
-      &Noscope,
+      &sniper_zoomed,
+      &sniper_body,
+      &sniper_delay,
+      &sniper_nozoom,
+      &sniper_noscope,
+    }
+  };
+  
+  Checkbox Ignore_A{ "--Aimbot--", comment };
+  Checkbox Ignore_A_cloak{ "Aimbot ignores cloak", true };
+  Checkbox Ignore_A_disguise{ "Aimbot ignores disguise", true };
+  Checkbox Ignore_A_taunt{ "Aimbot ignores taunt" };
+  Checkbox Ignore_E{ "--ESP--", comment };
+  Checkbox Ignore_E_cloak{ "ESP ignores cloak", true };
+  Checkbox Ignore_E_disguise{ "ESP ignores disguise" };
+  
+  Tab Ignore{ "Ignore", {
+      &Ignore_A,
+      &Ignore_A_cloak, &Ignore_A_disguise, &Ignore_A_taunt,
+      
+      &Ignore_E,
+      &Ignore_E_cloak, &Ignore_E_disguise
     }
   };
   
@@ -103,9 +106,11 @@ struct CGlobalVariables {
   Tab ESP{ "ESP", {
       &ESP_enable,
       &ESP_enemy,
+      
       &ESP_text,
       &ESP_building_text,
       &ESP_item_text,
+      
       &ESP_cham,
       &ESP_cham_mat,
       &ESP_object_cham,
@@ -113,11 +118,12 @@ struct CGlobalVariables {
       &ESP_player_cham,
       &ESP_backtrack,
       &ESP_proj_cham,
+      &ESP_hat,
+      &ESP_hand,
+      
       &ESP_misc,
       &ESP_fov,
       &ESP_target,
-      &ESP_hat,
-      &ESP_hand
     }
   };
   
@@ -154,24 +160,7 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox Ignore_A{ "--Aimbot--", comment };
-  Checkbox Ignore_A_cloak{ "Aimbot ignores cloak", true };
-  Checkbox Ignore_A_disguise{ "Aimbot ignores disguise", true };
-  Checkbox Ignore_A_taunt{ "Aimbot ignores taunt" };
-  Checkbox Ignore_T{ "--Trigger--", comment };
-  Checkbox Ignore_T_cloak{ "Trigger ignores cloak", true };
-  Checkbox Ignore_T_disguise{ "Trigger ignores disguise", true };
-  Checkbox Ignore_T_taunt{ "Trigger ignores taunt" };
-  Checkbox Ignore_E{ "--ESP--", comment };
-  Checkbox Ignore_E_cloak{ "ESP ignores cloak", true };
-  Checkbox Ignore_E_disguise{ "ESP ignores disguise" };
   
-  Tab Ignore{ "Ignore", {
-      &Ignore_A, &Ignore_A_cloak, &Ignore_A_disguise, &Ignore_A_taunt,
-      &Ignore_T, &Ignore_T_cloak, &Ignore_T_disguise, &Ignore_T_taunt,
-      &Ignore_E, &Ignore_E_cloak, &Ignore_E_disguise
-    }
-  };
   Checkbox Movement{ "--Movement--", comment };
   Checkbox Bunnyhop{ "Bunny hop", true };
   Checkbox Autostrafe{ "Auto strafe", true };
@@ -180,10 +169,16 @@ struct CGlobalVariables {
   Checkbox NoPush{ "No push", true };
   Checkbox engine{ "--engine pred--", true };
   Checkbox engine_edge{ "edge jump", true };
+  
   Tab Misc{ "Misc", {
+      &Movement,
       &Bunnyhop, &Autostrafe,
+      
+      &Random,
       &Norecoil, &NoPush,
-      &engine, &engine_edge
+      
+      &engine,
+      &engine_edge
     }
   };
   
@@ -219,14 +214,14 @@ struct CGlobalVariables {
   
   TabGroup tf2{ {
       &Aimbot,
-      &Trigger,
-      &ESP,
-      &Colors,
-      &Ignore,
       &Class,
+      &Ignore,
+      &ESP,
       &Misc,
+      &Colors,
       &Config,
       &Testing
     }
   };
+  
 };

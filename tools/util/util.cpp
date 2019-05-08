@@ -147,10 +147,10 @@ namespace Util {
   bool CanAmbassadorHeadshot( CBaseCombatWeapon *wpn ) {
     return gInts.globals->curtime - wpn->m_flLastFireTime() >= 1.0f;
   }
-  bool canBackstab( CBaseEntity *from, CBaseEntity *to, Vector from_angle ) {
-    Vector tarAngle = to->GetEyeAngles();
-    Vector wsc_spy_to_victim;
-    wsc_spy_to_victim = to->GetVecOrigin() - from->GetVecOrigin();
+  
+  //tarAngle = enemy->GetEyeAngles()
+  //wsc_spy_to_victim = enem->GetWorldSpaceCenter() - local->GetWorldSpaceCenter()
+  bool canBackstab( Vector tarAngle, Vector wsc_spy_to_victim, Vector from_angle ) {
     wsc_spy_to_victim.z = 0;
     wsc_spy_to_victim.NormalizeInPlace();
     Vector eye_spy;
@@ -162,7 +162,7 @@ namespace Util {
     eye_victim.z = 0;
     eye_victim.NormalizeInPlace();
     
-    if( Dot( wsc_spy_to_victim, eye_victim ) <= 0.0f ) {
+    if( Dot( wsc_spy_to_victim, eye_victim ) <= 0.01f ) {
       return false;
     }
     
@@ -176,6 +176,33 @@ namespace Util {
     
     return true;
   }
+  //double dunk code was bad anyway, might as well reuse for it for something useful...
+  //February 14, 2008 Patch
+  //Added a small delay(200 ms) before a zoomed Sniper shot can get a critical hit.
+  //seems strange no one's mentioned this...
+  bool canHeadshot( CBaseEntity *pLocal ) {
+    static float timer = 0;
+    static bool started = false;
+    
+    if( !( pLocal->GetCond() & tf_cond::TFCond_Zoomed ) ) {
+      started = false;
+      timer = 0;
+    }
+    
+    if( !started ) {
+      started = true;
+      timer = gInts.globals->curtime;
+    }
+    
+    if( started ) {
+      if( gInts.globals->curtime - timer > 0.2f ) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
   void minDist( weaponid id, float &dist ) {
     switch( id ) {
     case weaponid::Engi_s_TheShortCircuit: {

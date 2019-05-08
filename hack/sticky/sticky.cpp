@@ -7,7 +7,7 @@ namespace DemoSticky {
     Vector sticky_loc;
     float closest_dist = 0;
     
-    if( !gCvars.auto_sticky.value ) {
+    if( !gCvars.demo_sticky.value ) {
       return;
     }
     

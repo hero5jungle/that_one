@@ -60,7 +60,7 @@ namespace Aimbot {
       float last = FLT_MAX;
       bool head = Util::IsHeadshotWeapon( Class, wpn );
       
-      if( gCvars.head_body.value )
+      if( gCvars.sniper_body.value )
         if( Class == TF2_Sniper ) {
           head = head && pEntity->GetHealth() > 50;
         }
@@ -164,36 +164,6 @@ namespace Aimbot {
       return;
     }
     
-    static bool dunk = false;
-    
-    if( id == weaponid::Demoman_m_TheLooseCannon ) {
-      static float timer = 0;
-      static bool started = false;
-      
-      if( !( pCommand->buttons & IN_ATTACK ) ) {
-        started = false;
-        timer = 0;
-      }
-      
-      if( !started ) {
-        if( pCommand->buttons & IN_ATTACK ) {
-          started = true;
-          timer = gInts.globals->curtime;
-        }
-      }
-      
-      if( started ) {
-        float time = fminf( 0.85f, ( fmaxf( 0, gInts.globals->curtime - timer ) ) );
-        
-        if( time == 0.85f ) {
-          pCommand->buttons ^= IN_ATTACK;
-        }
-        
-        float dist = ( ( speed / 100.0f ) / 0.4f ) * ( 1.0f - time );
-        dunk = fabs( distance - dist ) < 0.1f;
-      }
-    }
-    
     Vector vAngs;
     VectorAngles( ( vEntity - vLocal ), vAngs );
     ClampAngle( vAngs );
@@ -207,9 +177,10 @@ namespace Aimbot {
     Vector angle_fov = Util::CalcAngle( vLocal, vEntity );
     Vector angle_proj = Util::CalcAngle( vLocal, pEntity->GetHitboxPosition( 4 ) );
     bool fov = ( Util::GetFOV( pCommand->viewangles, angle_fov ) < gCvars.Aimbot_fov.value );
-    bool pyro = ( gCvars.Aimbot_pyro.value && Class == TF2_Pyro && wpn_slot == 0 && !( wpn->GetItemDefinitionIndex() == weaponid::Pyro_m_DragonsFury ) );
+    bool pyro = ( gCvars.pyro_lazy.value && Class == TF2_Pyro && wpn_slot == 0 && !( wpn->GetItemDefinitionIndex() == weaponid::Pyro_m_DragonsFury ) );
     bool proj = ( speed != -1 && gCvars.Aimbot_proj.value && ( Util::GetFOV( pCommand->viewangles, angle_proj ) < gCvars.Aimbot_fov.value ) );
     bool lazy_melee = is_melee && gCvars.Aimbot_melee.value;
+    bool sniper_headshot = Util::canHeadshot( pLocal );
     
     if( fov || lazy_melee || pyro || proj ) {
       Util::lookAt( gCvars.Aimbot_silent.value, vAngs, pCommand );
@@ -234,9 +205,7 @@ namespace Aimbot {
         }
         
         if( quick_release ) {
-          if( dunk ) {
-            pCommand->buttons &= ~IN_ATTACK;
-          }
+          //i usually prefer to shoot these weapons myself
         } else if( Class == TF2_Heavy ) {
           //minigun
           if( wpn_slot == 0 && pCommand->buttons & IN_ATTACK2 ) {
@@ -245,16 +214,32 @@ namespace Aimbot {
             pCommand->buttons |= IN_ATTACK;
           }
         } else if( Class == TF2_Sniper && wpn_slot == 0 ) {
-          if( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && gCvars.Aimbot_zoom.value ) || !gCvars.Aimbot_zoom.value ) {
+          if( Util::IsHeadshotWeapon( Class, wpn ) ) {
+            if( pLocal->GetCond() & tf_cond::TFCond_Zoomed ) {
+              if( pLocal->GetCanSeeHitbox( pEntity, vEntity ) == 0 || gCvars.backtrack_arr != -1 || gCvars.Aimbot_hitbox.value != 2 )  {
+                if( sniper_headshot || !gCvars.sniper_delay.value )  {
+                  pCommand->buttons |= IN_ATTACK;
+                }
+              }
+            } else if( !gCvars.sniper_zoomed.value ) {
+              pCommand->buttons |= IN_ATTACK;
+            }
+          } else {
             pCommand->buttons |= IN_ATTACK;
+          }
+        } else if( wpn->GetClientClass()->iClassID == ( int )classId::CTFKnife ) {
+          if( gCvars.backtrack_arr != -1 ) {
+            if( Util::canBackstab( BacktrackData[index][gCvars.backtrack_arr].angle, BacktrackData[index][gCvars.backtrack_arr].wsc - pLocal->GetWorldSpaceCenter(), vAngs ) ) {
+              pCommand->buttons |= IN_ATTACK;
+            }
+          } else {
+            if( Util::canBackstab( pEntity->GetEyeAngles(), pEntity->GetVecOrigin() - pLocal->GetVecOrigin(), vAngs ) ) {
+              pCommand->buttons |= IN_ATTACK;
+            }
           }
         } else if( Class == TF2_Spy ) {
           if( Util::IsHeadshotWeapon( Class, wpn ) ) {
             if( Util::CanAmbassadorHeadshot( wpn ) ) {
-              pCommand->buttons |= IN_ATTACK;
-            }
-          } else if( is_melee ) {
-            if( Util::canBackstab( pLocal, pEntity, vAngs ) ) {
               pCommand->buttons |= IN_ATTACK;
             }
           } else {
@@ -389,5 +374,4 @@ namespace Aimbot {
     
     return best_target;
   }
-  
 }

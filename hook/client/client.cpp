@@ -1,7 +1,6 @@
 #include "../../sdk/sdk.h"
 #include "client.h"
 #include "../../hack/aimbot/aimbot.h"
-#include "../../hack/trigger/trigger.h"
 #include "../../hack/misc/misc.h"
 #include "../../hack/sticky/sticky.h"
 #include "../../hack/airblast/airblast.h"
@@ -61,7 +60,6 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
       EnginePred::Start( pLocal, cmd );
       Backtrack::Run( ch );
       Aimbot::Run( pLocal, cmd );
-      Triggerbot::Run( pLocal, cmd );
       Airblast::Run( pLocal, cmd );
       DemoSticky::Run( pLocal, cmd );
       EnginePred::End( pLocal, cmd );
@@ -86,7 +84,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void *_this, Clie
     int &fovPtr = *( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iFOV" ) );
     int defaultFov = *( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iDefaultFOV" ) );
     
-    if( gCvars.Nozoom.value ) {
+    if( gCvars.sniper_nozoom.value ) {
       fovPtr = defaultFov;
       pLocal->set( m_flFOVRate, 0.0f );
     }

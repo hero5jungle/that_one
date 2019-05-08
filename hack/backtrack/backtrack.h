@@ -8,6 +8,8 @@ struct LagRecord {
   float simtime;
   float movement;
   Vector hitbox;
+  Vector angle;
+  Vector wsc;
   matrix3x4 boneMatrix[128];
 };
 
