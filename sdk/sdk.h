@@ -2140,11 +2140,11 @@ class CTraceFilter : public ITraceFilter {
   bool ShouldHitEntity( void *pEntityHandle, int contentsMask ) override {
     CBaseEntity *pEntity = ( CBaseEntity * )pEntityHandle;
     
-    switch( pEntity->GetClientClass()->iClassID ) {
-    case 55: // Portal Window
-    case 64: // Spawn Door visualizers
-    case 117: // Sniper Dots
-      //case 225: // Medigun Shield
+    switch( ( classId )pEntity->GetClientClass()->iClassID ) {
+    case classId::CFuncAreaPortalWindow:
+    case classId::CFuncRespawnRoomVisualizer:
+    case classId::CSniperDot:
+    case classId::CTFMedigunShield:
       return false;
       break;
     }
