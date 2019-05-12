@@ -148,9 +148,10 @@ namespace Util {
     return gInts.globals->curtime - wpn->m_flLastFireTime() >= 1.0f;
   }
   
-  //tarAngle = enemy->GetEyeAngles()
-  //wsc_spy_to_victim = enem->GetWorldSpaceCenter() - local->GetWorldSpaceCenter()
-  bool canBackstab( Vector tarAngle, Vector wsc_spy_to_victim, Vector from_angle ) {
+  //from_angle = pCommand->viewangles
+  //to_angle = enemy->GetEyeAngles()
+  //wsc_spy_to_victim = enemy->GetWorldSpaceCenter() - local->GetWorldSpaceCenter()
+  bool canBackstab( Vector from_angle, Vector to_angle, Vector wsc_spy_to_victim ) {
     wsc_spy_to_victim.z = 0;
     wsc_spy_to_victim.NormalizeInPlace();
     Vector eye_spy;
@@ -158,7 +159,7 @@ namespace Util {
     eye_spy.z = 0;
     eye_spy.NormalizeInPlace();
     Vector eye_victim;
-    AngleVectors( tarAngle, &eye_victim );
+    AngleVectors( to_angle, &eye_victim );
     eye_victim.z = 0;
     eye_victim.NormalizeInPlace();
     

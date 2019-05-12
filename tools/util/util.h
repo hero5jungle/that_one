@@ -20,7 +20,7 @@ namespace Util {
   
   bool IsHeadshotWeapon( int Class, CBaseCombatWeapon *pWep );
   bool CanAmbassadorHeadshot( CBaseCombatWeapon *wpn );
-  bool canBackstab( Vector tarAngle, Vector wsc_spy_to_victim, Vector from_angle );
+  bool canBackstab( Vector from_angle, Vector to_angle, Vector wsc_spy_to_victim );
   bool canHeadshot( CBaseEntity *pLocal );
   
   void minDist( weaponid id, float &dist );

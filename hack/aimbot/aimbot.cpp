@@ -229,11 +229,11 @@ namespace Aimbot {
           }
         } else if( wpn->GetClientClass()->iClassID == ( int )classId::CTFKnife ) {
           if( gCvars.backtrack_arr != -1 ) {
-            if( Util::canBackstab( BacktrackData[index][gCvars.backtrack_arr].angle, BacktrackData[index][gCvars.backtrack_arr].wsc - pLocal->GetWorldSpaceCenter(), vAngs ) ) {
+            if( Util::canBackstab( pCommand->viewangles, BacktrackData[index][gCvars.backtrack_arr].angle, BacktrackData[index][gCvars.backtrack_arr].wsc - pLocal->GetWorldSpaceCenter() ) ) {
               pCommand->buttons |= IN_ATTACK;
             }
           } else {
-            if( Util::canBackstab( pEntity->GetEyeAngles(), pEntity->GetVecOrigin() - pLocal->GetVecOrigin(), vAngs ) ) {
+            if( Util::canBackstab( pCommand->viewangles, pEntity->GetEyeAngles(), pEntity->GetWorldSpaceCenter() - pLocal->GetWorldSpaceCenter() ) ) {
               pCommand->buttons |= IN_ATTACK;
             }
           }
@@ -249,7 +249,10 @@ namespace Aimbot {
           pCommand->buttons |= IN_ATTACK;
         }
       }
+      
     }
+    
+    
     
     Util::FixMove( pCommand, m_vOldViewAngle, m_fOldForwardMove, m_fOldSideMove );
   }
