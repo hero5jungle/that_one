@@ -1,5 +1,5 @@
 #include "backtrack.h"
-#include "../../tools/util/Util.h"
+#include "../../tools/util/util.h"
 std::deque<LagRecord> BacktrackData[64];
 #define BONE_USED_BY_ANYTHING   0x7FF00
 namespace Backtrack {
@@ -26,7 +26,7 @@ namespace Backtrack {
           continue;
         }
         
-        Vector hitbox = pEntity->GetHitboxPosition( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
+        Vector hitbox = pEntity->GetHitbox( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
         
         BacktrackData[i].push_front(
         LagRecord{

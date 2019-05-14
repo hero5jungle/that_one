@@ -13,27 +13,33 @@ struct CGlobalVariables {
   bool spyalert = false;
   Vector aim;
   int hitbox = -1;
+  int last_cmd_number = 0;
   
-  Checkbox Aimbot_enable{ "Enable Aimbot", true };
-  Slider   Aimbot_fov{ "Fov", 5, 1, 180, 1 };
-  Checkbox Aimbot_proj{ "Loose fov for proj", true };
-  Listbox  Aimbot_hitbox{ "Hitbox", { "nearest mouse", "first visible", "head", "body" }, 1, 130 };
-  Checkbox Aimbot_silent{ "Silent", true };
-  Slider   Aimbot_smooth{ "Smooting", 0, 0, 16, 1 };
+  
+  Checkbox Aimbot_enable{ "--Aimbot--", true };
+  Slider   Aimbot_fov{ "fov", 5, 1, 180, 1 };
+  Checkbox Aimbot_proj_lazy{ "lazy proj fov", true };
+  Listbox  Aimbot_proj_mode{ "proj mode", {"Velocity", "Engine"}, 1 };
+  Listbox  Aimbot_hitbox{ "hitbox", { "nearest mouse", "first visible", "head", "body" }, 1, 130 };
+  Checkbox Aimbot_silent{ "silent", true };
+  Slider   Aimbot_smooth{ "smooting", 0, 0, 16, 1 };
   Checkbox Aimbot_range{ "range check", true };
   Slider   Aimbot_ranges{ "shotgun wpn range", 26, 1, 100, 1, 160 };
-  Checkbox Backtrack{ "backtrack", true };
   Checkbox Aimbot_melee{ "melee aim", true };
+  Checkbox Backtrack{ "backtrack", true };
   KeyBind  Aimbot_auto_aim{ "Aim key", VK_SHIFT, e_kbmode::always };
   KeyBind  Aimbot_auto_shoot{ "Shoot key", VK_SHIFT, e_kbmode::always };
   
   Tab Aimbot{ "Aimbot", {
       &Aimbot_enable,
-      &Aimbot_fov, &Aimbot_proj, &Aimbot_hitbox,
+      &Aimbot_fov,
+      &Aimbot_proj_lazy,
+      &Aimbot_proj_mode,
+      &Aimbot_hitbox,
       &Aimbot_silent, &Aimbot_smooth,
       &Aimbot_range, &Aimbot_ranges,
-      &Backtrack,
       &Aimbot_melee,
+      &Backtrack,
       &Aimbot_auto_aim, &Aimbot_auto_shoot,
     }
   };
@@ -42,7 +48,6 @@ struct CGlobalVariables {
   Checkbox pyro_lazy{ "lazy pyro primary", true };
   Checkbox Airblast_enable{ "Enable airblast", true };
   Checkbox Airblast_silent{ "Silent aim", true };
-  Checkbox Airblast_rage{ "Rage aim" };
   Checkbox Demoman{ "--Demoman--", comment };
   Checkbox demo_sticky{ "auto sticky", true };
   Checkbox Sniper{ "--Sniper--", comment };
@@ -55,7 +60,8 @@ struct CGlobalVariables {
   Tab Class{ "Class", {
       &Pyro,
       &pyro_lazy,
-      &Airblast_enable, &Airblast_silent, &Airblast_rage,
+      &Airblast_enable,
+      &Airblast_silent,
       &Demoman,
       &demo_sticky,
       &Sniper,

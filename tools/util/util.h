@@ -3,15 +3,16 @@
 namespace Util {
   float Distance( Vector vOrigin, Vector vLocalOrigin );
   
-  void vector_transform( const Vector &vSome, const matrix3x4 vMatrix, Vector &vOut );
+  void vector_transform( const Vector &vSome, const matrix3x4 &vMatrix, Vector &vOut );
   
   float VectorialDistanceToGround( Vector origin );
   float DistanceToGround( CBaseEntity *ent );
+  float DistanceToGround( Vector origin );
   
   void FixMove( CUserCmd *pCmd, Vector m_vOldAngles, float m_fOldForward, float m_fOldSidemove );
   void lookAt( const bool silent, Vector vAngs, CUserCmd *pCommand );
   
-  bool ShouldReflect( CBaseEntity *ent, int lTeamNum, const char *name );
+  bool ShouldReflect( CBaseEntity *pLocal, CBaseEntity *pEntity, int Class );
   
   Vector CalcAngle( const Vector &src, const Vector &dst );
   float GetFOV( Vector viewAngle, const Vector &aimAngle );
@@ -26,5 +27,8 @@ namespace Util {
   void minDist( weaponid id, float &dist );
   bool projSetup( float &speed, float &chargetime, float &gravity, bool &quick_release, weaponid id, CBaseCombatWeapon *wpn );
   
-  Color team_color( CBaseEntity *pEntity, CBaseEntity *pLocal );
+  Vector ProjectilePrediction( CBaseEntity *pLocal, CBaseEntity *pEntity, Vector hitbox, float speed, float gravitymod );
+  Vector ProjectilePrediction_Engine( CBaseEntity *pLocal, CBaseEntity *pEntity, Vector hitbox, float speed, float gravitymod );
+  
+  Color team_color( CBaseEntity *pLocal, CBaseEntity *pEntity );
 }

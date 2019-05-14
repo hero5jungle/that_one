@@ -1,6 +1,4 @@
 #include "misc.h"
-#include "../../tools/util/Util.h"
-
 namespace Misc {
 
 
@@ -8,7 +6,7 @@ namespace Misc {
     bool ground = ( pLocal->GetFlags() & FL_ONGROUND );
     bool jump = pCommand->buttons & IN_JUMP;
     
-    if( pLocal->GetClassNum() != TF2_Scout ) {
+    if( pLocal->GetClass() != TF2_Scout ) {
       if( gCvars.Bunnyhop.value ) {
         if( !ground && jump ) {
           pCommand->buttons &= ~IN_JUMP;

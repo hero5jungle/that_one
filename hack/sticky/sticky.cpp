@@ -15,7 +15,7 @@ namespace DemoSticky {
       return;
     }
     
-    if( pLocal->GetClassNum() != TF2_Demoman ) {
+    if( pLocal->GetClass() != TF2_Demoman ) {
       return;
     }
     
@@ -31,7 +31,7 @@ namespace DemoSticky {
       }
       
       if( strstr( gInts.ModelInfo->GetModelName( sticky->GetModel() ), "sticky" ) ) {
-        sticky->GetWorldSpaceCenter( sticky_loc );
+        sticky_loc = sticky->GetWorldSpaceCenter( );
         
         for( int j = 1; j < gInts.Engine->GetMaxClients(); j++ ) {
           if( j == me ) {
@@ -66,7 +66,7 @@ namespace DemoSticky {
             continue;
           }
           
-          Vector vent = pEntity->GetHitboxPosition( 4 );
+          Vector vent = pEntity->GetHitbox( 4 );
           float dist = Util::Distance( sticky_loc, vent );
           
           if( dist < closest_dist || closest_dist == 0 ) {

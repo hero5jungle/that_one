@@ -1,4 +1,4 @@
-#include "Util.h"
+#include "util.h"
 #include "../signature/csignature.h"
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -14,7 +14,7 @@ namespace Util {
     return Dist;
   }
   
-  void vector_transform( const Vector &vSome, const matrix3x4 vMatrix, Vector &vOut ) {
+  void vector_transform( const Vector &vSome, const matrix3x4 &vMatrix, Vector &vOut ) {
     if( &vMatrix == nullptr ) {
       return;
     }
@@ -28,13 +28,13 @@ namespace Util {
   }
   
   float VectorialDistanceToGround( Vector origin ) {
-    auto *ground_trace = new trace_t();
+    trace_t ground_trace;
     Ray_t ray;
     Vector endpos = origin;
     endpos.z -= 8192;
     ray.Init( origin, endpos );
-    gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, nullptr, ground_trace );
-    return 8192.0f * ground_trace->fraction;
+    gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, nullptr, &ground_trace );
+    return 8192.0f * ground_trace.fraction;
   }
   float DistanceToGround( CBaseEntity *ent ) {
     if( ent->GetFlags() & FL_ONGROUND ) {
@@ -47,6 +47,15 @@ namespace Util {
     float v3 = VectorialDistanceToGround( origin + Vector( 10.0f, -10.0f, 0.0f ) );
     float v4 = VectorialDistanceToGround( origin + Vector( -10.0f, -10.0f, 0.0f ) );
     return MIN( v1, MIN( v2, MIN( v3, v4 ) ) );
+  }
+  float DistanceToGround( Vector origin ) {
+    trace_t ground_trace;
+    Ray_t ray;
+    Vector endpos = origin;
+    endpos.z -= 8192;
+    ray.Init( origin, endpos );
+    gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, nullptr, &ground_trace );
+    return 8192.0f * ground_trace.fraction;
   }
   
   void FixMove( CUserCmd *pCmd, Vector m_vOldAngles, float m_fOldForward, float m_fOldSidemove ) {
@@ -85,15 +94,24 @@ namespace Util {
     }
   }
   
-  bool ShouldReflect( CBaseEntity *ent, int lTeamNum, const char *name ) {
-    return !strcmp( name, "CTFProjectile_SentryRocket" ) || !strcmp( name, "CTFProjectile_Arrow" ) || !
-           strcmp( name, "CTFProjectile_HealingBolt" ) || !strcmp( name, "CTFProjectile_EnergyBall" ) || !
-           strcmp( name, "CTFProjectile_Flare" ) || !strcmp( name, "CTFProjectile_Jar" ) || !
-           strcmp( name, "CTFProjectile_JarMilk" ) || !strcmp( name, "CTFProjectile_Cleaver" ) || !
-           strcmp( name, "CTFProjectile_Throwable" ) || !strcmp( name, "CTFProjectile_Rocket" ) || !
-           strcmp( name, "CTFGrenadePipebombProjectile" ) || !strcmp( name, "CTFProjectile_ThrowableRepel" ) || !
-           strcmp( name, "CTFProjectile_ThrowableBrick" ) || !strcmp( name, "CTFProjectile_ThrowableBreadMonster" ) && ent->
-           GetTeamNum() != lTeamNum;
+  bool ShouldReflect( CBaseEntity *pLocal, CBaseEntity *pEntity, int Class ) {
+  
+    if( pLocal->GetTeamNum() != pEntity->GetTeamNum() ) {
+      switch( ( classId )Class ) {
+      case classId::CTFProjectile_SentryRocket:
+      case classId::CTFStickBomb:
+      case classId::CTFGrenadePipebombProjectile:
+      case classId::CTFProjectile_Arrow:
+      case classId::CTFProjectile_Jar:
+      case classId::CTFProjectile_Cleaver:
+      case classId::CTFProjectile_Rocket:
+      case classId::CTFProjectile_ThrowableRepel:
+      case classId::CTFProjectile_ThrowableBreadMonster:
+        return true;
+      }
+    }
+    
+    return false;
   }
   
   Vector CalcAngle( const Vector &src, const Vector &dst ) {
@@ -241,17 +259,12 @@ namespace Util {
     case weaponid::Pyro_m_CoffinNail:
     case weaponid::Pyro_m_Warhawk:
     case weaponid::Pyro_m_NostromoNapalmer: {
-      dist = 17.5f;
-      break;
-    }
-    
-    case weaponid::Medic_m_TheOverdose: {
-      dist = 20.0f;
+      dist = 17.0f;
       break;
     }
     
     case weaponid::Demoman_m_TheIronBomber: {
-      dist = 21.0f;
+      dist = 42.0f;
       break;
     }
     
@@ -263,18 +276,23 @@ namespace Util {
       break;
     }
     
+    case weaponid::Medic_m_TheOverdose:
     case weaponid::Medic_m_SyringeGun:
     case weaponid::Medic_m_SyringeGunR:
-    case weaponid::Medic_m_TheBlutsauger:
+    case weaponid::Medic_m_TheBlutsauger: {
+      dist = 42.0f;
+      break;
+    }
+    
     case weaponid::Demoman_m_TheLochnLoad: {
-      dist = 26.0f;
+      dist = 45.0f;
       break;
     }
     
     case weaponid::Pyro_s_TheScorchShot:
     case weaponid::Pyro_s_TheDetonator:
     case weaponid::Pyro_s_TheFlareGun: {
-      dist = 35.0f;
+      dist = 60.0f;
       break;
     }
     
@@ -336,45 +354,6 @@ namespace Util {
     case weaponid::Soldier_s_SoldiersShotgun:
     case weaponid::Heavy_s_HeavysShotgun:
     case weaponid::Pyro_s_PyrosShotgun: {
-      /*repeat skins
-      case weaponid::Heavy_s_Autumn:
-      case weaponid::Heavy_s_BackwoodsBoomstick:
-      case weaponid::Heavy_s_CivicDuty:
-      case weaponid::Heavy_s_CoffinNail:
-      case weaponid::Heavy_s_DressedtoKill:
-      case weaponid::Heavy_s_FestiveShotgun:
-      case weaponid::Heavy_s_FlowerPower:
-      case weaponid::Heavy_s_LightningRod:
-      case weaponid::Heavy_s_PanicAttack:
-      case weaponid::Heavy_s_RedBear:
-      case weaponid::Heavy_s_RusticRuiner:
-      case weaponid::Heavy_s_ShotgunR:
-      case weaponid::Pyro_s_Autumn:
-      case weaponid::Pyro_s_BackwoodsBoomstick:
-      case weaponid::Pyro_s_CivicDuty:
-      case weaponid::Pyro_s_CoffinNail:
-      case weaponid::Pyro_s_DressedtoKill:
-      case weaponid::Pyro_s_FestiveShotgun:
-      case weaponid::Pyro_s_FlowerPower:
-      case weaponid::Pyro_s_LightningRod:
-      case weaponid::Pyro_s_PanicAttack:
-      case weaponid::Pyro_s_RedBear:
-      case weaponid::Pyro_s_RusticRuiner:
-      case weaponid::Pyro_s_ShotgunR:
-      case weaponid::Soldier_s_Autumn:
-      case weaponid::Soldier_s_BackwoodsBoomstick:
-      case weaponid::Soldier_s_CivicDuty:
-      case weaponid::Soldier_s_CoffinNail:
-      case weaponid::Soldier_s_DressedtoKill:
-      case weaponid::Soldier_s_FestiveShotgun:
-      case weaponid::Soldier_s_FlowerPower:
-      case weaponid::Soldier_s_LightningRod:
-      case weaponid::Soldier_s_PanicAttack:
-      case weaponid::Soldier_s_RedBear:
-      case weaponid::Soldier_s_RusticRuiner:
-      case weaponid::Soldier_s_ShotgunR:
-      case weaponid::Soldier_s_TheReserveShooter:
-      */
       dist = gCvars.Aimbot_range.value ? gCvars.Aimbot_ranges.value : 9999.0f;
       break;
     }
@@ -482,7 +461,9 @@ namespace Util {
     case weaponid::Demoman_s_StickybombLauncherR:
     case weaponid::Demoman_s_TheQuickiebombLauncher:
     case weaponid::Demoman_s_TheScottishResistance: {
-      speed = 900.0f;
+      chargetime = gInts.globals->curtime - wpn->GetChargeTime();
+      speed = ( fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * 1500.0f ) + 900.0f;
+      gravity = ( fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * -0.7f ) + 0.5f;
       quick_release = true;
       break;
     }
@@ -527,19 +508,19 @@ namespace Util {
     }
     
     case weaponid::Soldier_m_TheLibertyLauncher: {
-      speed = 1545;
+      speed = 1500;
       break;
     }
     
     case weaponid::Demoman_m_TheLooseCannon: {
-      speed = 1450;
+      speed = 1400;
       gravity = 0.4f;
       quick_release = true;
       break;
     }
     
     case weaponid::Demoman_m_TheLochnLoad: {
-      speed = 1510;
+      speed = 1500;
       gravity = 0.4f;
       break;
     }
@@ -556,7 +537,7 @@ namespace Util {
     case weaponid::Demoman_m_TopShelf:
     case weaponid::Demoman_m_Warhawk:
     case weaponid::Demoman_m_ButcherBird: {
-      speed = 1215;
+      speed = 1200;
       gravity = 0.4f;
       break;
     }
@@ -610,7 +591,7 @@ namespace Util {
     case weaponid::Sniper_s_Jarate:
     case weaponid::Sniper_s_FestiveJarate:
     case weaponid::Pyro_s_GasPasser: {
-      speed = 1020;
+      speed = 1000;
       gravity = 0.5f;
       break;
     }
@@ -619,7 +600,8 @@ namespace Util {
     case weaponid::Medic_m_SyringeGunR:
     case weaponid::Medic_m_TheBlutsauger:
     case weaponid::Medic_m_TheOverdose: {
-      speed = 1000;
+      speed = 900;
+      gravity = 0.2f;
       break;
     }
     
@@ -629,6 +611,164 @@ namespace Util {
     }
     
     return true;
+  }
+  
+  
+  Vector ProjectilePrediction( CBaseEntity *pLocal, CBaseEntity *ent, Vector hitbox, float speed, float gravitymod ) {
+  
+    Vector result = hitbox;
+    float latency = gInts.Engine->GetNetChannelInfo()->GetLatency( FLOW_OUTGOING ) + gInts.Engine->GetNetChannelInfo()->GetLatency( FLOW_INCOMING );
+    
+    float to_ground = DistanceToGround( ent );
+    Vector velocity = EstimateAbsVelocity( ent );
+    
+    float medianTime = pLocal->GetEyePosition().DistTo( result ) / speed;
+    float range = 1.5f;
+    float currenttime = medianTime - range;
+    
+    if( currenttime <= 0.0f ) {
+      currenttime = 0.01f;
+    }
+    
+    float besttime = currenttime;
+    float mindelta = 65536.0f;
+    Vector bestpos = result;
+    int maxsteps = 300;
+    bool parachute = ent->GetCond() & TFCondEx2_Parachute;
+    
+    for( int steps = 0; steps < maxsteps; steps++, currenttime += ( ( float )( 2 * range ) / ( float )maxsteps ) ) {
+      Vector curpos = result;
+      curpos += velocity * currenttime;
+      curpos += velocity * currenttime * latency;
+      
+      if( to_ground > 0.0f ) {
+        curpos.z -= currenttime * currenttime * 400.0f * ( parachute ? 0.448f : 1.0f );
+        
+        if( curpos.z < result.z - to_ground ) {
+          curpos.z = result.z - to_ground;
+        }
+      }
+      
+      float rockettime = pLocal->GetEyePosition().DistTo( curpos ) / speed;
+      
+      rockettime += gInts.Engine->GetNetChannelInfo()->GetLatency( FLOW_OUTGOING );
+      
+      if( fabs( rockettime - currenttime ) < mindelta ) {
+        besttime = currenttime;
+        bestpos = curpos;
+        mindelta = fabs( rockettime - currenttime );
+      }
+    }
+    
+    besttime += gInts.Engine->GetNetChannelInfo()->GetLatency( FLOW_OUTGOING );
+    
+    if( gravitymod ) {
+      bestpos.z += ( 400 * besttime * besttime * gravitymod );
+    }
+    
+    // S = at^2/2 ; t = sqrt(2S/a)*/
+    
+    return bestpos;
+  }
+  Vector EnginePrediction( CBaseEntity *entity, float time ) {
+    Vector result = entity->GetVecOrigin();
+    
+    static CMoveData moveData;
+    memset( &moveData, 0, sizeof( CMoveData ) );
+    
+    float curTime = gInts.globals->curtime;
+    float frameTime = gInts.globals->frametime;
+    
+    CUserCmd fakecmd;
+    memset( &fakecmd, 0, sizeof( CUserCmd ) );
+    
+    Vector vel = EstimateAbsVelocity( entity );
+    
+    fakecmd.command_number = gCvars.last_cmd_number;
+    fakecmd.forwardmove = vel.x;
+    fakecmd.sidemove = -vel.y;
+    
+    Vector oldangles = entity->GetEyeAngles();
+    entity->SetEyeAngles( Vector() );
+    
+    CUserCmd *original_cmd = entity->GetCurrentCommand();
+    entity->SetCurrentCommand( &fakecmd );
+    
+    gInts.globals->curtime = entity->GetTickBase() * gInts.globals->interval_per_tick;
+    gInts.globals->frametime = time;
+    
+    Vector old_origin = entity->GetVecOrigin();
+    
+    gInts.GameMovement->StartTrackPredictionErrors( entity );
+    gInts.Prediction->SetupMove( entity, &fakecmd, &moveData );
+    gInts.GameMovement->ProcessMovement( entity, &moveData );
+    gInts.Prediction->FinishMove( entity, &fakecmd, &moveData );
+    gInts.GameMovement->FinishTrackPredictionErrors( entity );
+    
+    entity->SetCurrentCommand( original_cmd );
+    
+    gInts.globals->curtime = curTime;
+    gInts.globals->frametime = frameTime;
+    
+    result = entity->GetAbsOrigin();
+    
+    entity->SetVecOrigin( old_origin );
+    entity->SetEyeAngles( oldangles );
+    
+    return result;
+  }
+  Vector ProjectilePrediction_Engine( CBaseEntity *pLocal, CBaseEntity *pEntity, Vector hitbox, float speed, float gravitymod ) {
+    Vector origin = pEntity->GetVecOrigin();
+    Vector hitbox_offset = hitbox - origin;
+    
+    Vector velocity = EstimateAbsVelocity( pEntity );
+    
+    float medianTime = pLocal->GetEyePosition().DistTo( hitbox ) / speed;
+    float range = 1.5f;
+    float currenttime = medianTime - range;
+    
+    if( currenttime <= 0.0f ) {
+      currenttime = 0.01f;
+    }
+    
+    float besttime = currenttime;
+    float mindelta = 65536.0f;
+    Vector bestpos = origin;
+    Vector current = origin;
+    int maxsteps = 40;
+    bool onground = false;
+    
+    if( pEntity->GetCond() & FL_ONGROUND ) {
+      onground = true;
+    }
+    
+    float steplength = ( ( float )( 2 * range ) / ( float )maxsteps );
+    
+    for( int steps = 0; steps < maxsteps; steps++, currenttime += steplength ) {
+      pEntity->SetVecOrigin( current );
+      current = EnginePrediction( pEntity, steplength );
+      
+      if( onground ) {
+        float toground = DistanceToGround( current );
+        current.z -= toground;
+      }
+      
+      float rockettime = pLocal->GetEyePosition().DistTo( current ) / speed;
+      
+      if( fabs( rockettime - currenttime ) < mindelta ) {
+        besttime = currenttime;
+        bestpos = current;
+        mindelta = fabs( rockettime - currenttime );
+      }
+    }
+    
+    pEntity->SetVecOrigin( origin );
+    
+    if( gravitymod ) {
+      bestpos.z += ( 400 * besttime * besttime * gravitymod );
+    }
+    
+    return bestpos + hitbox_offset;
   }
   
   Color team_color( CBaseEntity *pLocal, CBaseEntity *pEntity ) {

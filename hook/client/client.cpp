@@ -1,5 +1,6 @@
 #include "../../sdk/sdk.h"
 #include "client.h"
+#include "../../tools/util/util.h"
 #include "../../hack/aimbot/aimbot.h"
 #include "../../hack/misc/misc.h"
 #include "../../hack/sticky/sticky.h"
@@ -8,7 +9,6 @@
 #include "../../hack/backtrack/latency.h"
 #include "../../hack/engine/engine.h"
 #include "../../sdk/cmat/cmat.h"
-#include "../../tools/util/util.h"
 #include <unordered_map>
 
 int __fastcall hkSendDatagram( CNetChan *netchan, PVOID, bf_write *datagram ) {
@@ -37,6 +37,8 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
   
   if( !cmd->command_number ) {
     return false;
+  } else {
+    gCvars.last_cmd_number = cmd->command_number;
   }
   
   INetChannel *ch = gInts.Engine->GetNetChannelInfo();
@@ -298,7 +300,7 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
             return !blueprint && ( dispenser || sentry || teleporter || intel );
           };
           
-          if( is_building( ( classId )pEntity->GetClientClass()->iClassID, model_name ) ) {
+          if( is_building( ( classId )pEntity->GetClassId(), model_name ) ) {
             if( !pEntity->IsDormant() )
               if( pEntity->GetLifeState() == LIFE_ALIVE ) {
                 //Hidden UnUnLit

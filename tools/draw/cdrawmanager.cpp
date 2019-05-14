@@ -1,5 +1,4 @@
 #include "cdrawmanager.h"
-#include "../util/Util.h"
 #include "../../hook/panel/panels.h"
 
 namespace DrawManager {

@@ -219,6 +219,18 @@ enum ClientFrameStage_t {
   FRAME_RENDER_END
 };
 
+enum tf_classes {
+  TF2_Scout = 1,
+  TF2_Soldier = 3,
+  TF2_Pyro = 7,
+  TF2_Demoman = 4,
+  TF2_Heavy = 6,
+  TF2_Engineer = 9,
+  TF2_Medic = 5,
+  TF2_Sniper = 2,
+  TF2_Spy = 8,
+};
+
 class CBaseEntity {
  public:
   template <typename T>
@@ -232,20 +244,22 @@ class CBaseEntity {
   }
   
   Vector GetViewOffset() {
-    static CDynamicNetvar<Vector>n( "DT_BasePlayer", "localdata", "m_vecViewOffset[0]" );
-    return n.GetValue( this );
-  }
-  void SetCurrentCommand( CUserCmd *cmd ) {
-    static CDynamicNetvar<CUserCmd *>n( "DT_BasePlayer", "localdata", "m_hConstraintEntity" );
-    return n.SetValue( this - 4, cmd );
+    DYNVAR_RETURN( Vector, this, "DT_BasePlayer", "localdata", "m_vecViewOffset[0]" );
   }
   
-  Vector GetViewPos() {
-    return GetAbsOrigin() + GetViewOffset();
+  void SetCurrentCommand( CUserCmd *cmd ) {
+    DYNVAR_SET( CUserCmd *, this - 4, cmd, "DT_BasePlayer", "localdata", "m_hConstraintEntity" );
+  }
+  
+  CUserCmd *GetCurrentCommand() {
+    DYNVAR_RETURN( CUserCmd *, this - 4, "DT_BasePlayer", "localdata", "m_hConstraintEntity" );
   }
   
   Vector GetVecOrigin() {
     DYNVAR_RETURN( Vector, this, "DT_BaseEntity", "m_vecOrigin" );
+  }
+  void SetVecOrigin( Vector origin ) {
+    DYNVAR_SET( Vector, this, origin, "DT_BaseEntity", "m_vecOrigin" );
   }
   
   Vector &GetAbsOrigin() {
@@ -253,10 +267,8 @@ class CBaseEntity {
     return getvfunc<OriginalFn>( this, 9 )( this );
   }
   
-  int sniper_ammo() {
-    static int offset =
-      gNetVars.get_offset( "DT_BasePlayer", "localdata", "m_iAmmo" );
-    return *( int * )( this + offset + 4 );
+  int ammo() {
+    DYNVAR_RETURN( int, this + 4, "DT_BasePlayer", "localdata", "m_iAmmo" );
   }
   
   bool IsBaseCombatWeapon() {
@@ -283,32 +295,24 @@ class CBaseEntity {
     DYNVAR_RETURN( MoveType_t, this, "DT_BaseEntity", "movetype" );
   }
   
-  Vector &GetAngles() {
-    static int offset = gNetVars.get_offset( "DT_TFPlayer", "tfnonlocaldata",
-                        "m_angEyeAngles[0]" );
-    return *( Vector * )( this + offset );
+  Vector GetAngles() {
+    DYNVAR_RETURN( Vector, this, "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[0]" );
   }
   
-  Vector &GetAnglesHTC() {
-    static int offset = gNetVars.get_offset( "DT_TFPlayer", "tfnonlocaldata",
-                        "m_angEyeAngles[1]" );
-    return *( Vector * )( this + offset );
+  Vector GetAnglesHTC() {
+    DYNVAR_RETURN( Vector, this, "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[1]" );
   }
   
   float GetPitch() {
-    static int offset = gNetVars.get_offset( "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[0]" );
-    return *( float * )( this + offset );
+    DYNVAR_RETURN( float, this, "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[0]" );
   }
   
   float GetYaw() {
-    static int offset = gNetVars.get_offset( "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[1]" );
-    return *( float * )( this + offset );
+    DYNVAR_RETURN( float, this, "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[1]" );
   }
   
   bool CanBackStab() {
-    static int offset =
-      gNetVars.get_offset( "DT_TFWeaponKnife", "m_bReadyToBackstab" );
-    return *( bool * )( this + offset );
+    DYNVAR_RETURN( bool, this, "DT_TFWeaponKnife", "m_bReadyToBackstab" );
   }
   
   Vector &GetAbsAngles() {
@@ -316,12 +320,6 @@ class CBaseEntity {
     return getvfunc<OriginalFn>( this, 10 )( this );
   }
   
-  void GetWorldSpaceCenter( Vector &vWorldSpaceCenter ) {
-    Vector vMin, vMax;
-    this->GetRenderBounds( vMin, vMax );
-    vWorldSpaceCenter = this->GetAbsOrigin();
-    vWorldSpaceCenter.z += ( vMin.z + vMax.z ) / 2;
-  }
   Vector GetWorldSpaceCenter( ) {
     Vector vMin, vMax;
     this->GetRenderBounds( vMin, vMax );
@@ -336,12 +334,10 @@ class CBaseEntity {
     return getvfunc<OriginalFn>( pRenderable, 9 )( pRenderable );
   }
   
-  bool SetupBones( matrix3x4 *pBoneToWorldOut, int nMaxBones, int boneMask,
-                   float currentTime ) {
+  bool SetupBones( matrix3x4 *pBoneToWorldOut, int nMaxBones, int boneMask, float currentTime ) {
     PVOID pRenderable = ( PVOID )( this + 0x4 );
     typedef bool( __thiscall * OriginalFn )( PVOID, matrix3x4 *, int, int, float );
-    return getvfunc<OriginalFn>( pRenderable, 16 )(
-             pRenderable, pBoneToWorldOut, nMaxBones, boneMask, currentTime );
+    return getvfunc<OriginalFn>( pRenderable, 16 )( pRenderable, pBoneToWorldOut, nMaxBones, boneMask, currentTime );
   }
   
   ClientClass *GetClientClass() {
@@ -381,25 +377,102 @@ class CBaseEntity {
   int GetGroundEntity() {
     DYNVAR_RETURN( int, this, "DT_BasePlayer", "localdata", "m_hGroundEntity" );
   }
-  // Some stuff later defined in CBaseEntity.cpp
+  
+  
+  int GetHealth() {
+    DYNVAR_RETURN( int, this, "DT_BasePlayer", "m_iHealth" );
+  }
+  
+  int GetTeamNum() {
+    DYNVAR_RETURN( int, this, "DT_BaseEntity", "m_iTeamNum" );
+  }
+  
+  int GetFlags() {
+    DYNVAR_RETURN( int, this, "DT_BasePlayer", "m_fFlags" );
+  }
+  
+  BYTE GetLifeState() {
+    DYNVAR_RETURN( BYTE, this, "DT_BasePlayer", "m_lifeState" );
+  }
+  
+  int GetClassId() {
+    return this->GetClientClass()->iClassID;
+  }
+  int GetClass() {
+    DYNVAR_RETURN( int, this, "DT_TFPlayer", "m_PlayerClass", "m_iClass" );
+  }
+  char *szGetClass() {
+    DYNVAR( iClass, int, "DT_TFPlayer", "m_PlayerClass", "m_iClass" );
+    
+    switch( iClass.GetValue( this ) ) {
+    case TF2_Scout:
+      return "Scout";
+      
+    case TF2_Soldier:
+      return "Soldier";
+      
+    case TF2_Pyro:
+      return "Pyro";
+      
+    case TF2_Demoman:
+      return "Demoman";
+      
+    case TF2_Heavy:
+      return "Heavy";
+      
+    case TF2_Engineer:
+      return "Engineer";
+      
+    case TF2_Medic:
+      return "Medic";
+      
+    case TF2_Sniper:
+      return "Sniper";
+      
+    case TF2_Spy:
+      return "Spy";
+      
+    default:
+      return "Other";
+    }
+  }
+  
+  int GetCond() {
+    DYNVAR_RETURN( int, this, "DT_TFPlayer", "m_Shared", "m_nPlayerCond" );
+  }
+  
+  
+  
+  Vector GetCollideableMins() {
+    DYNVAR_RETURN( Vector, this, "DT_BaseEntity", "m_Collision", "m_vecMins" );
+  }
+  
+  Vector GetCollideableMaxs() {
+    DYNVAR_RETURN( Vector, this, "DT_BaseEntity", "m_Collision", "m_vecMaxs" );
+  }
+  
+  Vector GetEyePosition() {
+    DYNVAR_RETURN( Vector, this, "DT_BasePlayer", "localdata", "m_vecViewOffset[0]" ) + this->GetAbsOrigin();
+  }
+  
+  Vector GetEyeAngles() {
+    DYNVAR_RETURN( Vector, this, "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[0]" );
+  }
+  
+  void SetEyeAngles( Vector angle ) {
+    DYNVAR( eye, Vector, "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[0]" );
+    eye.SetValue( this, angle );
+  }
+  
+  Vector GetAbsEyePosition() {
+    DYNVAR_RETURN( Vector, this, "DT_BasePlayer", "localdata", "m_vecViewOffset[0]" );
+  }
+  
+  //CBaseEntity.cpp
+  Vector GetHitbox( int hitbox );
+  CBaseCombatWeapon *GetActiveWeapon();
   bool CanSee( CBaseEntity *pEntity, const Vector &pos );
   int GetCanSeeHitbox( CBaseEntity *pEntity, const Vector &pos );
-  int GetHealth();
-  int GetTeamNum();
-  int GetFlags();
-  BYTE GetLifeState();
-  int GetClassNum();
-  char *szGetClass();
-  int GetCond();
-  Vector GetEyeAngles();
-  CBaseCombatWeapon *GetActiveWeapon();
-  Vector GetCollideableMins();
-  Vector GetCollideableMaxs();
-  Vector GetEyePosition();
-  Vector GetAbsEyePosition();
-  Vector GetHitboxPosition( int iHitbox );
-  
-  
 };
 
 class CObject : public CBaseEntity {
@@ -2140,7 +2213,7 @@ class CTraceFilter : public ITraceFilter {
   bool ShouldHitEntity( void *pEntityHandle, int contentsMask ) override {
     CBaseEntity *pEntity = ( CBaseEntity * )pEntityHandle;
     
-    switch( ( classId )pEntity->GetClientClass()->iClassID ) {
+    switch( ( classId )pEntity->GetClassId() ) {
     case classId::CFuncAreaPortalWindow:
     case classId::CFuncRespawnRoomVisualizer:
     case classId::CSniperDot:
@@ -2515,17 +2588,7 @@ class IGameEventManager2 {
   }
 };
 
-enum tf_classes {
-  TF2_Scout = 1,
-  TF2_Soldier = 3,
-  TF2_Pyro = 7,
-  TF2_Demoman = 4,
-  TF2_Heavy = 6,
-  TF2_Engineer = 9,
-  TF2_Medic = 5,
-  TF2_Sniper = 2,
-  TF2_Spy = 8,
-};
+
 
 enum source_lifestates {
   LIFE_ALIVE,

@@ -1,7 +1,6 @@
 #include "airblast.h"
-#include "../../tools/util/Util.h"
 #include "../../sdk/sdk.h"
-
+#include "../../tools/util/util.h"
 namespace Airblast {
 
   void Run( CBaseEntity *pLocal, CUserCmd *cmd ) {
@@ -19,10 +18,15 @@ namespace Airblast {
       return;
     }
     
-    if( pLocal->GetLifeState() != LIFE_ALIVE ||
-        pLocal->GetClassNum() != TF2_Pyro ||
-        wpn->GetSlot() != 0 ||
-        wpn->GetClientClass()->iClassID == weaponid::Pyro_m_ThePhlogistinator ) {
+    if( pLocal->GetLifeState() != LIFE_ALIVE ) {
+      return;
+    }
+    
+    if( pLocal->GetClass() != TF2_Pyro ) {
+      return;
+    }
+    
+    if( wpn->GetSlot() != 0 || wpn->GetClassId() == weaponid::Pyro_m_ThePhlogistinator ) {
       return;
     }
     
@@ -44,7 +48,7 @@ namespace Airblast {
         continue;
       }
       
-      if( !Util::ShouldReflect( ent, pLocal->GetTeamNum(), ent->GetClientClass()->chName ) ) {
+      if( !Util::ShouldReflect( pLocal, ent, ent->GetClassId() ) ) {
         continue;
       }
       
@@ -69,9 +73,7 @@ namespace Airblast {
     Vector angles;
     Vector tr;
     
-    if( gCvars.Airblast_rage.value  && enem && pLocal->CanSee( enem, enem->GetHitboxPosition( 4 ) ) ) {
-      tr = ( enem->GetHitboxPosition( 4 ) - pLocal->GetEyePosition() );
-    } else if( pLocal->CanSee( nullptr, closest_vec ) ) {
+    if( pLocal->CanSee( nullptr, closest_vec ) ) {
       tr = ( closest_vec - pLocal->GetEyePosition() );
     } else {
       return;

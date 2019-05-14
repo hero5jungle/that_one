@@ -1,6 +1,6 @@
 #include "esp.h"
 #include "../../tools/draw/cdrawmanager.h"
-#include "../../tools/util/Util.h"
+#include "../../tools/util/util.h"
 namespace ESP {
 
   void Run( CBaseEntity *pLocal ) {
@@ -48,10 +48,10 @@ namespace ESP {
           continue;
         }
         
-        Vector center, pos;
-        pEnt->GetWorldSpaceCenter( center );
+        Vector center = pEnt->GetWorldSpaceCenter();
+        Vector pos;
         string name = pEnt->GetClientClass()->chName;
-        classId id = ( classId )pEnt->GetClientClass()->iClassID;
+        classId id = ( classId )pEnt->GetClassId();
         float distance = Util::Distance( pLocal->GetEyePosition(), center );
         Color team = Util::team_color( pLocal, pEnt );
         
