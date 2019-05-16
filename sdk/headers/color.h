@@ -1,4 +1,5 @@
 #pragma once
+#include "../headers/vector.h"
 typedef unsigned char byte;
 struct Color {
   byte rgba[4];
@@ -43,6 +44,9 @@ struct Color {
     rgba[1] = ( input >> 16 ) & 0xFF;
     rgba[2] = ( input >> 8 ) & 0xFF;
     rgba[3] = input & 0xFF;
+  }
+  Vector rgb() {
+    return { rgba[0] / 255.0f, rgba[1] / 255.0f, rgba[2] / 255.0f };
   }
 };
 namespace Colors {

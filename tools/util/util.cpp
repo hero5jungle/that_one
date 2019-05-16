@@ -118,8 +118,8 @@ namespace Util {
     Vector vAngle;
     Vector delta( ( src.x - dst.x ), ( src.y - dst.y ), ( src.z - dst.z ) );
     double hyp = sqrt( delta.x * delta.x + delta.y * delta.y );
-    vAngle.x = float( atanf( float( delta.z / hyp ) ) * 57.295779513082f );
-    vAngle.y = float( atanf( float( delta.y / delta.x ) ) * 57.295779513082f );
+    vAngle.x = float( atanf( float( delta.z / hyp ) ) * RADPI );
+    vAngle.y = float( atanf( float( delta.y / delta.x ) ) * RADPI );
     vAngle.z = 0.0f;
     
     if( delta.x >= 0.0 ) {
@@ -133,6 +133,15 @@ namespace Util {
     AngleVectors( viewAngle, &aim );
     AngleVectors( aimAngle, &ang );
     return RAD2DEG( acos( aim.Dot( ang ) / aim.LengthSqr() ) );
+  }
+  float GetClockwiseAngle( Vector viewAngle, const Vector &aimAngle ) {
+    Vector ang, aim;
+    AngleVectors( viewAngle, &aim );
+    AngleVectors( aimAngle, &ang );
+    const float dot = ang.x * aim.x + ang.y * aim.y;
+    const float det = ang.x * aim.y - ang.y * aim.x;
+    const float angle = atan2( det, dot );
+    return angle;
   }
   
   Vector EstimateAbsVelocity( CBaseEntity *ent ) {
@@ -269,8 +278,20 @@ namespace Util {
     }
     
     case weaponid::Scout_s_TheFlyingGuillotine:
-    case weaponid::Scout_s_TheFlyingGuillotineG:
+    case weaponid::Scout_s_TheFlyingGuillotineG: {
+      dist = 45.0f;
+      break;
+    }
+    
     case weaponid::Scout_s_MadMilk:
+    case weaponid::Scout_s_MutatedMilk:
+    case weaponid::Sniper_s_Jarate:
+    case weaponid::Sniper_s_FestiveJarate:
+    case weaponid::Pyro_s_GasPasser: {
+      dist = 23.0f;
+      break;
+    }
+    
     case weaponid::Pyro_m_DragonsFury: {
       dist = 23.0f;
       break;
@@ -478,8 +499,7 @@ namespace Util {
       break;
     }
     
-    case weaponid::Scout_s_TheFlyingGuillotine:
-    case weaponid::Scout_s_TheFlyingGuillotineG:
+    
     case weaponid::Pyro_m_DragonsFury: {
       speed = 3000;
       break;
@@ -586,13 +606,18 @@ namespace Util {
       break;
     }
     
+    case weaponid::Scout_s_TheFlyingGuillotine:
+    case weaponid::Scout_s_TheFlyingGuillotineG: {
+      speed = 3000;
+      break;
+    }
+    
     case weaponid::Scout_s_MadMilk:
     case weaponid::Scout_s_MutatedMilk:
     case weaponid::Sniper_s_Jarate:
     case weaponid::Sniper_s_FestiveJarate:
     case weaponid::Pyro_s_GasPasser: {
       speed = 1000;
-      gravity = 0.5f;
       break;
     }
     

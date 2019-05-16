@@ -71,7 +71,7 @@ class Menu {
   vector<Dialog *> dialogs;
   
   // - Set the starting position and menu scale
-  POINT pos = { 100, 100 }, scale = { 500, 480 };
+  POINT pos = { 100, 100 }, scale = { 575, 500 };
   
   TabGroup Tabs;
 };

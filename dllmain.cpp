@@ -64,9 +64,9 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
     gInts.globals = *( CGlobals ** )( Signatures::GetEngineSignature( "A1 ? ? ? ? 8B 11 68" ) + 8 );
     XASSERT( gInts.globals );
     //
-    const DWORD dwClientModeAddress = Signatures::GetClientSignature( "8B 0D ? ? ? ? 8B 02 D9 05" );
-    XASSERT( dwClientModeAddress );
-    gInts.ClientMode = **( ClientModeShared ** * )( dwClientModeAddress + 2 );
+    const DWORD ClientMode = Signatures::GetClientSignature( "8B 0D ? ? ? ? 8B 02 D9 05" );
+    XASSERT( ClientMode );
+    gInts.ClientMode = **( ClientModeShared ** * )( ClientMode + 2 );
     XASSERT( gInts.ClientMode );
     // material stuff
     Keyvalues::GetOffsets();

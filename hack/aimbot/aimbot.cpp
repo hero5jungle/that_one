@@ -109,7 +109,7 @@ namespace Aimbot {
     }
     
     if( speed != -1 ) {
-      bool is_on_ground = pEntity->GetFlags() & FL_ONGROUND;
+      bool on_ground = pEntity->GetFlags() & FL_ONGROUND;
       
       if( id == weaponid::Soldier_s_TheRighteousBison || id == weaponid::Demoman_m_TheLooseCannon ) {
         vEntity = pEntity->GetHitbox( gCvars.hitbox );
@@ -117,7 +117,7 @@ namespace Aimbot {
         vEntity = pEntity->GetAbsOrigin();
         vEntity[2] += 15.0f;
       } else if( id == weaponid::Sniper_m_TheHuntsman || id == weaponid::Sniper_m_FestiveHuntsman || id == weaponid::Sniper_m_TheFortifiedCompound ) {
-        vEntity = pEntity->GetHitbox( 0 );
+        vEntity = on_ground ? pEntity->GetHitbox( 0 ) : pEntity->GetHitbox( 4 );
       } else {
         vEntity = pEntity->GetHitbox( gCvars.hitbox );
       }

@@ -16,87 +16,111 @@ struct CGlobalVariables {
   int last_cmd_number = 0;
   
   
-  Checkbox Aimbot_enable{ "--Aimbot--", true };
-  Slider   Aimbot_fov{ "fov", 5, 1, 180, 1 };
-  Checkbox Aimbot_proj_lazy{ "lazy proj fov", true };
-  Listbox  Aimbot_proj_mode{ "proj mode", {"Velocity", "Engine"}, 1 };
-  Listbox  Aimbot_hitbox{ "hitbox", { "nearest mouse", "first visible", "head", "body" }, 1, 130 };
-  Checkbox Aimbot_silent{ "silent", true };
-  Slider   Aimbot_smooth{ "smooting", 0, 0, 16, 1 };
-  Checkbox Aimbot_range{ "range check", true };
-  Slider   Aimbot_ranges{ "shotgun wpn range", 26, 1, 100, 1, 160 };
-  Checkbox Aimbot_melee{ "melee aim", true };
-  Checkbox Backtrack{ "backtrack", true };
+  Checkbox Aimbot_enable{ "Enable aimbot", true };
+  Slider   Aimbot_fov{ "Fov", 5, 1, 180, 1 };
+  Checkbox Aimbot_proj_lazy{ "Lazy proj fov", true };
+  Listbox  Aimbot_proj_mode{ "Proj mode", {"Velocity", "Engine"}, 1 };
+  Listbox  Aimbot_hitbox{ "Hitbox", { "nearest mouse", "first visible", "head", "body" }, 1, 130 };
+  Checkbox Aimbot_silent{ "Silent", true };
+  Slider   Aimbot_smooth{ "Smooting", 0, 0, 16, 1 };
+  Checkbox Aimbot_range{ "Range check", true };
+  Slider   Aimbot_ranges{ "Shotgun range", 26, 1, 100, 1 };
+  Checkbox Aimbot_melee{ "Melee aim", true };
+  Checkbox Backtrack{ "Backtrack", true };
   KeyBind  Aimbot_auto_aim{ "Aim key", VK_SHIFT, e_kbmode::always };
   KeyBind  Aimbot_auto_shoot{ "Shoot key", VK_SHIFT, e_kbmode::always };
   
-  Tab Aimbot{ "Aimbot", {
+  Groupbox AIMBOT{ "--Aimbot--", {
       &Aimbot_enable,
       &Aimbot_fov,
       &Aimbot_proj_lazy,
       &Aimbot_proj_mode,
       &Aimbot_hitbox,
-      &Aimbot_silent, &Aimbot_smooth,
-      &Aimbot_range, &Aimbot_ranges,
+      &Aimbot_silent,
+      &Aimbot_smooth,
+      &Aimbot_range,
+      &Aimbot_ranges,
       &Aimbot_melee,
       &Backtrack,
-      &Aimbot_auto_aim, &Aimbot_auto_shoot,
+      &Aimbot_auto_aim,
+      &Aimbot_auto_shoot
+    }, 170
+    
+  };
+  Tab Aimbot{ "Aimbot", {
+      &AIMBOT
     }
   };
   
-  Checkbox Pyro{ "--Pyro--", comment };
+  
   Checkbox pyro_lazy{ "lazy pyro primary", true };
   Checkbox Airblast_enable{ "Enable airblast", true };
   Checkbox Airblast_silent{ "Silent aim", true };
-  Checkbox Demoman{ "--Demoman--", comment };
+  
   Checkbox demo_sticky{ "auto sticky", true };
-  Checkbox Sniper{ "--Sniper--", comment };
+  
   Checkbox sniper_zoomed{ "Zoomed only", true };
   Checkbox sniper_body{ "sniper bodyshot if kill", true };
   Checkbox sniper_delay{ "Wait for headshot", true };
   Checkbox sniper_nozoom{ "No zoom" };
   Checkbox sniper_noscope{ "No scope", true };
   
-  Tab Class{ "Class", {
-      &Pyro,
+  Groupbox PYRO{ "--Pyro--", {
       &pyro_lazy,
-      &Airblast_enable,
-      &Airblast_silent,
-      &Demoman,
-      &demo_sticky,
-      &Sniper,
+      &Airblast_enable, &Airblast_silent
+    }
+  };
+  
+  Groupbox DEMOMAN{ "--Demoman--", {
+      &demo_sticky
+    }
+  };
+  
+  Groupbox SNIPER{ "--Sniper--", {
       &sniper_zoomed,
       &sniper_body,
       &sniper_delay,
       &sniper_nozoom,
-      &sniper_noscope,
+      &sniper_noscope
     }
   };
   
-  Checkbox Ignore_A{ "--Aimbot--", comment };
+  Tab Class{ "Class", {
+      &PYRO,
+      &DEMOMAN,
+      &SNIPER,
+    }
+  };
+  
   Checkbox Ignore_A_cloak{ "Aimbot ignores cloak", true };
   Checkbox Ignore_A_disguise{ "Aimbot ignores disguise", true };
   Checkbox Ignore_A_taunt{ "Aimbot ignores taunt" };
-  Checkbox Ignore_E{ "--ESP--", comment };
+  
+  Groupbox IGNORE_A{ "--Aimbot--", {
+      &Ignore_A_cloak,
+      &Ignore_A_disguise,
+      &Ignore_A_taunt
+    }, 195
+  };
+  
   Checkbox Ignore_E_cloak{ "ESP ignores cloak", true };
   Checkbox Ignore_E_disguise{ "ESP ignores disguise" };
+  Groupbox IGNORE_E{ "--ESP--", {&Ignore_E_cloak, &Ignore_E_disguise} };
   
   Tab Ignore{ "Ignore", {
-      &Ignore_A,
-      &Ignore_A_cloak, &Ignore_A_disguise, &Ignore_A_taunt,
-      
-      &Ignore_E,
-      &Ignore_E_cloak, &Ignore_E_disguise
+      &IGNORE_A,
+      &IGNORE_E,
     }
   };
   
   Checkbox ESP_enable{ "Enable ESP", true };
   Checkbox ESP_enemy{ "Enemy only" };
-  Checkbox ESP_text{ "--text esp--", true };
+  
   Checkbox ESP_building_text{ "building text", true };
   Checkbox ESP_item_text{ "pickup names", true };
-  Checkbox ESP_cham{ "--chams--", true };
-  Listbox  ESP_cham_mat{ "cham material", { "shaded", "glow", "shiny"}, 0 };
+  Groupbox ESP_TEXT{ "--text esp--", {&ESP_building_text, &ESP_item_text} };
+  
+  Listbox  ESP_cham_mat{ "cham material", { "shaded", "glow"}, 0 };
   Checkbox ESP_object_cham{ "Object cham", true };
   Checkbox ESP_building_cham{ "Building cham", true };
   Checkbox ESP_player_cham{ "Player cham", true };
@@ -104,20 +128,8 @@ struct CGlobalVariables {
   Checkbox ESP_proj_cham{ "projectile cham", true };
   Checkbox ESP_hat{ "No player items" };
   Listbox  ESP_hand{ "Hands", { "Normal", "None", "transparent", "mat" }, 0 };
-  Checkbox ESP_misc{ "--misc--", true };
-  Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
-  Listbox  ESP_target{ "target highlight", { "Off", "line", "color", "both" }, 1 };
   
-  
-  Tab ESP{ "ESP", {
-      &ESP_enable,
-      &ESP_enemy,
-      
-      &ESP_text,
-      &ESP_building_text,
-      &ESP_item_text,
-      
-      &ESP_cham,
+  Groupbox ESP_CHAM{ "--chams--", {
       &ESP_cham_mat,
       &ESP_object_cham,
       &ESP_building_cham,
@@ -126,95 +138,162 @@ struct CGlobalVariables {
       &ESP_proj_cham,
       &ESP_hat,
       &ESP_hand,
-      
-      &ESP_misc,
+    } };
+    
+  Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
+  Checkbox ESP_around_fov{ "Out of fov esp", true };
+  Listbox  ESP_target{ "target highlight", { "Off", "line", "color", "both" }, 1 };
+  
+  Groupbox ESP_MISC{ "--misc--", {
       &ESP_fov,
+      &ESP_around_fov,
       &ESP_target,
+    }
+  };
+  
+  Tab ESP{ "ESP", {
+      &ESP_enable,
+      &ESP_enemy,
+      &ESP_TEXT,
+      &ESP_CHAM,
+      &ESP_MISC,
     }
   };
   
   ColorPicker color_pickup{ "pickups", Colors::Green };
   ColorPicker color_building{ "buildings", Colors::White };
+  
+  Groupbox color_world_obj{ "--World obj cham--", {
+      &color_pickup,
+      &color_building
+    }
+  };
+  
   Listbox     color_type{ "cham color type", { "red/blue", "enemy/ally" } };
   ColorPicker color_red{ "red", Colors::Red };
   ColorPicker color_blue{ "blue", Colors::Blue };
   ColorPicker color_enemy{ "enemy", Colors::Orange };
   ColorPicker color_ally{ "ally", Colors::Indigo };
-  ColorPicker color_cham_history{ "backtrack history", Colors::White };
-  ColorPicker color_cham_tick{ "backtrack tick", Colors::Green };
-  ColorPicker color_aim{ "target color", Colors::Violet };
-  ColorPicker color_fov{ "fov circle", Colors::Yellow, true };
-  Checkbox    world_enabled{ "world/sky color" };
-  ColorPicker world_clr{ "World color", Color( 200 ) };
-  ColorPicker sky_clr{ "Sky color", Color( 200 ) };
   
-  Tab Colors{ "Color", {
-      &color_pickup,
-      &color_building,
+  Groupbox color_cham{ "--Player cham--", {
       &color_type,
       &color_red,
       &color_blue,
       &color_enemy,
-      &color_ally,
+      &color_ally
+    }
+  };
+  
+  ColorPicker color_cham_history{ "backtrack history", Colors::White };
+  ColorPicker color_cham_tick{ "backtrack tick", Colors::Green };
+  
+  Groupbox color_backtrack{ "--Backtrack cham--", {
       &color_cham_history,
-      &color_cham_tick,
+      &color_cham_tick
+    }
+  };
+  
+  ColorPicker color_aim{ "target color", Colors::Violet };
+  ColorPicker color_fov{ "fov circle", Colors::Yellow, true };
+  
+  Groupbox color_misc{ "--Misc color--", {
       &color_aim,
-      &color_fov,
+      &color_fov
+    }
+  };
+  
+  Checkbox    world_enabled{ "world/sky color" };
+  ColorPicker world_clr{ "World color", Color( 200 ) };
+  ColorPicker sky_clr{ "Sky color", Color( 200 ) };
+  
+  Groupbox color_world{ "--World color--", {
       &world_enabled,
       &world_clr,
       &sky_clr
     }
   };
   
+  Tab Colors{ "Color", {
+      &color_world_obj,
+      &color_cham,
+      &color_backtrack,
+      &color_misc,
+      &color_world
+    }
+  };
   
-  Checkbox Movement{ "--Movement--", comment };
   Checkbox Bunnyhop{ "Bunny hop", true };
   Checkbox Autostrafe{ "Auto strafe", true };
-  Checkbox Random{ "--Random--", comment };
-  Checkbox Norecoil{ "No visual recoil", true };
-  Checkbox NoPush{ "No push", true };
-  Checkbox engine{ "--engine pred--", true };
-  Checkbox engine_edge{ "edge jump", true };
   
-  Tab Misc{ "Misc", {
-      &Movement,
-      &Bunnyhop, &Autostrafe,
-      
-      &Random,
-      &Norecoil, &NoPush,
-      
+  Groupbox MOVEMENT{ "--Movement--", {
+      &Bunnyhop,
+      &Autostrafe
+    }
+  };
+  
+  Checkbox NoRecoil{ "No visual recoil", true };
+  Checkbox NoPush{ "No push", true };
+  
+  Groupbox MISC{ "--Misc--", {
+      &NoRecoil,
+      &NoPush
+    }
+  };
+  
+  Checkbox engine{ "engine prediction", true };
+  Checkbox engine_edge{ "edge jump", true };
+  Groupbox ENGINE{ "--Engine pred--", {
       &engine,
       &engine_edge
     }
   };
   
-  Checkbox loadbyclass{ "load based on class" };
+  Checkbox latency{ "latency" };
+  Slider latency_amount{ "added latency", 0, 0, 800, 10, 120 };
+  Slider ping_diff{ "ping difference", 0, -100, 100, 10, 140 };
+  
+  Groupbox LATENCY{ "--Latency--", {
+      &latency,
+      &latency_amount,
+      &ping_diff,
+      
+    } };
+  Checkbox explanation1{ "200 ping for 400ms backtrack", comment };
+  Checkbox explanation2{ "or 800 ping for the 1 sec backtrack", comment };
+  
+  Tab Misc{ "Misc", {
+      &MOVEMENT,
+      &MISC,
+      &ENGINE,
+      &LATENCY,
+      &explanation1,
+      &explanation2
+    }
+  };
+  
+  Checkbox    loadbyclass{ "load based on class" };
   func_switch savejson{ "save to json", SaveToJson };
   func_switch loadjson{ "load from json", LoadFromJson };
   
-  Tab Config{ "Config", {
+  Groupbox CONFIG{ "--Config--", {
       &loadbyclass,
       &savejson,
       &loadjson
+    }, 200
+  };
+  
+  Tab Config{ "Config", {
+      &CONFIG
     }
   };
   
   Checkbox Sv_cheat{ "sv_cheat 1" };
   Checkbox Thirdperson{ "Third person" };
-  Checkbox latency{ "latency test" };
-  Slider latency_amount{ "added latency", 0, 0, 800, 10, 120 };
-  Slider ping_diff{ "ping difference", 0, -100, 100, 10, 140 };
-  Checkbox explanation1{ "200 ping for 400ms backtrack", comment };
-  Checkbox explanation2{ "or 800 ping for the 1 sec backtrack", comment };
+  
   
   Tab Testing{ "Testing", {
       &Sv_cheat,
       &Thirdperson,
-      &latency,
-      &latency_amount,
-      &ping_diff,
-      &explanation1,
-      &explanation2
     }
   };
   

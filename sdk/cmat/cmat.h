@@ -6,7 +6,7 @@ namespace Materials {
   extern IMaterial *shaded, *glow, *shiny;
   void Initialize();
   
-  IMaterial *CreateMaterial( bool IgnoreZ, bool Flat, bool Wireframe, bool Shiny );
+  IMaterial *CreateMaterial( bool Flat );
   void ResetMaterial();
   
   void ForceMaterial( IMaterial *material, Color color );

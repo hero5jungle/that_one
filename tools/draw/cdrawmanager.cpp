@@ -116,21 +116,11 @@ namespace DrawManager {
   void Rotating_Dot_Circle( float x, float y, float r, float s, Color color ) {
     float Step = 3.141 / s;
     float timer = gInts.globals->curtime;
-    //start is left, end goes anti clockwise
-    bool flip = false;
     
     for( float a = timer; a < timer + ( 3.141 * 2 ); a += Step ) {
       float xt = r * cos( a ) + x;
       float yt = r * sin( a ) + y;
       DrawRect( xt - 1, yt - 1, 3, 3, color );
-      
-      if( flip ) {
-        float xl = r * cos( a + Step ) + x;
-        float yl = r * sin( a + Step ) + y;
-        DrawLine( xt, yt, xl, yl, color );
-      }
-      
-      flip = !flip;
     }
   }
   

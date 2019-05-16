@@ -16,6 +16,7 @@ namespace Util {
   
   Vector CalcAngle( const Vector &src, const Vector &dst );
   float GetFOV( Vector viewAngle, const Vector &aimAngle );
+  float GetClockwiseAngle( Vector viewAngle, const Vector &aimAngle );
   
   Vector EstimateAbsVelocity( CBaseEntity *ent );
   

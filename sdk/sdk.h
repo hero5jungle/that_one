@@ -78,6 +78,7 @@ using MaterialHandle_t = unsigned short ;
 
 #define me gInts.Engine->GetLocalPlayer()
 #define GetBaseEntity gInts.EntList->GetClientEntity
+#define GetBaseEntityFromHandle gInts.EntList->GetClientEntityFromHandle
 #define FL_ONGROUND (1 << 0)
 #define FLOW_OUTGOING 0
 #define FLOW_INCOMING 1
@@ -258,6 +259,7 @@ class CBaseEntity {
   Vector GetVecOrigin() {
     DYNVAR_RETURN( Vector, this, "DT_BaseEntity", "m_vecOrigin" );
   }
+  
   void SetVecOrigin( Vector origin ) {
     DYNVAR_SET( Vector, this, origin, "DT_BaseEntity", "m_vecOrigin" );
   }
@@ -283,10 +285,12 @@ class CBaseEntity {
   int  GetTickBase( ) {
     DYNVAR_RETURN( int, this, "DT_BasePlayer", "localdata", "m_nTickBase" );
   }
+  
   void UpTickBase() {
     static CDynamicNetvar<int >n( "DT_BasePlayer", "localdata", "m_nTickBase" );
     n.SetValue( this, n.GetValue( this ) + 1 );
   }
+  
   float flSimulationTime() {
     DYNVAR_RETURN( float, this, "DT_BaseEntity", "m_flSimulationTime" );
   }
@@ -378,7 +382,6 @@ class CBaseEntity {
     DYNVAR_RETURN( int, this, "DT_BasePlayer", "localdata", "m_hGroundEntity" );
   }
   
-  
   int GetHealth() {
     DYNVAR_RETURN( int, this, "DT_BasePlayer", "m_iHealth" );
   }
@@ -440,8 +443,6 @@ class CBaseEntity {
   int GetCond() {
     DYNVAR_RETURN( int, this, "DT_TFPlayer", "m_Shared", "m_nPlayerCond" );
   }
-  
-  
   
   Vector GetCollideableMins() {
     DYNVAR_RETURN( Vector, this, "DT_BaseEntity", "m_Collision", "m_vecMins" );
