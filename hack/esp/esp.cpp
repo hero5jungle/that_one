@@ -53,14 +53,35 @@ namespace ESP {
           Vector view_angle;
           gInts.Engine->GetViewAngles( view_angle );
           const float deg = Util::GetClockwiseAngle( view_angle, angle );
+          //rotation
           const float xrot = cos( deg - PI / 2 );
           const float yrot = sin( deg - PI / 2 );
+          //start and end
           const float x1 = ( radius + 5.0f ) * xrot;
           const float y1 = ( radius + 5.0f ) * yrot;
           const float x2 = ( radius + 15.0f ) * xrot;
           const float y2 = ( radius + 15.0f ) * yrot;
+          //arrow constants
+          constexpr float arrow_angle = DEG2RAD( 90.0f );
+          constexpr float arrow_lenght = 6.0f;
+          //arrow math
+          const Vector line = Vector( x2, y2, 0.0f ) - Vector( x1, y1, 0.0f );
+          const float length = line.Length();
+          //base of arrow
+          const float fpoint_on_line = arrow_lenght / ( atanf( arrow_angle ) * length );
+          const Vector point_on_line = Vector( x2, y2, 0 ) + ( line * fpoint_on_line * -1.0f );
+          const Vector normal_vector = { -line.y, line.x, 0.0f };
+          const Vector normal = Vector( arrow_lenght, arrow_lenght, 0.0f ) / ( length * 2 );
+          //left and right points
+          const Vector rotation = normal * normal_vector;
+          const Vector left  = point_on_line + rotation;
+          const Vector right = point_on_line - rotation;
+          //arrow
+          //  ^
+          //  |
+          DrawManager::DrawLine( cx + x2, cy + y2, cx + left.x, cy + left.y, gCvars.color_fov.get_color() );
+          DrawManager::DrawLine( cx + x2, cy + y2, cx + right.x, cy + right.y, gCvars.color_fov.get_color() );
           DrawManager::DrawLine( cx + x1, cy + y1, cx + x2, cy + y2, gCvars.color_fov.get_color() );
-          DrawManager::DrawRect( cx + x2 - 3, cy + y2 - 3, 6, 6, gCvars.color_fov.get_color() );
         }
       }
     }
