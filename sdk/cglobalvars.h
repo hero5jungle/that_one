@@ -53,14 +53,14 @@ struct CGlobalVariables {
   };
   
   
-  Checkbox pyro_lazy{ "lazy pyro primary", true };
+  Checkbox pyro_lazy{ "Lazy pyro primary", true };
   Checkbox Airblast_enable{ "Enable airblast", true };
   Checkbox Airblast_silent{ "Silent aim", true };
   
-  Checkbox demo_sticky{ "auto sticky", true };
+  Checkbox demo_sticky{ "Auto sticky", true };
   
   Checkbox sniper_zoomed{ "Zoomed only", true };
-  Checkbox sniper_body{ "sniper bodyshot if kill", true };
+  Checkbox sniper_body{ "Sniper bodyshot if kill", true };
   Checkbox sniper_delay{ "Wait for headshot", true };
   Checkbox sniper_nozoom{ "No zoom" };
   Checkbox sniper_noscope{ "No scope", true };
@@ -105,7 +105,12 @@ struct CGlobalVariables {
   
   Checkbox Ignore_E_cloak{ "ESP ignores cloak", true };
   Checkbox Ignore_E_disguise{ "ESP ignores disguise" };
-  Groupbox IGNORE_E{ "--ESP--", {&Ignore_E_cloak, &Ignore_E_disguise} };
+  
+  Groupbox IGNORE_E{ "--ESP--", {
+      &Ignore_E_cloak,
+      &Ignore_E_disguise
+    }
+  };
   
   Tab Ignore{ "Ignore", {
       &IGNORE_A,
@@ -116,20 +121,33 @@ struct CGlobalVariables {
   Checkbox ESP_enable{ "Enable ESP", true };
   Checkbox ESP_enemy{ "Enemy only" };
   
-  Checkbox ESP_building_text{ "building text", true };
-  Checkbox ESP_item_text{ "pickup names", true };
-  Groupbox ESP_TEXT{ "--text esp--", {&ESP_building_text, &ESP_item_text} };
+  Groupbox ESP_BASE{ "--ESP--", {
+      &ESP_enable,
+      &ESP_enemy
+    }
+  };
   
-  Listbox  ESP_cham_mat{ "cham material", { "shaded", "glow"}, 0 };
+  Checkbox ESP_building_text{ "Building text", true };
+  Checkbox ESP_item_text{ "Item names", true };
+  
+  Groupbox ESP_TEXT{ "--Text esp--", {
+      &ESP_building_text,
+      &ESP_item_text
+    }
+  };
+  
+  Checkbox ESP_cham{ "Enable chams", true };
+  Listbox  ESP_cham_mat{ "Cham material", { "shaded", "glow"}, 0 };
   Checkbox ESP_object_cham{ "Object cham", true };
   Checkbox ESP_building_cham{ "Building cham", true };
   Checkbox ESP_player_cham{ "Player cham", true };
   Checkbox ESP_backtrack{ "Backtrack cham", true };
-  Checkbox ESP_proj_cham{ "projectile cham", true };
+  Checkbox ESP_proj_cham{ "Projectile cham", true };
   Checkbox ESP_hat{ "No player items" };
-  Listbox  ESP_hand{ "Hands", { "Normal", "None", "transparent", "mat" }, 0 };
+  Listbox  ESP_hand{ "Hands", { "normal", "none", "transparent", "mat" }, 0 };
   
-  Groupbox ESP_CHAM{ "--chams--", {
+  Groupbox ESP_CHAM{ "--Chams--", {
+      &ESP_cham,
       &ESP_cham_mat,
       &ESP_object_cham,
       &ESP_building_cham,
@@ -141,39 +159,38 @@ struct CGlobalVariables {
     } };
     
   Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
+  Listbox  ESP_target{ "Target highlight", { "Off", "line", "color", "both" }, 1 };
   Checkbox ESP_around_fov{ "Out of fov esp", true };
-  Listbox  ESP_target{ "target highlight", { "Off", "line", "color", "both" }, 1 };
   
-  Groupbox ESP_MISC{ "--misc--", {
+  Groupbox ESP_MISC{ "--Misc--", {
       &ESP_fov,
-      &ESP_around_fov,
       &ESP_target,
+      &ESP_around_fov,
     }
   };
   
   Tab ESP{ "ESP", {
-      &ESP_enable,
-      &ESP_enemy,
+      &ESP_BASE,
       &ESP_TEXT,
       &ESP_CHAM,
       &ESP_MISC,
     }
   };
   
-  ColorPicker color_pickup{ "pickups", Colors::Green };
-  ColorPicker color_building{ "buildings", Colors::White };
+  ColorPicker color_items{ "Items", Colors::Green };
+  ColorPicker color_building{ "Buildings", Colors::White };
   
   Groupbox color_world_obj{ "--World obj cham--", {
-      &color_pickup,
+      &color_items,
       &color_building
     }
   };
   
-  Listbox     color_type{ "cham color type", { "red/blue", "enemy/ally" } };
-  ColorPicker color_red{ "red", Colors::Red };
-  ColorPicker color_blue{ "blue", Colors::Blue };
-  ColorPicker color_enemy{ "enemy", Colors::Orange };
-  ColorPicker color_ally{ "ally", Colors::Indigo };
+  Listbox     color_type{ "Cham color type", { "red/blue", "enemy/ally" } };
+  ColorPicker color_red{ "Red", Colors::Red };
+  ColorPicker color_blue{ "Blue", Colors::Blue };
+  ColorPicker color_enemy{ "Enemy", Colors::Orange };
+  ColorPicker color_ally{ "Ally", Colors::Indigo };
   
   Groupbox color_cham{ "--Player cham--", {
       &color_type,
@@ -184,8 +201,8 @@ struct CGlobalVariables {
     }
   };
   
-  ColorPicker color_cham_history{ "backtrack history", Colors::White };
-  ColorPicker color_cham_tick{ "backtrack tick", Colors::Green };
+  ColorPicker color_cham_history{ "Backtrack history", Colors::White };
+  ColorPicker color_cham_tick{ "Backtrack tick", Colors::Green };
   
   Groupbox color_backtrack{ "--Backtrack cham--", {
       &color_cham_history,
@@ -193,8 +210,8 @@ struct CGlobalVariables {
     }
   };
   
-  ColorPicker color_aim{ "target color", Colors::Violet };
-  ColorPicker color_fov{ "fov circle", Colors::Yellow, true };
+  ColorPicker color_aim{ "Target color", Colors::Violet };
+  ColorPicker color_fov{ "Fov circle", Colors::Yellow, true };
   
   Groupbox color_misc{ "--Misc color--", {
       &color_aim,
@@ -202,7 +219,7 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox    world_enabled{ "world/sky color" };
+  Checkbox    world_enabled{ "World/Sky color" };
   ColorPicker world_clr{ "World color", Color( 200 ) };
   ColorPicker sky_clr{ "Sky color", Color( 200 ) };
   
@@ -240,17 +257,17 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox engine{ "engine prediction", true };
-  Checkbox engine_edge{ "edge jump", true };
+  Checkbox engine{ "Engine prediction", true };
+  Checkbox engine_edge{ "Edge jump", true };
   Groupbox ENGINE{ "--Engine pred--", {
       &engine,
       &engine_edge
     }
   };
   
-  Checkbox latency{ "latency" };
-  Slider latency_amount{ "added latency", 0, 0, 800, 10, 120 };
-  Slider ping_diff{ "ping difference", 0, -100, 100, 10, 140 };
+  Checkbox latency{ "Latency" };
+  Slider latency_amount{ "Added latency", 0, 0, 800, 10, 120 };
+  Slider ping_diff{ "Ping difference", 0, -100, 100, 10, 140 };
   
   Groupbox LATENCY{ "--Latency--", {
       &latency,
@@ -271,9 +288,9 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox    loadbyclass{ "load based on class" };
-  func_switch savejson{ "save to json", SaveToJson };
-  func_switch loadjson{ "load from json", LoadFromJson };
+  Checkbox    loadbyclass{ "Load based on class" };
+  func_switch savejson{ "Save to json", SaveToJson };
+  func_switch loadjson{ "Load from json", LoadFromJson };
   
   Groupbox CONFIG{ "--Config--", {
       &loadbyclass,
@@ -287,7 +304,7 @@ struct CGlobalVariables {
     }
   };
   
-  Checkbox Sv_cheat{ "sv_cheat 1" };
+  Checkbox Sv_cheat{ "Sv_cheat 1" };
   Checkbox Thirdperson{ "Third person" };
   
   

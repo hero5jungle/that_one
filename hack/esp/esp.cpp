@@ -2,14 +2,13 @@
 #include "../../tools/draw/cdrawmanager.h"
 #include "../../tools/util/util.h"
 namespace ESP {
-
   void Run( CBaseEntity *pLocal ) {
+  
     if( !gCvars.ESP_enable.value ) {
       return;
     }
     
-    
-    if( gCvars.ESP_fov.value ) {
+    if( gCvars.ESP_fov.value || gCvars.ESP_around_fov.value ) {
       int iWidth, iHeight;
       gInts.Engine->GetScreenSize( iWidth, iHeight );
       float cx = ( float )iWidth / 2.0f;
@@ -65,12 +64,12 @@ namespace ESP {
           constexpr float arrow_angle = DEG2RAD( 90.0f );
           constexpr float arrow_lenght = 6.0f;
           //arrow math
-          const Vector line = Vector( x2, y2, 0.0f ) - Vector( x1, y1, 0.0f );
+          const Vector line{ x2 - x1, y2 - y1, 0.0f };
           const float length = line.Length();
           //base of arrow
           const float fpoint_on_line = arrow_lenght / ( atanf( arrow_angle ) * length );
           const Vector point_on_line = Vector( x2, y2, 0 ) + ( line * fpoint_on_line * -1.0f );
-          const Vector normal_vector = { -line.y, line.x, 0.0f };
+          const Vector normal_vector{ -line.y, line.x, 0.0f };
           const Vector normal = Vector( arrow_lenght, arrow_lenght, 0.0f ) / ( length * 2 );
           //left and right points
           const Vector rotation = normal * normal_vector;

@@ -14,6 +14,99 @@ bool checkExists( string file ) {
   return open;
 }
 
+template<typename SETTING, typename TAB>
+void Save( json &main, string player_class, TAB tab, SETTING setting ) {
+  switch( setting->type ) {
+  case e_control::checkbox: {
+    auto checkbox = ( Checkbox * )( setting );
+    
+    if( checkbox->value != -1 ) {
+      main[player_class][tab->name][checkbox->name] = checkbox->value;
+    }
+    
+    break;
+  }
+  
+  case e_control::slider: {
+    auto slider = ( Slider * )( setting );
+    main[player_class][tab->name][slider->name] = slider->value;
+    break;
+  }
+  
+  case e_control::listbox: {
+    auto list = ( Listbox * )( setting );
+    main[player_class][tab->name][list->name] = list->value;
+    break;
+  }
+  
+  case e_control::colorpicker: {
+    auto colorpicker = ( ColorPicker * )( setting );
+    main[player_class][tab->name][colorpicker->name]["color"] = colorpicker->color.to_int();
+    main[player_class][tab->name][colorpicker->name]["def"] = colorpicker->bDef;
+    main[player_class][tab->name][colorpicker->name]["rainbow"] = colorpicker->rainbow;
+    break;
+  }
+  
+  case e_control::keybind: {
+    auto keybind = ( KeyBind * )( setting );
+    main[player_class][tab->name][keybind->name]["key"] = keybind->key;
+    main[player_class][tab->name][keybind->name]["mode"] = keybind->mode;
+    break;
+  }
+  
+  // no values
+  default: {
+    break;
+  }
+  }
+}
+
+template<typename SETTING, typename TAB>
+void Load( json &main, string player_class, TAB tab, SETTING setting ) {
+  switch( setting->type ) {
+  case e_control::checkbox: {
+    auto checkbox = ( Checkbox * )( setting );
+    
+    if( checkbox->value != -1 ) {
+      checkbox->value = main[player_class][tab->name][checkbox->name];
+    }
+    
+    break;
+  }
+  
+  case e_control::slider: {
+    auto slider = ( Slider * )( setting );
+    slider->value = main[player_class][tab->name][slider->name];
+    break;
+  }
+  
+  case e_control::listbox: {
+    auto list = ( Listbox * )( setting );
+    list->value = main[player_class][tab->name][list->name];
+    break;
+  }
+  
+  case e_control::colorpicker: {
+    auto colorpicker = ( ColorPicker * )( setting );
+    colorpicker->color.from_int( main[player_class][tab->name][colorpicker->name]["color"] );
+    colorpicker->bDef = main[player_class][tab->name][colorpicker->name]["def"];
+    colorpicker->rainbow = main[player_class][tab->name][colorpicker->name]["rainbow"];
+    break;
+  }
+  
+  case e_control::keybind: {
+    auto keybind = ( KeyBind * )( setting );
+    keybind->key = main[player_class][tab->name][keybind->name]["key"];
+    keybind->mode = main[player_class][tab->name][keybind->name]["mode"];
+    break;
+  }
+  
+  default: {
+    break;
+  }
+  }
+}
+
 void SaveToJson() {
   json main;
   
@@ -41,48 +134,12 @@ void SaveToJson() {
   
   for( auto tab : gMenu.GetTabs()->tabs ) {
     for( auto setting : tab->children ) {
-      switch( setting->type ) {
-      case e_control::checkbox: {
-        auto checkbox = ( Checkbox * )( setting );
-        
-        if( checkbox->value != -1 ) {
-          main[player_class][tab->name][checkbox->name] = checkbox->value;
+      if( setting->type == e_control::groupbox ) {
+        for( auto group : setting->children ) {
+          Save( main, player_class, tab, group );
         }
-        
-        break;
-      }
-      
-      case e_control::slider: {
-        auto slider = ( Slider * )( setting );
-        main[player_class][tab->name][slider->name] = slider->value;
-        break;
-      }
-      
-      case e_control::listbox: {
-        auto list = ( Listbox * )( setting );
-        main[player_class][tab->name][list->name] = list->value;
-        break;
-      }
-      
-      case e_control::colorpicker: {
-        auto colorpicker = ( ColorPicker * )( setting );
-        main[player_class][tab->name][colorpicker->name]["color"] = colorpicker->color.to_int();
-        main[player_class][tab->name][colorpicker->name]["def"] = colorpicker->bDef;
-        main[player_class][tab->name][colorpicker->name]["rainbow"] = colorpicker->rainbow;
-        break;
-      }
-      
-      case e_control::keybind: {
-        auto keybind = ( KeyBind * )( setting );
-        main[player_class][tab->name][keybind->name]["key"] = keybind->key;
-        main[player_class][tab->name][keybind->name]["mode"] = keybind->mode;
-        break;
-      }
-      
-      // no values
-      default: {
-        break;
-      }
+      } else {
+        Save( main, player_class, tab, setting );
       }
     }
   }
@@ -120,47 +177,12 @@ void LoadFromJson() {
     
     for( auto tab : gMenu.GetTabs()->tabs ) {
       for( auto setting : tab->children ) {
-        switch( setting->type ) {
-        case e_control::checkbox: {
-          auto checkbox = ( Checkbox * )( setting );
-          
-          if( checkbox->value != -1 ) {
-            checkbox->value = main[player_class][tab->name][checkbox->name];
+        if( setting->type == e_control::groupbox ) {
+          for( auto group : setting->children ) {
+            Load( main, player_class, tab, group );
           }
-          
-          break;
-        }
-        
-        case e_control::slider: {
-          auto slider = ( Slider * )( setting );
-          slider->value = main[player_class][tab->name][slider->name];
-          break;
-        }
-        
-        case e_control::listbox: {
-          auto list = ( Listbox * )( setting );
-          list->value = main[player_class][tab->name][list->name];
-          break;
-        }
-        
-        case e_control::colorpicker: {
-          auto colorpicker = ( ColorPicker * )( setting );
-          colorpicker->color.from_int( main[player_class][tab->name][colorpicker->name]["color"] );
-          colorpicker->bDef = main[player_class][tab->name][colorpicker->name]["def"];
-          colorpicker->rainbow = main[player_class][tab->name][colorpicker->name]["rainbow"];
-          break;
-        }
-        
-        case e_control::keybind: {
-          auto keybind = ( KeyBind * )( setting );
-          keybind->key = main[player_class][tab->name][keybind->name]["key"];
-          keybind->mode = main[player_class][tab->name][keybind->name]["mode"];
-          break;
-        }
-        
-        default: {
-          break;
-        }
+        } else {
+          Load( main, player_class, tab, setting );
         }
       }
     }
