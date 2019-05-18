@@ -258,10 +258,10 @@ struct CGlobalVariables {
   };
   
   Checkbox engine{ "Engine prediction", true };
-  Checkbox engine_edge{ "Edge jump", true };
+  Checkbox engine_edgejump{ "Edge jump", true };
   Groupbox ENGINE{ "--Engine pred--", {
       &engine,
-      &engine_edge
+      &engine_edgejump
     }
   };
   

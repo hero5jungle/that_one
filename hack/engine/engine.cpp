@@ -25,8 +25,10 @@ namespace EnginePred {
       //edge jump end
       int current_GroundEntity = pLocal->GetGroundEntity();
       
-      if( past_GroundEntity != -1 && current_GroundEntity == -1 ) {
-        cmd->buttons |= IN_JUMP ;
+      if( gCvars.engine_edgejump.value ) {
+        if( past_GroundEntity != -1 && current_GroundEntity == -1 ) {
+          cmd->buttons |= IN_JUMP;
+        }
       }
     }
   }
