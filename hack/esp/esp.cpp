@@ -114,7 +114,7 @@ namespace ESP {
         
         Vector center = pEnt->GetWorldSpaceCenter();
         Vector pos;
-        string name = pEnt->GetClientClass()->chName;
+        string name = pEnt->GetClientClass()->name;
         classId id = ( classId )pEnt->GetClassId();
         float distance = Util::Distance( pLocal->GetEyePosition(), center );
         Color team = Util::team_color( pLocal, pEnt );

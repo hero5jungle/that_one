@@ -3,51 +3,48 @@
 std::deque<LagRecord> BacktrackData[64];
 #define BONE_USED_BY_ANYTHING   0x7FF00
 namespace Backtrack {
-  void collect_tick() {
-    CBaseEntity *pLocal = GetBaseEntity( me );
-    
-    if( pLocal ) {
-      for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
-        CBaseEntity *pEntity = GetBaseEntity( i );
-        
-        if( !pEntity ) {
-          continue;
-        }
-        
-        if( pEntity->IsDormant() ) {
-          continue;
-        }
-        
-        if( pEntity->GetLifeState() != LIFE_ALIVE ) {
-          continue;
-        }
-        
-        if( pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
-          continue;
-        }
-        
-        Vector hitbox = pEntity->GetHitbox( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
-        
-        BacktrackData[i].push_front(
-        LagRecord{
-          false,
-          pEntity->flSimulationTime(),
-          Util::EstimateAbsVelocity( pEntity ).Length(),
-          hitbox, pEntity->GetEyeAngles(),
-          pEntity->GetWorldSpaceCenter()
-        }
-        );
-        
-        BacktrackData[i].front().valid = pEntity->SetupBones(
-                                           BacktrackData[i].front().boneMatrix,
-                                           128,
-                                           BONE_USED_BY_ANYTHING,
-                                           gInts.globals->curtime
-                                         );
-                                         
-        if( BacktrackData[i].size() > 70 ) {
-          BacktrackData[i].pop_back();
-        }
+  void collect_tick( CBaseEntity *pLocal ) {
+  
+    for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
+      CBaseEntity *pEntity = GetBaseEntity( i );
+      
+      if( !pEntity ) {
+        continue;
+      }
+      
+      if( pEntity->IsDormant() ) {
+        continue;
+      }
+      
+      if( pEntity->GetLifeState() != LIFE_ALIVE ) {
+        continue;
+      }
+      
+      if( pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
+        continue;
+      }
+      
+      Vector hitbox = pEntity->GetHitbox( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
+      
+      BacktrackData[i].push_front(
+      LagRecord{
+        false,
+        pEntity->flSimulationTime(),
+        Util::EstimateAbsVelocity( pEntity ),
+        hitbox, pEntity->GetEyeAngles(),
+        pEntity->GetWorldSpaceCenter()
+      }
+      );
+      
+      BacktrackData[i].front().valid = pEntity->SetupBones(
+                                         BacktrackData[i].front().boneMatrix,
+                                         128,
+                                         BONE_USED_BY_ANYTHING,
+                                         gInts.globals->curtime
+                                       );
+                                       
+      if( BacktrackData[i].size() > 70 ) {
+        BacktrackData[i].pop_back();
       }
     }
   }

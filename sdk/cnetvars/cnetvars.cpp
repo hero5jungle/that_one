@@ -15,10 +15,10 @@ void CNetVars::Initialize() {
   
   while( client_class != nullptr ) {
     const auto class_info = std::make_shared<node>( 0 );
-    auto *recv_table = client_class->Table;
+    auto *recv_table = client_class->table;
     populate_nodes( recv_table, &class_info->nodes );
     nodes.emplace( recv_table->GetName(), class_info );
-    client_class = client_class->pNextClass;
+    client_class = client_class->next;
   }
 }
 

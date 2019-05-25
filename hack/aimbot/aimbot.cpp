@@ -125,7 +125,7 @@ namespace Aimbot {
       if( gCvars.Aimbot_proj_mode.value ) {
         vEntity = Util::ProjectilePrediction_Engine( pLocal, pEntity, vEntity, speed, gravity );
       } else {
-        vEntity = Util::ProjectilePrediction( pLocal, pEntity, vEntity, speed, gravity );
+        vEntity = Util::ProjectilePrediction_velocity( pLocal, pEntity, vEntity, speed, gravity );
       }
     } else {
       if( gCvars.backtrack_arr != -1 && ( int )BacktrackData[index].size() > gCvars.backtrack_arr ) {

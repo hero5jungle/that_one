@@ -1,6 +1,7 @@
 #pragma once
 #include "../menu/base/controls.h"
 #include "headers/vector.h"
+#include "../tools/dumps/dumps.h"
 
 bool checkExists( string file );
 void SaveToJson();
@@ -306,11 +307,14 @@ struct CGlobalVariables {
   
   Checkbox Sv_cheat{ "Sv_cheat 1" };
   Checkbox Thirdperson{ "Third person" };
-  
+  func_switch Dump_classId{ "Dump classId", Dumps::dumpClassIds };
+  func_switch Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
   
   Tab Testing{ "Testing", {
       &Sv_cheat,
       &Thirdperson,
+      &Dump_classId,
+      &Dump_netvar
     }
   };
   

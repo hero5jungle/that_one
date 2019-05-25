@@ -639,14 +639,13 @@ namespace Util {
   }
   
   
-  Vector ProjectilePrediction( CBaseEntity *pLocal, CBaseEntity *ent, Vector hitbox, float speed, float gravitymod ) {
+  Vector ProjectilePrediction_velocity( CBaseEntity *pLocal, CBaseEntity *ent, Vector hitbox, float speed, float gravitymod ) {
   
     Vector result = hitbox;
     float latency = gInts.Engine->GetNetChannelInfo()->GetLatency( FLOW_OUTGOING ) + gInts.Engine->GetNetChannelInfo()->GetLatency( FLOW_INCOMING );
     
     float to_ground = DistanceToGround( ent );
     Vector velocity = EstimateAbsVelocity( ent );
-    
     float medianTime = pLocal->GetEyePosition().DistTo( result ) / speed;
     float range = 1.5f;
     float currenttime = medianTime - range;

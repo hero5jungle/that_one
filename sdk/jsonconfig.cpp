@@ -145,7 +145,7 @@ void SaveToJson() {
   }
   
   ofstream write( "that_one.json" );
-  write << setw( 4 ) << main << "\r\n";
+  write << setw( 4 ) << main;
   write.close();
 }
 void LoadFromJson() {

@@ -6,7 +6,7 @@
 struct LagRecord {
   bool valid;
   float simtime;
-  float movement;
+  Vector velocity;
   Vector hitbox;
   Vector angle;
   Vector wsc;
@@ -22,14 +22,14 @@ namespace Backtrack {
     return ( ( ( val ) > ( max ) ) ? ( max ) : ( ( ( val ) < ( min ) ) ? ( min ) : ( val ) ) );
   }
   
-  void collect_tick();
+  void collect_tick( CBaseEntity *pLocal );
   float lerp_time();
   void cache_INetChannel( INetChannel *ch );
   bool is_tick_valid( float simtime );
   
-  const inline void Run( INetChannel *ch ) {
+  const inline void Run( CBaseEntity *pLocal, INetChannel *ch ) {
     if( gCvars.Backtrack.value ) {
-      collect_tick();
+      collect_tick( pLocal );
       cache_INetChannel( ch );
     }
   };

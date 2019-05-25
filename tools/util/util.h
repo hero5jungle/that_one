@@ -28,7 +28,7 @@ namespace Util {
   void minDist( weaponid id, float &dist );
   bool projSetup( float &speed, float &chargetime, float &gravity, bool &quick_release, weaponid id, CBaseCombatWeapon *wpn );
   
-  Vector ProjectilePrediction( CBaseEntity *pLocal, CBaseEntity *pEntity, Vector hitbox, float speed, float gravitymod );
+  Vector ProjectilePrediction_velocity( CBaseEntity *pLocal, CBaseEntity *pEntity, Vector hitbox, float speed, float gravitymod );
   Vector ProjectilePrediction_Engine( CBaseEntity *pLocal, CBaseEntity *pEntity, Vector hitbox, float speed, float gravitymod );
   
   Color team_color( CBaseEntity *pLocal, CBaseEntity *pEntity );

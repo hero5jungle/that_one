@@ -60,7 +60,7 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
     try {
       Misc::Run( pLocal, cmd );
       EnginePred::Start( pLocal, cmd );
-      Backtrack::Run( ch );
+      Backtrack::Run( pLocal, ch );
       Aimbot::Run( pLocal, cmd );
       Airblast::Run( pLocal, cmd );
       DemoSticky::Run( pLocal, cmd );
@@ -226,7 +226,7 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
                 if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][tick].simtime ) ) {
                   ticks++;
                   
-                  if( BacktrackData[gCvars.aim_index][tick].valid && BacktrackData[gCvars.aim_index][tick].movement > 45.0f ) {
+                  if( BacktrackData[gCvars.aim_index][tick].valid && BacktrackData[gCvars.aim_index][tick].velocity.Length() > 45.0f ) {
                     Color tick_color = tick == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
                     //Hidden
                     wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
@@ -335,7 +335,7 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
             return false;
           };
           
-          if( should_cham_proj( pLocal, pEntity, pEntity->GetClientClass()->iClassID ) ) {
+          if( should_cham_proj( pLocal, pEntity, pEntity->GetClientClass()->classId ) ) {
             Color RGBA = gCvars.color_items.get_color();
             //Hidden Lit
             wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
