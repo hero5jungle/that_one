@@ -606,7 +606,7 @@ void DrawKeyBindBox( void *data, size_t Index ) {
   list.value = ( int )kb->mode;
   list.RunControl( Index );
 }
-int func_switch::Draw( bool mouseOver ) {
+int Functionbox::Draw( bool mouseOver ) {
   if( mouseOver ) {
     DrawManager::DrawRect( x + 2, y + 2, h - 4, h - 4, Color( 35, 135, 230 ) );
   }
@@ -616,7 +616,7 @@ int func_switch::Draw( bool mouseOver ) {
   return h;
 }
 
-void func_switch::HandleInput() {
+void Functionbox::HandleInput() {
   if( gMenu.mb == e_mb::lclick || gMenu.mb == e_mb::rclick ) {
     func();
   }

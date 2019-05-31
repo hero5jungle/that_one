@@ -98,7 +98,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void *_this, Clie
     static bool Thirdperson_enabled = false;
     bool *thirdperson = ( bool * )( ( DWORD )( pLocal ) + gNetVars.get_offset( "DT_TFPlayer", "m_nForceTauntCam" ) );
     
-    if( gCvars.Thirdperson.value ) {
+    if( gCvars.Thirdperson.KeyDown() ) {
       auto *yaw = ( float * )( ( DWORD )( pLocal ) + gNetVars.get_offset( "DT_BasePlayer", "pl", "deadflag" ) + 4 );
       auto *pitch = ( float * )( ( DWORD )( pLocal ) + gNetVars.get_offset( "DT_BasePlayer", "pl", "deadflag" ) + 8 );
       *yaw = qLASTTICK.x;
@@ -108,7 +108,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void *_this, Clie
         *thirdperson = true;
         Thirdperson_enabled = true;
       }
-    } else if( !Thirdperson_enabled || !gCvars.Thirdperson.value ) {
+    } else if( !Thirdperson_enabled || !gCvars.Thirdperson.KeyDown() ) {
       *thirdperson = false;
       Thirdperson_enabled = false;
     }

@@ -195,20 +195,6 @@ LRESULT __stdcall Hooked_WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
     
   default:
     break;
-    /*break;
-    case WM_LBUTTONDOWN:
-    if (wParam == MK_LBUTTON)
-    gMenu.key = (e_key)VK_LBUTTON;
-    break;
-    case WM_RBUTTONDOWN:
-    if (wParam == MK_RBUTTON)
-    {
-    gKey.key = (e_key)VK_RBUTTON;
-    break;
-    }
-    case WM_MBUTTONDOWN:
-    if (wParam == MK_MBUTTON)
-    gKey.key = (e_key)VK_MBUTTON;*/
   }
   
   return CallWindowProc( gMenu.windowProc, hWnd, uMsg, wParam, lParam );

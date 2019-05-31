@@ -305,14 +305,14 @@ class KeyBind : public BaseControl {
   }
 };
 
-class func_switch : public BaseControl {
+class Functionbox : public BaseControl {
   void( *func )();
  public:
  
   int Draw( bool mouseOver = false );
   void HandleInput();
   
-  func_switch( const char *Name, void( *Func )( void ), int W = 100, int X = 0, int Y = 0 ) {
+  Functionbox( const char *Name, void( *Func )( void ), int W = 100, int X = 0, int Y = 0 ) {
     type = e_control::func, flags = scale_width;
     name = Name, func = Func, x = X, y = Y;
     h = 15 + 15, w = W;

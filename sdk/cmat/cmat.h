@@ -3,7 +3,7 @@
 class IMaterial;
 
 namespace Materials {
-  extern IMaterial *shaded, *glow, *shiny;
+  extern IMaterial *shaded, *glow;
   void Initialize();
   
   IMaterial *CreateMaterial( bool Flat );

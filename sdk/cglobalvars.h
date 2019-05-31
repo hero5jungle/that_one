@@ -290,8 +290,8 @@ struct CGlobalVariables {
   };
   
   Checkbox    loadbyclass{ "Load based on class" };
-  func_switch savejson{ "Save to json", SaveToJson };
-  func_switch loadjson{ "Load from json", LoadFromJson };
+  Functionbox savejson{ "Save to json", SaveToJson };
+  Functionbox loadjson{ "Load from json", LoadFromJson };
   
   Groupbox CONFIG{ "--Config--", {
       &loadbyclass,
@@ -306,9 +306,9 @@ struct CGlobalVariables {
   };
   
   Checkbox Sv_cheat{ "Sv_cheat 1" };
-  Checkbox Thirdperson{ "Third person" };
-  func_switch Dump_classId{ "Dump classId", Dumps::dumpClassIds };
-  func_switch Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
+  KeyBind Thirdperson{ "Third person", 0x54, e_kbmode::hold };
+  Functionbox Dump_classId{ "Dump classId", Dumps::dumpClassIds };
+  Functionbox Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
   
   Tab Testing{ "Testing", {
       &Sv_cheat,

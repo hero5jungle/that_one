@@ -5,41 +5,32 @@ namespace Materials {
   
   void  Initialize() {
     glow = gInts.MatSystem->FindMaterial( "dev/glow_color", "Model textures" );
-    shaded = CreateMaterial( false );
     glow->IncrementReferenceCount();
-    shaded->IncrementReferenceCount();
+    shaded = CreateMaterial( false );
   }
   
-  IMaterial *CreateMaterial( bool Flat ) {
+  IMaterial *CreateMaterial( bool flat ) {
     static int created = 0;
-    static const char tmp[] = {
-      "\"%s\"\
-		\n{\
-		\n\t\"$basetexture\" \"vgui/white_additive\"\
-		\n\t\"$envmap\" \"""\"\
-		\n\t\"$normalmapalphaenvmapmask\" \"0\"\
-		\n\t\"$envmapcontrast\" \"0\"\
-		\n\t\"$model\" \"1\"\
-		\n\t\"$flat\" \"1\"\
-		\n\t\"$nocull\" \"0\"\
-		\n\t\"$selfillum\" \"1\"\
-		\n\t\"$halflambert\" \"1\"\
-		\n\t\"$nofog\" \"0\"\
-		\n\t\"$ignorez\" \"0\"\
-		\n\t\"$znearer\" \"0\"\
-		\n\t\"$wireframe\" \"0\"\
-        \n}\n"
-    };
-    char *baseType = ( Flat ? "UnlitGeneric" : "VertexLitGeneric" );
-    char material[512];
-    sprintf_s( material, sizeof( material ), tmp, baseType );
-    char name[512];
-    sprintf_s( name, sizeof( name ), "#mat_%i.vmt", created );
+    string type = flat ? "UnlitGeneric" : "VertexLitGeneric";
+    const string data = "\""s + type + R"#(" {
+      "$basetexture" "vgui/white_additive"
+      "$envmap" ""
+      "$model" "1"
+      "$flat" "1"
+      "$nocull"  "0"
+      "$selfillum" "1"
+      "$halflambert" "1"
+      "$nofog"  "0"
+      "$znearer" "0"
+      "$wireframe" "0"
+      "$ignorez" "0"
+    })#"s;
+    const string name = "#mat_"s + to_string( created ) + ".vmt"s;
     created++;
-    KeyValues *keyValues = ( KeyValues * )malloc( sizeof( KeyValues ) );
-    keyValues->Initialize( keyValues, baseType );
-    keyValues->LoadFromBuffer( keyValues, name, material );
-    IMaterial *createdMaterial = gInts.MatSystem->CreateMaterial( name, keyValues );
+    KeyValues *keyValues = new KeyValues;
+    keyValues->Initialize( keyValues, const_cast<char *>( type.c_str() ) );
+    keyValues->LoadFromBuffer( keyValues, name.c_str(), data.c_str() );
+    IMaterial *createdMaterial = gInts.MatSystem->CreateMaterial( name.c_str(), keyValues );
     
     if( !createdMaterial ) {
       return nullptr;
@@ -55,6 +46,7 @@ namespace Materials {
     gInts.RenderView->SetColorModulation( flDefault );
     gInts.MdlRender->ForcedMaterialOverride( nullptr );
   }
+  
   void ForceMaterial( IMaterial *material, Color color ) {
     if( material ) {
       float base[3];

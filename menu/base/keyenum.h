@@ -10,10 +10,23 @@ class CKey {
   }
   
   inline bool AcceptedKey( byte c ) {
-    return
-      AlphaChar( c ) ||
-      c == VK_ESCAPE || c == VK_TAB || c == VK_CONTROL || c == VK_SHIFT || c == VK_SPACE ||
-      c == VK_LBUTTON || c == VK_RBUTTON || c == VK_MBUTTON;
+    if( AlphaChar( c ) ) {
+      return true;
+    }
+    
+    switch( c ) {
+    case VK_ESCAPE:
+    case VK_TAB:
+    case VK_CONTROL:
+    case VK_SHIFT:
+    case VK_SPACE:
+    case VK_LBUTTON:
+    case VK_RBUTTON:
+    case VK_MBUTTON:
+      return true;
+    }
+    
+    return false;
   }
   
   wstring KeyToString( byte c ) {

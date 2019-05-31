@@ -13,9 +13,7 @@ class vmt_hook {
   DAWORD *original = nullptr;
   int size = 0;
  public:
-  vmt_hook( ) = default;
-  
-  void setup( void *base, const int index, void *function ) {
+  void setup( void *base ) {
     baseclass = static_cast<DAWORD **>( base );
     
     while( static_cast<DAWORD *>( *baseclass )[size] ) {
@@ -26,7 +24,6 @@ class vmt_hook {
     current = std::make_unique<DAWORD[]>( size );
     std::memcpy( current.get(), original, size * sizeof( DAWORD ) );
     *baseclass = current.get();
-    hook( function, index );
   };
   
   template <typename Fn>
@@ -35,7 +32,7 @@ class vmt_hook {
     return reinterpret_cast<Fn>( original[index] );
   }
   
-  const inline void hook( void *function, const int index ) {
+  const inline void hook( const int index, void *function ) {
     assert( index <= size );
     current[index] = reinterpret_cast<DAWORD>( function );
   }
@@ -56,7 +53,8 @@ class vmt_single : vmt_hook {
   void setup( void *base, const int index, void *function ) {
     Index = index;
     Function = function;
-    vmt_hook::setup( base, index, function );
+    vmt_hook::setup( base );
+    rehook( );
   };
   
   const inline Fn get_original( ) {
@@ -64,7 +62,7 @@ class vmt_single : vmt_hook {
   }
   
   const inline void rehook( ) {
-    vmt_hook::hook( Function, Index );
+    vmt_hook::hook( Index, Function );
   }
   
   const inline void unhook( ) {

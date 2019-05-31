@@ -3139,22 +3139,22 @@ struct CInterfaces {
   IPrediction *Prediction;
 };
 
+using CreateMoveFn = bool( __thiscall * )( PVOID, float, CUserCmd * );
+using FrameStageNotifyThinkFn = void( __fastcall * )( PVOID, void *, ClientFrameStage_t );
+using DrawModelExecuteFn = void( __stdcall * )( void *state, ModelRenderInfo_t &pInfo, matrix3x4 *pCustomBoneToWorld );
+using PaintTraverseFn = void( __thiscall * )( PVOID, unsigned int, bool, bool );
+using SendDatagramFn = int( __thiscall * )( CNetChan *, bf_write * );
+
 struct CHooks {
-  //client
-  using SendDatagramFn = int( __thiscall * )( CNetChan *, bf_write * );
-  using CreateMoveFn = bool( __thiscall * )( PVOID, float, CUserCmd * );
-  using FrameStageNotifyThinkFn = void( __fastcall * )( PVOID, void *, ClientFrameStage_t );
-  using DrawModelExecuteFn = void( __stdcall * )( void *state, ModelRenderInfo_t &pInfo, matrix3x4 *pCustomBoneToWorld );
-  vmt_single<SendDatagramFn> SendDatagram;
   vmt_single<CreateMoveFn> CreateMove;
-  vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
   vmt_single<DrawModelExecuteFn> DrawModelExecute;
-  //panel
-  using PaintTraverseFn = void( __thiscall * )( PVOID, unsigned int, bool, bool );
+  vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
   vmt_single<PaintTraverseFn> PaintTraverse;
+  vmt_single<SendDatagramFn> SendDatagram;
+  
 };
 
-enum gOffsets : int {
+enum gOffsets {
   DrawModelExecute = 19,
   CreateMove = 21,
   FrameStageNotifyThink = 35,
