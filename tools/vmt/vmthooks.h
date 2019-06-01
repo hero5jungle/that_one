@@ -1,6 +1,6 @@
 #pragma once
 #include <cassert>
-//written by a pleb, inspiration taken from aixxe's https://github.com/aixxe/vmthook code
+//written by a pleb
 #ifdef _WIN64
 using DAWORD = DWORD64;
 #else
@@ -67,5 +67,32 @@ class vmt_single : vmt_hook {
   
   const inline void unhook( ) {
     vmt_hook::unhook( Index );
+  }
+};
+// a quick and dirty wrapper that allows lazier vmt_hook management
+template<typename Fn>
+class vmt_func {
+ private:
+  int Index = 0;
+  void *Function = nullptr;
+  vmt_hook *Hook;
+ public:
+  void setup( vmt_hook *hook, const int index, void *function ) {
+    Hook = hook;
+    Index = index;
+    Function = function;
+    rehook();
+  };
+  
+  const inline Fn get_original() {
+    return Hook->get_original<Fn>( Index );
+  }
+  
+  const inline void rehook() {
+    Hook->hook( Index, Function );
+  }
+  
+  const inline void unhook() {
+    Hook->unhook( Index );
   }
 };
