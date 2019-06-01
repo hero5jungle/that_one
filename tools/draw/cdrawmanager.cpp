@@ -33,7 +33,7 @@ namespace DrawManager {
   }
   
   void DrawString( int x, int y, Color color, const char *text, HFont font, bool center ) {
-    DrawString( x, y, color, ToWchar( text ).c_str(), font, center );
+    DrawString( x, y, color, ToWstring( text ).c_str(), font, center );
   }
   
   void DrawString( int x, int y, Color Color, const wchar_t *text, HFont font, bool center ) {

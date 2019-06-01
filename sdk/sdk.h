@@ -84,7 +84,7 @@ using MaterialHandle_t = unsigned short ;
 #define FLOW_INCOMING 1
 
 
-inline wstring ToWchar( const char *text ) {
+inline wstring ToWstring( const char *text ) {
   size_t length = strlen( text ) + 1;
   wstring wc( length, L'#' );
   mbstowcs( &wc[0], text, length );

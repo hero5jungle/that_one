@@ -190,7 +190,7 @@ int Groupbox::Draw( bool mouseOver ) {
   // Initializing our height variable
   GetHeight();
   int strw, strh;
-  gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWchar( name ).c_str(), strw, strh );
+  gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWstring( name ).c_str(), strw, strh );
   y += ( strh / 2 );
   DrawManager::DrawLine( x, y, x, y + h, Color( 80 ) );
   DrawManager::DrawLine( x + w, y, x + w, y + h, Color( 80 ) );
@@ -215,7 +215,7 @@ int Groupbox::Draw( bool mouseOver ) {
 
 void Groupbox::HandleInput() {
   int strw, strh;
-  gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWchar( name ).c_str(), strw, strh );
+  gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWstring( name ).c_str(), strw, strh );
   int cx = x + SPACING, cy = y + SPACING + ( strh / 2 );
   
   for( auto &i : children ) {
@@ -244,7 +244,7 @@ int Groupbox::GetHeight() {
   }
   
   int strw, strh;
-  gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWchar( name ).c_str(), strw, strh );
+  gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWstring( name ).c_str(), strw, strh );
   return h + ( strh / 2 );
 }
 

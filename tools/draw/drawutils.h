@@ -25,14 +25,11 @@ class CFonts {
   void Initialize();
   void Reload();
   HFont anon;
-  HFont arial;
   HFont verdana_bold;
   HFont verdana;
   HFont calibri_light;
   HFont calibri_light_small;
   HFont calibri;
-  HFont cambria;
-  HFont esp;
 };
 extern CFonts gFonts;
 
