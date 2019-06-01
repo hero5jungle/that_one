@@ -306,7 +306,7 @@ struct CGlobalVariables {
   };
   
   Checkbox Sv_cheat{ "Sv_cheat 1" };
-  KeyBind Thirdperson{ "Third person", 0x54, e_kbmode::hold };
+  KeyBind Thirdperson{ "Third person", 0x54, e_kbmode::disabled };
   Functionbox Dump_classId{ "Dump classId", Dumps::dumpClassIds };
   Functionbox Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
   
