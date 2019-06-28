@@ -62,7 +62,7 @@ class CKey {
       return L"Middle mouse";
     }
     
-    return NULL;
+    return L"";
   }
 };
 extern CKey gKey;

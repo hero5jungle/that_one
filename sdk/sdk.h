@@ -17,14 +17,10 @@ using namespace std;
 #define WIN32_LEAN_AND_MEAN
 #pragma warning(disable:4996)
 #pragma warning(disable:4244)
-using CreateInterface_t = void *( __cdecl * )( const char *, int * );
+
 using CreateInterfaceFn = void *( * )( const char *pName, int *pReturnCode );
 
-using VertexFormat_t = unsigned __int64;
 class CGameTrace;
-using trace_t = CGameTrace;
-using matrix3x4 = float[3][4];
-using ModelInstanceHandle_t = int;
 class CUtil;
 class CNetVars;
 class CBaseCombatWeapon;
@@ -73,13 +69,18 @@ class KeyValues;
 class InputEvent_t;
 class INetMessage;
 class INetChannelHandler;
-using FileHandle_t = void *;
-using MaterialHandle_t = unsigned short ;
+
+using VertexFormat_t = unsigned __int64;
+using trace_t = class CGameTrace;
+using matrix3x4 = float[3][4];
+using ModelInstanceHandle_t = int;
+using FileHandle_t = void*;
+using MaterialHandle_t = unsigned short;
 
 #define me gInts.Engine->GetLocalPlayer()
 #define GetBaseEntity gInts.EntList->GetClientEntity
 #define GetBaseEntityFromHandle gInts.EntList->GetClientEntityFromHandle
-#define FL_ONGROUND (1 << 0)
+#define FL_ONGROUND 1
 #define FLOW_OUTGOING 0
 #define FLOW_INCOMING 1
 
@@ -111,36 +112,35 @@ typedef struct player_info_s {
 } player_info_t;
 
 enum MoveType_t {
-  MOVETYPE_NONE = 0,
+  MOVETYPE_NONE = 0, 
   /**< never moves */
-  MOVETYPE_ISOMETRIC,
+  MOVETYPE_ISOMETRIC, 
   /**< For players */
-  MOVETYPE_WALK,
+  MOVETYPE_WALK, 
   /**< Player only - moving on the ground */
-  MOVETYPE_STEP,
+  MOVETYPE_STEP, 
   /**< gravity, special edge handling -- monsters use this */
-  MOVETYPE_FLY,
+  MOVETYPE_FLY, 
   /**< No gravity, but still collides with stuff */
-  MOVETYPE_FLYGRAVITY,
+  MOVETYPE_FLYGRAVITY, 
   /**< flies through the air + is affected by gravity */
-  MOVETYPE_VPHYSICS,
+  MOVETYPE_VPHYSICS, 
   /**< uses VPHYSICS for simulation */
-  MOVETYPE_PUSH,
+  MOVETYPE_PUSH, 
   /**< no clip to world, push and crush */
-  MOVETYPE_NOCLIP,
+  MOVETYPE_NOCLIP, 
   /**< No gravity, no collisions, still do velocity/avelocity
        */
-  MOVETYPE_LADDER,
+  MOVETYPE_LADDER, 
   /**< Used by players only when going onto a ladder */
-  MOVETYPE_OBSERVER,
-  /**< Observer movement, depends on player's observer mode
-       */
-  MOVETYPE_CUSTOM,
+  MOVETYPE_OBSERVER, 
+  /**< Observer movement, depends on player's observer mode*/
+  MOVETYPE_CUSTOM, 
   /**< Allows the entity to describe its own physics */
   
-  MOVETYPE_LAST = MOVETYPE_CUSTOM,
+  MOVETYPE_LAST = MOVETYPE_CUSTOM, 
   
-  MOVETYPE_MAX_BITS = 4,
+  MOVETYPE_MAX_BITS = 4, 
 };
 
 class ClientClass {
@@ -196,36 +196,34 @@ class CUserCmd {
 };
 
 enum ClientFrameStage_t {
-  FRAME_UNDEFINED = -1,
-  // (haven't run any frames yet)
-  FRAME_START,
-  
+  FRAME_UNDEFINED = -1, 
+  // haven't run any frames yet
+  FRAME_START, 
   // A network packet is being recieved
-  FRAME_NET_UPDATE_START,
+  FRAME_NET_UPDATE_START, 
   // Data has been received and we're going to start calling PostDataUpdate
-  FRAME_NET_UPDATE_POSTDATAUPDATE_START,
+  FRAME_NET_UPDATE_POSTDATAUPDATE_START, 
   // Data has been received and we've called PostDataUpdate on all data
   // recipients
-  FRAME_NET_UPDATE_POSTDATAUPDATE_END,
+  FRAME_NET_UPDATE_POSTDATAUPDATE_END, 
   // We've received all packets, we can now do interpolation, prediction, etc..
-  FRAME_NET_UPDATE_END,
-  
+  FRAME_NET_UPDATE_END, 
   // We're about to start rendering the scene
-  FRAME_RENDER_START,
+  FRAME_RENDER_START, 
   // We've finished rendering the scene.
   FRAME_RENDER_END
 };
 
 enum tf_classes {
-  TF2_Scout = 1,
-  TF2_Soldier = 3,
-  TF2_Pyro = 7,
-  TF2_Demoman = 4,
-  TF2_Heavy = 6,
-  TF2_Engineer = 9,
-  TF2_Medic = 5,
-  TF2_Sniper = 2,
-  TF2_Spy = 8,
+  TF2_Scout = 1, 
+  TF2_Soldier = 3, 
+  TF2_Pyro = 7, 
+  TF2_Demoman = 4, 
+  TF2_Heavy = 6, 
+  TF2_Engineer = 9, 
+  TF2_Medic = 5, 
+  TF2_Sniper = 2, 
+  TF2_Spy = 8, 
 };
 
 class CBaseEntity {
@@ -314,7 +312,13 @@ class CBaseEntity {
   bool CanBackStab() {
     DYNVAR_RETURN( bool, this, "DT_TFWeaponKnife", "m_bReadyToBackstab" );
   }
-  
+  unsigned int ObserverTarget() {
+    DYNVAR_RETURN(unsigned int, this, "DT_BasePlayer", "m_hObserverTarget");
+  }
+  int ObserverMode() {
+    DYNVAR_RETURN(int, this, "DT_BasePlayer", "m_iObserverMode");
+  }
+
   Vector &GetAbsAngles() {
     typedef Vector&( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 10 )( this );
@@ -565,139 +569,139 @@ class CObjectSentryGun : public CObject {
 };
 
 enum ButtonCode_t {
-  BUTTON_CODE_INVALID = -1,
-  BUTTON_CODE_NONE = 0,
+  BUTTON_CODE_INVALID = -1, 
+  BUTTON_CODE_NONE = 0, 
   
-  KEY_FIRST = 0,
+  KEY_FIRST = 0, 
   
-  KEY_NONE = KEY_FIRST,
-  KEY_0,
-  KEY_1,
-  KEY_2,
-  KEY_3,
-  KEY_4,
-  KEY_5,
-  KEY_6,
-  KEY_7,
-  KEY_8,
-  KEY_9,
-  KEY_A,
-  KEY_B,
-  KEY_C,
-  KEY_D,
-  KEY_E,
-  KEY_F,
-  KEY_G,
-  KEY_H,
-  KEY_I,
-  KEY_J,
-  KEY_K,
-  KEY_L,
-  KEY_M,
-  KEY_N,
-  KEY_O,
-  KEY_P,
-  KEY_Q,
-  KEY_R,
-  KEY_S,
-  KEY_T,
-  KEY_U,
-  KEY_V,
-  KEY_W,
-  KEY_X,
-  KEY_Y,
-  KEY_Z,
-  KEY_PAD_0,
-  KEY_PAD_1,
-  KEY_PAD_2,
-  KEY_PAD_3,
-  KEY_PAD_4,
-  KEY_PAD_5,
-  KEY_PAD_6,
-  KEY_PAD_7,
-  KEY_PAD_8,
-  KEY_PAD_9,
-  KEY_PAD_DIVIDE,
-  KEY_PAD_MULTIPLY,
-  KEY_PAD_MINUS,
-  KEY_PAD_PLUS,
-  KEY_PAD_ENTER,
-  KEY_PAD_DECIMAL,
-  KEY_LBRACKET,
-  KEY_RBRACKET,
-  KEY_SEMICOLON,
-  KEY_APOSTROPHE,
-  KEY_BACKQUOTE,
-  KEY_COMMA,
-  KEY_PERIOD,
-  KEY_SLASH,
-  KEY_BACKSLASH,
-  KEY_MINUS,
-  KEY_EQUAL,
-  KEY_ENTER,
-  KEY_SPACE,
-  KEY_BACKSPACE,
-  KEY_TAB,
-  KEY_CAPSLOCK,
-  KEY_NUMLOCK,
-  KEY_ESCAPE,
-  KEY_SCROLLLOCK,
-  KEY_INSERT,
-  KEY_DELETE,
-  KEY_HOME,
-  KEY_END,
-  KEY_PAGEUP,
-  KEY_PAGEDOWN,
-  KEY_BREAK,
-  KEY_LSHIFT,
-  KEY_RSHIFT,
-  KEY_LALT,
-  KEY_RALT,
-  KEY_LCONTROL,
-  KEY_RCONTROL,
-  KEY_LWIN,
-  KEY_RWIN,
-  KEY_APP,
-  KEY_UP,
-  KEY_LEFT,
-  KEY_DOWN,
-  KEY_RIGHT,
-  KEY_F1,
-  KEY_F2,
-  KEY_F3,
-  KEY_F4,
-  KEY_F5,
-  KEY_F6,
-  KEY_F7,
-  KEY_F8,
-  KEY_F9,
-  KEY_F10,
-  KEY_F11,
-  KEY_F12,
-  KEY_CAPSLOCKTOGGLE,
-  KEY_NUMLOCKTOGGLE,
-  KEY_SCROLLLOCKTOGGLE,
+  KEY_NONE = KEY_FIRST, 
+  KEY_0, 
+  KEY_1, 
+  KEY_2, 
+  KEY_3, 
+  KEY_4, 
+  KEY_5, 
+  KEY_6, 
+  KEY_7, 
+  KEY_8, 
+  KEY_9, 
+  KEY_A, 
+  KEY_B, 
+  KEY_C, 
+  KEY_D, 
+  KEY_E, 
+  KEY_F, 
+  KEY_G, 
+  KEY_H, 
+  KEY_I, 
+  KEY_J, 
+  KEY_K, 
+  KEY_L, 
+  KEY_M, 
+  KEY_N, 
+  KEY_O, 
+  KEY_P, 
+  KEY_Q, 
+  KEY_R, 
+  KEY_S, 
+  KEY_T, 
+  KEY_U, 
+  KEY_V, 
+  KEY_W, 
+  KEY_X, 
+  KEY_Y, 
+  KEY_Z, 
+  KEY_PAD_0, 
+  KEY_PAD_1, 
+  KEY_PAD_2, 
+  KEY_PAD_3, 
+  KEY_PAD_4, 
+  KEY_PAD_5, 
+  KEY_PAD_6, 
+  KEY_PAD_7, 
+  KEY_PAD_8, 
+  KEY_PAD_9, 
+  KEY_PAD_DIVIDE, 
+  KEY_PAD_MULTIPLY, 
+  KEY_PAD_MINUS, 
+  KEY_PAD_PLUS, 
+  KEY_PAD_ENTER, 
+  KEY_PAD_DECIMAL, 
+  KEY_LBRACKET, 
+  KEY_RBRACKET, 
+  KEY_SEMICOLON, 
+  KEY_APOSTROPHE, 
+  KEY_BACKQUOTE, 
+  KEY_COMMA, 
+  KEY_PERIOD, 
+  KEY_SLASH, 
+  KEY_BACKSLASH, 
+  KEY_MINUS, 
+  KEY_EQUAL, 
+  KEY_ENTER, 
+  KEY_SPACE, 
+  KEY_BACKSPACE, 
+  KEY_TAB, 
+  KEY_CAPSLOCK, 
+  KEY_NUMLOCK, 
+  KEY_ESCAPE, 
+  KEY_SCROLLLOCK, 
+  KEY_INSERT, 
+  KEY_DELETE, 
+  KEY_HOME, 
+  KEY_END, 
+  KEY_PAGEUP, 
+  KEY_PAGEDOWN, 
+  KEY_BREAK, 
+  KEY_LSHIFT, 
+  KEY_RSHIFT, 
+  KEY_LALT, 
+  KEY_RALT, 
+  KEY_LCONTROL, 
+  KEY_RCONTROL, 
+  KEY_LWIN, 
+  KEY_RWIN, 
+  KEY_APP, 
+  KEY_UP, 
+  KEY_LEFT, 
+  KEY_DOWN, 
+  KEY_RIGHT, 
+  KEY_F1, 
+  KEY_F2, 
+  KEY_F3, 
+  KEY_F4, 
+  KEY_F5, 
+  KEY_F6, 
+  KEY_F7, 
+  KEY_F8, 
+  KEY_F9, 
+  KEY_F10, 
+  KEY_F11, 
+  KEY_F12, 
+  KEY_CAPSLOCKTOGGLE, 
+  KEY_NUMLOCKTOGGLE, 
+  KEY_SCROLLLOCKTOGGLE, 
   
-  KEY_LAST = KEY_SCROLLLOCKTOGGLE,
-  KEY_COUNT = KEY_LAST - KEY_FIRST + 1,
+  KEY_LAST = KEY_SCROLLLOCKTOGGLE, 
+  KEY_COUNT = KEY_LAST - KEY_FIRST + 1, 
   
   // Mouse
-  MOUSE_FIRST = KEY_LAST + 1,
+  MOUSE_FIRST = KEY_LAST + 1, 
   
-  MOUSE_LEFT = MOUSE_FIRST,
-  MOUSE_RIGHT,
-  MOUSE_MIDDLE,
-  MOUSE_4,
-  MOUSE_5,
-  MOUSE_WHEEL_UP,
+  MOUSE_LEFT = MOUSE_FIRST, 
+  MOUSE_RIGHT, 
+  MOUSE_MIDDLE, 
+  MOUSE_4, 
+  MOUSE_5, 
+  MOUSE_WHEEL_UP, 
   // A fake button which is 'pressed' and 'released' when the
   // wheel is moved up
-  MOUSE_WHEEL_DOWN,
+  MOUSE_WHEEL_DOWN, 
   // A fake button which is 'pressed' and 'released' when the
   // wheel is moved down
   
-  MOUSE_LAST = MOUSE_WHEEL_DOWN,
-  MOUSE_COUNT = MOUSE_LAST - MOUSE_FIRST + 1,
+  MOUSE_LAST = MOUSE_WHEEL_DOWN, 
+  MOUSE_COUNT = MOUSE_LAST - MOUSE_FIRST + 1, 
 };
 
 class CObjectTeleporter : public CObject {
@@ -726,7 +730,7 @@ class CObjectTeleporter : public CObject {
   }
   
   float GetRechargeTime() {
-    DYNVAR_RETURN( float, this, "DT_ObjectTeleporter",
+    DYNVAR_RETURN( float, this, "DT_ObjectTeleporter", 
                    "m_flCurrentRechargeDuration" );
   }
   
@@ -753,23 +757,19 @@ class CBaseCombatWeapon : public CBaseEntity {
   }
   
   float GetChargeTime() {
-    DYNVAR_RETURN( float, this, "DT_WeaponPipebombLauncher",
-                   "PipebombLauncherLocalData", "m_flChargeBeginTime" );
+    DYNVAR_RETURN( float, this, "DT_WeaponPipebombLauncher", "PipebombLauncherLocalData", "m_flChargeBeginTime" );
   }
   
   float GetChargeDamage() {
-    DYNVAR_RETURN( float, this, "DT_TFSniperRifle", "SniperRifleLocalData",
-                   "m_flChargedDamage" );
+    DYNVAR_RETURN( float, this, "DT_TFSniperRifle", "SniperRifleLocalData", "m_flChargedDamage" );
   }
   
   weaponid GetItemDefinitionIndex() {
-    DYNVAR_RETURN( weaponid, this, "DT_EconEntity", "m_AttributeManager", "m_Item",
-                   "m_iItemDefinitionIndex" );
+    DYNVAR_RETURN( weaponid, this, "DT_EconEntity", "m_AttributeManager", "m_Item", "m_iItemDefinitionIndex" );
   }
   
   float m_flLastFireTime() {
-    DYNVAR_RETURN( float, this, "DT_TFWeaponBase", "LocalActiveTFWeaponData",
-                   "m_flLastFireTime" );
+    DYNVAR_RETURN( float, this, "DT_TFWeaponBase", "LocalActiveTFWeaponData", "m_flLastFireTime" );
   }
   float GetSwingRange( CBaseEntity *pLocal ) {
     typedef int( __thiscall * OriginalFn )( CBaseEntity * );
@@ -782,367 +782,367 @@ class CBaseCombatWeapon : public CBaseEntity {
 };
 
 enum class classId : int {
-  CAI_BaseNPC = 0,
-  CBaseAnimating = 1,
-  CBaseAnimatingOverlay = 2,
-  CBaseAttributableItem = 3,
-  CBaseCombatCharacter = 4,
-  CBaseCombatWeapon = 5,
-  CBaseDoor = 6,
-  CBaseEntity = 7,
-  CBaseFlex = 8,
-  CBaseGrenade = 9,
-  CBaseObject = 10,
-  CBaseObjectUpgrade = 11,
-  CBaseParticleEntity = 12,
-  CBasePlayer = 13,
-  CBaseProjectile = 14,
-  CBasePropDoor = 15,
-  CBaseTeamObjectiveResource = 16,
-  CBaseTempEntity = 17,
-  CBaseViewModel = 18,
-  CBeam = 19,
-  CBoneFollower = 20,
-  CBonusDuckPickup = 21,
-  CBonusPack = 22,
-  CBonusRoundLogic = 23,
-  CBreakableProp = 24,
-  CBreakableSurface = 25,
-  CCaptureFlag = 26,
-  CCaptureFlagReturnIcon = 27,
-  CCaptureZone = 28,
-  CColorCorrection = 29,
-  CColorCorrectionVolume = 30,
-  CCurrencyPack = 31,
-  CDynamicLight = 32,
-  CDynamicProp = 33,
-  CEconEntity = 34,
-  CEconWearable = 35,
-  CEmbers = 36,
-  CEntityDissolve = 37,
-  CEntityFlame = 38,
-  CEntityParticleTrail = 39,
-  CEnvDetailController = 40,
-  CEnvParticleScript = 41,
-  CEnvProjectedTexture = 42,
-  CEnvQuadraticBeam = 43,
-  CEnvScreenEffect = 44,
-  CEnvScreenOverlay = 45,
-  CEnvTonemapController = 46,
-  CEnvWind = 47,
-  CEyeballBoss = 48,
-  CFireSmoke = 49,
-  CFireTrail = 50,
-  CFish = 51,
-  CFogController = 52,
-  CFuncAreaPortalWindow = 55,
-  CFuncConveyor = 56,
-  CFuncForceField = 57,
-  CFuncLadder = 58,
-  CFuncMonitor = 59,
-  CFuncOccluder = 60,
-  CFuncPasstimeGoal = 61,
-  CFuncReflectiveGlass = 62,
-  CFuncRespawnRoom = 63,
-  CFuncRespawnRoomVisualizer = 64,
-  CFuncRotating = 65,
-  CFuncSmokeVolume = 66,
-  CFuncTrackTrain = 67,
-  CFunc_Dust = 53,
-  CFunc_LOD = 54,
-  CGameRulesProxy = 68,
-  CHalloweenGiftPickup = 69,
-  CHalloweenPickup = 70,
-  CHalloweenSoulPack = 71,
-  CHandleTest = 72,
-  CHeadlessHatman = 73,
-  CHightower_TeleportVortex = 74,
-  CInfoLadderDismount = 75,
-  CInfoLightingRelative = 76,
-  CInfoOverlayAccessor = 77,
-  CLaserDot = 78,
-  CLightGlow = 79,
-  CMannVsMachineStats = 80,
-  CMaterialModifyControl = 81,
-  CMerasmus = 82,
-  CMerasmusDancer = 83,
-  CMonsterResource = 84,
-  CObjectCartDispenser = 85,
-  CObjectDispenser = 86,
-  CObjectSapper = 87,
-  CObjectSentrygun = 88,
-  CObjectTeleporter = 89,
-  CParticleFire = 90,
-  CParticlePerformanceMonitor = 91,
-  CParticleSystem = 92,
-  CPasstimeBall = 93,
-  CPasstimeGun = 94,
-  CPhysBox = 95,
-  CPhysBoxMultiplayer = 96,
-  CPhysMagnet = 99,
-  CPhysicsProp = 97,
-  CPhysicsPropMultiplayer = 98,
-  CPlasma = 100,
-  CPlayerDestructionDispenser = 101,
-  CPlayerResource = 102,
-  CPointCamera = 103,
-  CPointCommentaryNode = 104,
-  CPoseController = 105,
-  CPrecipitation = 106,
-  CPropVehicleDriveable = 107,
-  CRagdollManager = 108,
-  CRagdollProp = 109,
-  CRagdollPropAttached = 110,
-  CRobotDispenser = 111,
-  CRopeKeyframe = 112,
-  CSceneEntity = 113,
-  CShadowControl = 114,
-  CSlideshowDisplay = 115,
-  CSmokeStack = 116,
-  CSniperDot = 117,
-  CSpotlightEnd = 118,
-  CSprite = 119,
-  CSpriteOriented = 120,
-  CSpriteTrail = 121,
-  CSteamJet = 122,
-  CSun = 123,
-  CTEArmorRicochet = 128,
-  CTEBSPDecal = 141,
-  CTEBaseBeam = 129,
-  CTEBeamEntPoint = 130,
-  CTEBeamEnts = 131,
-  CTEBeamFollow = 132,
-  CTEBeamLaser = 133,
-  CTEBeamPoints = 134,
-  CTEBeamRing = 135,
-  CTEBeamRingPoint = 136,
-  CTEBeamSpline = 137,
-  CTEBloodSprite = 138,
-  CTEBloodStream = 139,
-  CTEBreakModel = 140,
-  CTEBubbleTrail = 143,
-  CTEBubbles = 142,
-  CTEClientProjectile = 144,
-  CTEDecal = 145,
-  CTEDust = 146,
-  CTEDynamicLight = 147,
-  CTEEffectDispatch = 148,
-  CTEEnergySplash = 149,
-  CTEExplosion = 150,
-  CTEFireBullets = 151,
-  CTEFizz = 152,
-  CTEFootprintDecal = 153,
-  CTEGaussExplosion = 154,
-  CTEGlowSprite = 155,
-  CTEImpact = 156,
-  CTEKillPlayerAttachments = 157,
-  CTELargeFunnel = 158,
-  CTEMetalSparks = 160,
-  CTEMuzzleFlash = 161,
-  CTEParticleSystem = 162,
-  CTEPhysicsProp = 163,
-  CTEPlayerAnimEvent = 164,
-  CTEPlayerDecal = 165,
-  CTEProjectedDecal = 166,
-  CTEShatterSurface = 167,
-  CTEShowLine = 168,
-  CTESmoke = 170,
-  CTESparks = 171,
-  CTESprite = 172,
-  CTESpriteSpray = 173,
-  CTETFBlood = 176,
-  CTETFExplosion = 177,
-  CTETFParticleEffect = 178,
-  CTEWorldDecal = 179,
-  CTFAmmoPack = 180,
-  CTFBall_Ornament = 181,
-  CTFBaseBoss = 182,
-  CTFBaseProjectile = 183,
-  CTFBaseRocket = 184,
-  CTFBat = 185,
-  CTFBat_Fish = 186,
-  CTFBat_Giftwrap = 187,
-  CTFBat_Wood = 188,
-  CTFBonesaw = 189,
-  CTFBotHintEngineerNest = 190,
-  CTFBottle = 191,
-  CTFBreakableMelee = 192,
-  CTFBreakableSign = 193,
-  CTFBuffItem = 194,
-  CTFCannon = 195,
-  CTFChargedSMG = 196,
-  CTFCleaver = 197,
-  CTFClub = 198,
-  CTFCompoundBow = 199,
-  CTFCrossbow = 200,
-  CTFDRGPomson = 201,
-  CTFDroppedWeapon = 202,
-  CTFFireAxe = 203,
-  CTFFists = 204,
-  CTFFlameManager = 205,
-  CTFFlameRocket = 206,
-  CTFFlameThrower = 207,
-  CTFFlareGun = 208,
-  CTFFlareGun_Revenge = 209,
-  CTFGameRulesProxy = 210,
-  CTFGasManager = 211,
-  CTFGenericBomb = 212,
-  CTFGlow = 213,
-  CTFGrapplingHook = 214,
-  CTFGrenadeLauncher = 215,
-  CTFGrenadePipebombProjectile = 216,
-  CTFHalloweenMinigame = 217,
-  CTFHalloweenMinigame_FallingPlatforms = 218,
-  CTFHellZap = 219,
-  CTFItem = 220,
-  CTFJar = 221,
-  CTFJarGas = 222,
-  CTFJarMilk = 223,
-  CTFKatana = 224,
-  CTFKnife = 225,
-  CTFLaserPointer = 226,
-  CTFLunchBox = 227,
-  CTFLunchBox_Drink = 228,
-  CTFMechanicalArm = 229,
-  CTFMedigunShield = 230,
-  CTFMiniGame = 231,
-  CTFMinigameLogic = 232,
-  CTFMinigun = 233,
-  CTFObjectiveResource = 234,
-  CTFPEPBrawlerBlaster = 240,
-  CTFParachute = 235,
-  CTFParachute_Primary = 236,
-  CTFParachute_Secondary = 237,
-  CTFParticleCannon = 238,
-  CTFPasstimeLogic = 239,
-  CTFPipebombLauncher = 241,
-  CTFPistol = 242,
-  CTFPistol_Scout = 243,
-  CTFPistol_ScoutPrimary = 244,
-  CTFPistol_ScoutSecondary = 245,
-  CTFPlayer = 246,
-  CTFPlayerDestructionLogic = 247,
-  CTFPlayerResource = 248,
-  CTFPointManager = 249,
-  CTFPowerupBottle = 250,
-  CTFProjectile_Arrow = 251,
-  CTFProjectile_BallOfFire = 252,
-  CTFProjectile_Cleaver = 253,
-  CTFProjectile_EnergyBall = 254,
-  CTFProjectile_EnergyRing = 255,
-  CTFProjectile_Flare = 256,
-  CTFProjectile_GrapplingHook = 257,
-  CTFProjectile_HealingBolt = 258,
-  CTFProjectile_Jar = 259,
-  CTFProjectile_JarGas = 260,
-  CTFProjectile_JarMilk = 261,
-  CTFProjectile_MechanicalArmOrb = 262,
-  CTFProjectile_Rocket = 263,
-  CTFProjectile_SentryRocket = 264,
-  CTFProjectile_SpellBats = 265,
-  CTFProjectile_SpellFireball = 266,
-  CTFProjectile_SpellKartBats = 267,
-  CTFProjectile_SpellKartOrb = 268,
-  CTFProjectile_SpellLightningOrb = 269,
-  CTFProjectile_SpellMeteorShower = 270,
-  CTFProjectile_SpellMirv = 271,
-  CTFProjectile_SpellPumpkin = 272,
-  CTFProjectile_SpellSpawnBoss = 273,
-  CTFProjectile_SpellSpawnHorde = 274,
-  CTFProjectile_SpellSpawnZombie = 275,
-  CTFProjectile_SpellTransposeTeleport = 276,
-  CTFProjectile_Throwable = 277,
-  CTFProjectile_ThrowableBreadMonster = 278,
-  CTFProjectile_ThrowableBrick = 279,
-  CTFProjectile_ThrowableRepel = 280,
-  CTFPumpkinBomb = 281,
-  CTFRagdoll = 282,
-  CTFRaygun = 283,
-  CTFReviveMarker = 284,
-  CTFRevolver = 285,
-  CTFRobotArm = 286,
-  CTFRobotDestructionLogic = 290,
-  CTFRobotDestruction_Robot = 287,
-  CTFRobotDestruction_RobotGroup = 288,
-  CTFRobotDestruction_RobotSpawn = 289,
-  CTFRocketLauncher = 291,
-  CTFRocketLauncher_AirStrike = 292,
-  CTFRocketLauncher_DirectHit = 293,
-  CTFRocketLauncher_Mortar = 294,
-  CTFRocketPack = 295,
-  CTFSMG = 305,
-  CTFScatterGun = 296,
-  CTFShotgun = 297,
-  CTFShotgunBuildingRescue = 302,
-  CTFShotgun_HWG = 298,
-  CTFShotgun_Pyro = 299,
-  CTFShotgun_Revenge = 300,
-  CTFShotgun_Soldier = 301,
-  CTFShovel = 303,
-  CTFSlap = 304,
-  CTFSniperRifle = 306,
-  CTFSniperRifleClassic = 307,
-  CTFSniperRifleDecap = 308,
-  CTFSodaPopper = 309,
-  CTFSpellBook = 310,
-  CTFStickBomb = 311,
-  CTFStunBall = 312,
-  CTFSword = 313,
-  CTFSyringeGun = 314,
-  CTFTankBoss = 315,
-  CTFTauntProp = 316,
-  CTFTeam = 317,
-  CTFThrowable = 318,
-  CTFViewModel = 319,
-  CTFWeaponBase = 320,
-  CTFWeaponBaseGrenadeProj = 321,
-  CTFWeaponBaseGun = 322,
-  CTFWeaponBaseMelee = 323,
-  CTFWeaponBaseMerasmusGrenade = 324,
-  CTFWeaponBuilder = 325,
-  CTFWeaponFlameBall = 326,
-  CTFWeaponInvis = 327,
-  CTFWeaponPDA = 328,
-  CTFWeaponPDAExpansion_Dispenser = 332,
-  CTFWeaponPDAExpansion_Teleporter = 333,
-  CTFWeaponPDA_Engineer_Build = 329,
-  CTFWeaponPDA_Engineer_Destroy = 330,
-  CTFWeaponPDA_Spy = 331,
-  CTFWeaponSapper = 334,
-  CTFWearable = 335,
-  CTFWearableCampaignItem = 336,
-  CTFWearableDemoShield = 337,
-  CTFWearableItem = 338,
-  CTFWearableLevelableItem = 339,
-  CTFWearableRazorback = 340,
-  CTFWearableRobotArm = 341,
-  CTFWearableVM = 342,
-  CTFWrench = 343,
-  CTeam = 124,
-  CTeamRoundTimer = 126,
-  CTeamTrainWatcher = 127,
-  CTeamplayRoundBasedRulesProxy = 125,
-  CTeleportVortex = 159,
-  CTesla = 169,
-  CTestTraceline = 175,
-  CTest_ProxyToggle_Networkable = 174,
-  CVGuiScreen = 344,
-  CVoteController = 345,
-  CWaterBullet = 346,
-  CWaterLODControl = 347,
-  CWeaponIFMBase = 348,
-  CWeaponIFMBaseCamera = 349,
-  CWeaponIFMSteadyCam = 350,
-  CWeaponMedigun = 351,
-  CWorld = 352,
-  CZombie = 353,
-  DustTrail = 354,
-  MovieExplosion = 355,
-  NextBotCombatCharacter = 356,
-  ParticleSmokeGrenade = 357,
-  RocketTrail = 358,
-  SmokeTrail = 359,
-  SporeExplosion = 360,
+  CAI_BaseNPC = 0, 
+  CBaseAnimating = 1, 
+  CBaseAnimatingOverlay = 2, 
+  CBaseAttributableItem = 3, 
+  CBaseCombatCharacter = 4, 
+  CBaseCombatWeapon = 5, 
+  CBaseDoor = 6, 
+  CBaseEntity = 7, 
+  CBaseFlex = 8, 
+  CBaseGrenade = 9, 
+  CBaseObject = 10, 
+  CBaseObjectUpgrade = 11, 
+  CBaseParticleEntity = 12, 
+  CBasePlayer = 13, 
+  CBaseProjectile = 14, 
+  CBasePropDoor = 15, 
+  CBaseTeamObjectiveResource = 16, 
+  CBaseTempEntity = 17, 
+  CBaseViewModel = 18, 
+  CBeam = 19, 
+  CBoneFollower = 20, 
+  CBonusDuckPickup = 21, 
+  CBonusPack = 22, 
+  CBonusRoundLogic = 23, 
+  CBreakableProp = 24, 
+  CBreakableSurface = 25, 
+  CCaptureFlag = 26, 
+  CCaptureFlagReturnIcon = 27, 
+  CCaptureZone = 28, 
+  CColorCorrection = 29, 
+  CColorCorrectionVolume = 30, 
+  CCurrencyPack = 31, 
+  CDynamicLight = 32, 
+  CDynamicProp = 33, 
+  CEconEntity = 34, 
+  CEconWearable = 35, 
+  CEmbers = 36, 
+  CEntityDissolve = 37, 
+  CEntityFlame = 38, 
+  CEntityParticleTrail = 39, 
+  CEnvDetailController = 40, 
+  CEnvParticleScript = 41, 
+  CEnvProjectedTexture = 42, 
+  CEnvQuadraticBeam = 43, 
+  CEnvScreenEffect = 44, 
+  CEnvScreenOverlay = 45, 
+  CEnvTonemapController = 46, 
+  CEnvWind = 47, 
+  CEyeballBoss = 48, 
+  CFireSmoke = 49, 
+  CFireTrail = 50, 
+  CFish = 51, 
+  CFogController = 52, 
+  CFuncAreaPortalWindow = 55, 
+  CFuncConveyor = 56, 
+  CFuncForceField = 57, 
+  CFuncLadder = 58, 
+  CFuncMonitor = 59, 
+  CFuncOccluder = 60, 
+  CFuncPasstimeGoal = 61, 
+  CFuncReflectiveGlass = 62, 
+  CFuncRespawnRoom = 63, 
+  CFuncRespawnRoomVisualizer = 64, 
+  CFuncRotating = 65, 
+  CFuncSmokeVolume = 66, 
+  CFuncTrackTrain = 67, 
+  CFunc_Dust = 53, 
+  CFunc_LOD = 54, 
+  CGameRulesProxy = 68, 
+  CHalloweenGiftPickup = 69, 
+  CHalloweenPickup = 70, 
+  CHalloweenSoulPack = 71, 
+  CHandleTest = 72, 
+  CHeadlessHatman = 73, 
+  CHightower_TeleportVortex = 74, 
+  CInfoLadderDismount = 75, 
+  CInfoLightingRelative = 76, 
+  CInfoOverlayAccessor = 77, 
+  CLaserDot = 78, 
+  CLightGlow = 79, 
+  CMannVsMachineStats = 80, 
+  CMaterialModifyControl = 81, 
+  CMerasmus = 82, 
+  CMerasmusDancer = 83, 
+  CMonsterResource = 84, 
+  CObjectCartDispenser = 85, 
+  CObjectDispenser = 86, 
+  CObjectSapper = 87, 
+  CObjectSentrygun = 88, 
+  CObjectTeleporter = 89, 
+  CParticleFire = 90, 
+  CParticlePerformanceMonitor = 91, 
+  CParticleSystem = 92, 
+  CPasstimeBall = 93, 
+  CPasstimeGun = 94, 
+  CPhysBox = 95, 
+  CPhysBoxMultiplayer = 96, 
+  CPhysMagnet = 99, 
+  CPhysicsProp = 97, 
+  CPhysicsPropMultiplayer = 98, 
+  CPlasma = 100, 
+  CPlayerDestructionDispenser = 101, 
+  CPlayerResource = 102, 
+  CPointCamera = 103, 
+  CPointCommentaryNode = 104, 
+  CPoseController = 105, 
+  CPrecipitation = 106, 
+  CPropVehicleDriveable = 107, 
+  CRagdollManager = 108, 
+  CRagdollProp = 109, 
+  CRagdollPropAttached = 110, 
+  CRobotDispenser = 111, 
+  CRopeKeyframe = 112, 
+  CSceneEntity = 113, 
+  CShadowControl = 114, 
+  CSlideshowDisplay = 115, 
+  CSmokeStack = 116, 
+  CSniperDot = 117, 
+  CSpotlightEnd = 118, 
+  CSprite = 119, 
+  CSpriteOriented = 120, 
+  CSpriteTrail = 121, 
+  CSteamJet = 122, 
+  CSun = 123, 
+  CTEArmorRicochet = 128, 
+  CTEBSPDecal = 141, 
+  CTEBaseBeam = 129, 
+  CTEBeamEntPoint = 130, 
+  CTEBeamEnts = 131, 
+  CTEBeamFollow = 132, 
+  CTEBeamLaser = 133, 
+  CTEBeamPoints = 134, 
+  CTEBeamRing = 135, 
+  CTEBeamRingPoint = 136, 
+  CTEBeamSpline = 137, 
+  CTEBloodSprite = 138, 
+  CTEBloodStream = 139, 
+  CTEBreakModel = 140, 
+  CTEBubbleTrail = 143, 
+  CTEBubbles = 142, 
+  CTEClientProjectile = 144, 
+  CTEDecal = 145, 
+  CTEDust = 146, 
+  CTEDynamicLight = 147, 
+  CTEEffectDispatch = 148, 
+  CTEEnergySplash = 149, 
+  CTEExplosion = 150, 
+  CTEFireBullets = 151, 
+  CTEFizz = 152, 
+  CTEFootprintDecal = 153, 
+  CTEGaussExplosion = 154, 
+  CTEGlowSprite = 155, 
+  CTEImpact = 156, 
+  CTEKillPlayerAttachments = 157, 
+  CTELargeFunnel = 158, 
+  CTEMetalSparks = 160, 
+  CTEMuzzleFlash = 161, 
+  CTEParticleSystem = 162, 
+  CTEPhysicsProp = 163, 
+  CTEPlayerAnimEvent = 164, 
+  CTEPlayerDecal = 165, 
+  CTEProjectedDecal = 166, 
+  CTEShatterSurface = 167, 
+  CTEShowLine = 168, 
+  CTESmoke = 170, 
+  CTESparks = 171, 
+  CTESprite = 172, 
+  CTESpriteSpray = 173, 
+  CTETFBlood = 176, 
+  CTETFExplosion = 177, 
+  CTETFParticleEffect = 178, 
+  CTEWorldDecal = 179, 
+  CTFAmmoPack = 180, 
+  CTFBall_Ornament = 181, 
+  CTFBaseBoss = 182, 
+  CTFBaseProjectile = 183, 
+  CTFBaseRocket = 184, 
+  CTFBat = 185, 
+  CTFBat_Fish = 186, 
+  CTFBat_Giftwrap = 187, 
+  CTFBat_Wood = 188, 
+  CTFBonesaw = 189, 
+  CTFBotHintEngineerNest = 190, 
+  CTFBottle = 191, 
+  CTFBreakableMelee = 192, 
+  CTFBreakableSign = 193, 
+  CTFBuffItem = 194, 
+  CTFCannon = 195, 
+  CTFChargedSMG = 196, 
+  CTFCleaver = 197, 
+  CTFClub = 198, 
+  CTFCompoundBow = 199, 
+  CTFCrossbow = 200, 
+  CTFDRGPomson = 201, 
+  CTFDroppedWeapon = 202, 
+  CTFFireAxe = 203, 
+  CTFFists = 204, 
+  CTFFlameManager = 205, 
+  CTFFlameRocket = 206, 
+  CTFFlameThrower = 207, 
+  CTFFlareGun = 208, 
+  CTFFlareGun_Revenge = 209, 
+  CTFGameRulesProxy = 210, 
+  CTFGasManager = 211, 
+  CTFGenericBomb = 212, 
+  CTFGlow = 213, 
+  CTFGrapplingHook = 214, 
+  CTFGrenadeLauncher = 215, 
+  CTFGrenadePipebombProjectile = 216, 
+  CTFHalloweenMinigame = 217, 
+  CTFHalloweenMinigame_FallingPlatforms = 218, 
+  CTFHellZap = 219, 
+  CTFItem = 220, 
+  CTFJar = 221, 
+  CTFJarGas = 222, 
+  CTFJarMilk = 223, 
+  CTFKatana = 224, 
+  CTFKnife = 225, 
+  CTFLaserPointer = 226, 
+  CTFLunchBox = 227, 
+  CTFLunchBox_Drink = 228, 
+  CTFMechanicalArm = 229, 
+  CTFMedigunShield = 230, 
+  CTFMiniGame = 231, 
+  CTFMinigameLogic = 232, 
+  CTFMinigun = 233, 
+  CTFObjectiveResource = 234, 
+  CTFPEPBrawlerBlaster = 240, 
+  CTFParachute = 235, 
+  CTFParachute_Primary = 236, 
+  CTFParachute_Secondary = 237, 
+  CTFParticleCannon = 238, 
+  CTFPasstimeLogic = 239, 
+  CTFPipebombLauncher = 241, 
+  CTFPistol = 242, 
+  CTFPistol_Scout = 243, 
+  CTFPistol_ScoutPrimary = 244, 
+  CTFPistol_ScoutSecondary = 245, 
+  CTFPlayer = 246, 
+  CTFPlayerDestructionLogic = 247, 
+  CTFPlayerResource = 248, 
+  CTFPointManager = 249, 
+  CTFPowerupBottle = 250, 
+  CTFProjectile_Arrow = 251, 
+  CTFProjectile_BallOfFire = 252, 
+  CTFProjectile_Cleaver = 253, 
+  CTFProjectile_EnergyBall = 254, 
+  CTFProjectile_EnergyRing = 255, 
+  CTFProjectile_Flare = 256, 
+  CTFProjectile_GrapplingHook = 257, 
+  CTFProjectile_HealingBolt = 258, 
+  CTFProjectile_Jar = 259, 
+  CTFProjectile_JarGas = 260, 
+  CTFProjectile_JarMilk = 261, 
+  CTFProjectile_MechanicalArmOrb = 262, 
+  CTFProjectile_Rocket = 263, 
+  CTFProjectile_SentryRocket = 264, 
+  CTFProjectile_SpellBats = 265, 
+  CTFProjectile_SpellFireball = 266, 
+  CTFProjectile_SpellKartBats = 267, 
+  CTFProjectile_SpellKartOrb = 268, 
+  CTFProjectile_SpellLightningOrb = 269, 
+  CTFProjectile_SpellMeteorShower = 270, 
+  CTFProjectile_SpellMirv = 271, 
+  CTFProjectile_SpellPumpkin = 272, 
+  CTFProjectile_SpellSpawnBoss = 273, 
+  CTFProjectile_SpellSpawnHorde = 274, 
+  CTFProjectile_SpellSpawnZombie = 275, 
+  CTFProjectile_SpellTransposeTeleport = 276, 
+  CTFProjectile_Throwable = 277, 
+  CTFProjectile_ThrowableBreadMonster = 278, 
+  CTFProjectile_ThrowableBrick = 279, 
+  CTFProjectile_ThrowableRepel = 280, 
+  CTFPumpkinBomb = 281, 
+  CTFRagdoll = 282, 
+  CTFRaygun = 283, 
+  CTFReviveMarker = 284, 
+  CTFRevolver = 285, 
+  CTFRobotArm = 286, 
+  CTFRobotDestructionLogic = 290, 
+  CTFRobotDestruction_Robot = 287, 
+  CTFRobotDestruction_RobotGroup = 288, 
+  CTFRobotDestruction_RobotSpawn = 289, 
+  CTFRocketLauncher = 291, 
+  CTFRocketLauncher_AirStrike = 292, 
+  CTFRocketLauncher_DirectHit = 293, 
+  CTFRocketLauncher_Mortar = 294, 
+  CTFRocketPack = 295, 
+  CTFSMG = 305, 
+  CTFScatterGun = 296, 
+  CTFShotgun = 297, 
+  CTFShotgunBuildingRescue = 302, 
+  CTFShotgun_HWG = 298, 
+  CTFShotgun_Pyro = 299, 
+  CTFShotgun_Revenge = 300, 
+  CTFShotgun_Soldier = 301, 
+  CTFShovel = 303, 
+  CTFSlap = 304, 
+  CTFSniperRifle = 306, 
+  CTFSniperRifleClassic = 307, 
+  CTFSniperRifleDecap = 308, 
+  CTFSodaPopper = 309, 
+  CTFSpellBook = 310, 
+  CTFStickBomb = 311, 
+  CTFStunBall = 312, 
+  CTFSword = 313, 
+  CTFSyringeGun = 314, 
+  CTFTankBoss = 315, 
+  CTFTauntProp = 316, 
+  CTFTeam = 317, 
+  CTFThrowable = 318, 
+  CTFViewModel = 319, 
+  CTFWeaponBase = 320, 
+  CTFWeaponBaseGrenadeProj = 321, 
+  CTFWeaponBaseGun = 322, 
+  CTFWeaponBaseMelee = 323, 
+  CTFWeaponBaseMerasmusGrenade = 324, 
+  CTFWeaponBuilder = 325, 
+  CTFWeaponFlameBall = 326, 
+  CTFWeaponInvis = 327, 
+  CTFWeaponPDA = 328, 
+  CTFWeaponPDAExpansion_Dispenser = 332, 
+  CTFWeaponPDAExpansion_Teleporter = 333, 
+  CTFWeaponPDA_Engineer_Build = 329, 
+  CTFWeaponPDA_Engineer_Destroy = 330, 
+  CTFWeaponPDA_Spy = 331, 
+  CTFWeaponSapper = 334, 
+  CTFWearable = 335, 
+  CTFWearableCampaignItem = 336, 
+  CTFWearableDemoShield = 337, 
+  CTFWearableItem = 338, 
+  CTFWearableLevelableItem = 339, 
+  CTFWearableRazorback = 340, 
+  CTFWearableRobotArm = 341, 
+  CTFWearableVM = 342, 
+  CTFWrench = 343, 
+  CTeam = 124, 
+  CTeamRoundTimer = 126, 
+  CTeamTrainWatcher = 127, 
+  CTeamplayRoundBasedRulesProxy = 125, 
+  CTeleportVortex = 159, 
+  CTesla = 169, 
+  CTestTraceline = 175, 
+  CTest_ProxyToggle_Networkable = 174, 
+  CVGuiScreen = 344, 
+  CVoteController = 345, 
+  CWaterBullet = 346, 
+  CWaterLODControl = 347, 
+  CWeaponIFMBase = 348, 
+  CWeaponIFMBaseCamera = 349, 
+  CWeaponIFMSteadyCam = 350, 
+  CWeaponMedigun = 351, 
+  CWorld = 352, 
+  CZombie = 353, 
+  DustTrail = 354, 
+  MovieExplosion = 355, 
+  NextBotCombatCharacter = 356, 
+  ParticleSmokeGrenade = 357, 
+  RocketTrail = 358, 
+  SmokeTrail = 359, 
+  SporeExplosion = 360, 
   SporeTrail = 361
 };
 
@@ -1154,17 +1154,13 @@ class IGameEvent {
   
   virtual bool IsReliable() const = 0; // if event handled reliable
   virtual bool IsLocal() const = 0; // if event is never networked
-  virtual bool IsEmpty(
-    const char *keyName = nullptr ) = 0; // check if data field exists
+  virtual bool IsEmpty(const char *keyName = nullptr ) = 0; // check if data field exists
     
   // Data access
-  virtual bool GetBool( const char *keyName = nullptr,
-                        bool defaultValue = false ) = 0;
+  virtual bool GetBool( const char *keyName = nullptr, bool defaultValue = false ) = 0;
   virtual int GetInt( const char *keyName = nullptr, int defaultValue = 0 ) = 0;
-  virtual float GetFloat( const char *keyName = nullptr,
-                          float defaultValue = 0.0f ) = 0;
-  virtual const char *GetString( const char *keyName = nullptr,
-                                 const char *defaultValue = "" ) = 0;
+  virtual float GetFloat( const char *keyName = nullptr, float defaultValue = 0.0f ) = 0;
+  virtual const char *GetString( const char *keyName = nullptr, const char *defaultValue = "" ) = 0;
                                  
   virtual void SetBool( const char *keyName, bool value ) = 0;
   virtual void SetInt( const char *keyName, int value ) = 0;
@@ -1213,7 +1209,7 @@ class IInputSystem : public IAppSystem {
   // Gets the time of the last polling in ms
   virtual int GetPollTick() const = 0;
   
-  // Is a button down? "Buttons" are binary-state input devices (mouse buttons,
+  // Is a button down? "Buttons" are binary-state input devices (mouse buttons, 
   // keyboard keys)
   virtual bool IsButtonDown( ButtonCode_t code ) const = 0;
   
@@ -1249,7 +1245,7 @@ class IInputSystem : public IAppSystem {
   // Sample the joystick and append events to the input queue
   virtual void SampleDevices( void ) = 0;
   
-  virtual void SetRumble( float fLeftMotor, float fRightMotor,
+  virtual void SetRumble( float fLeftMotor, float fRightMotor, 
                           int userId = -1 ) = 0;
   virtual void StopRumble( void ) = 0;
   
@@ -1325,14 +1321,12 @@ class ICvar : public IAppSystem {
   // Install a global change callback (to be called when any convar changes)
   virtual void InstallGlobalChangeCallback( FnChangeCallback_t callback ) = 0;
   virtual void RemoveGlobalChangeCallback( FnChangeCallback_t callback ) = 0;
-  virtual void CallGlobalChangeCallbacks( ConVar *var, const char *pOldString,
-                                          float flOldValue ) = 0;
+  virtual void CallGlobalChangeCallbacks( ConVar *var, const char *pOldString, float flOldValue ) = 0;
                                           
   // Install a console printer
   virtual void InstallConsoleDisplayFunc( void *pDisplayFunc ) = 0;
   virtual void RemoveConsoleDisplayFunc( void *pDisplayFunc ) = 0;
-  virtual void ConsoleColorPrintf( const Color &clr, const char *pFormat,
-                                   ... ) const = 0;
+  virtual void ConsoleColorPrintf( const Color &clr, const char *pFormat, ... ) const = 0;
   virtual void ConsolePrintf( const char *pFormat, ... ) const = 0;
   virtual void ConsoleDPrintf( const char *pFormat, ... ) const = 0;
   
@@ -1348,8 +1342,7 @@ class ICvar : public IAppSystem {
   virtual void PublishToVXConsole() = 0;
 #endif
   virtual bool IsMaterialThreadSetAllowed() const = 0;
-  virtual void QueueMaterialThreadSetValue( ConVar *pConVar,
-      const char *pValue ) = 0;
+  virtual void QueueMaterialThreadSetValue( ConVar *pConVar, const char *pValue ) = 0;
   virtual void QueueMaterialThreadSetValue( ConVar *pConVar, int nValue ) = 0;
   virtual void QueueMaterialThreadSetValue( ConVar *pConVar, float flValue ) = 0;
   virtual bool HasQueuedMaterialThreadConVarSets() const = 0;
@@ -1370,7 +1363,7 @@ class ICvar : public IAppSystem {
   /// }
   /// The Iterator class actually wraps the internal factory methods
   /// so you don't need to worry about new/delete -- scope takes care
-  //  of it.
+  ///  of it.
   /// We need an iterator like this because we can't simply return a
   /// pointer to the internal data type that contains the cvars --
   /// it's a custom, protected class with unusual semantics and is
@@ -1424,15 +1417,13 @@ typedef struct netadr_s {
   // void SetType(netadrtype_t type);
   void SetPort( unsigned short port );
   bool SetFromSockadr( const struct sockaddr *s );
-  void SetIP(
-    unsigned int unIP ); // Sets IP.  unIP is in host order (little-endian)
+  void SetIP(    unsigned int unIP ); // Sets IP.  unIP is in host order (little-endian)
   void SetIPAndPort( unsigned int unIP, unsigned short usPort ) {
     SetIP( unIP );
     SetPort( usPort );
   }
   
-  void SetFromString( const char *pch,
-                      bool bUseDNS = false ); // if bUseDNS is true then do a DNS
+  void SetFromString( const char *pch, bool bUseDNS = false ); // if bUseDNS is true then do a DNS
 // lookup if needed
 
   bool CompareAdr( const netadr_s &a, bool onlyBase = false ) const;
@@ -1476,44 +1467,42 @@ typedef struct netadr_s {
 class INetChannelInfo {
  public:
   enum {
-    GENERIC = 0,
+    GENERIC = 0, 
     // must be first and is default group
-    LOCALPLAYER,
+    LOCALPLAYER, 
     // bytes for local player entity update
-    OTHERPLAYERS,
+    OTHERPLAYERS, 
     // bytes for other players update
-    ENTITIES,
+    ENTITIES, 
     // all other entity bytes
-    SOUNDS,
+    SOUNDS, 
     // game sounds
-    EVENTS,
+    EVENTS, 
     // event messages
-    TEMPENTS,
+    TEMPENTS, 
     // temp entities
-    USERMESSAGES,
+    USERMESSAGES, 
     // user messages
-    ENTMESSAGES,
+    ENTMESSAGES, 
     // entity messages
-    VOICE,
+    VOICE, 
     // voice data
-    STRINGTABLE,
+    STRINGTABLE, 
     // a stringtable update
-    MOVE,
+    MOVE, 
     // client move cmds
-    STRINGCMD,
+    STRINGCMD, 
     // string command
-    SIGNON,
+    SIGNON, 
     // various signondata
-    TOTAL,
+    TOTAL, 
     // must be last and is not a real group
   };
   
   virtual const char *GetName( void ) const = 0; // get channel name
-  virtual const char *GetAddress(
-    void ) const = 0; // get channel IP address as string
+  virtual const char *GetAddress(    void ) const = 0; // get channel IP address as string
   virtual float GetTime( void ) const = 0; // current net time
-  virtual float GetTimeConnected(
-    void ) const = 0; // get connection time in seconds
+  virtual float GetTimeConnected(    void ) const = 0; // get connection time in seconds
   virtual int GetBufferSize( void ) const = 0; // netchannel packet history size
   virtual int GetDataRate( void ) const = 0; // send data rate in byte/sec
   
@@ -1523,8 +1512,7 @@ class INetChannelInfo {
   
   virtual float GetLatency( int flow )
   const = 0; // current latency (RTT), more accurate but jittering
-  virtual float GetAvgLatency(
-    int flow ) const = 0; // average packet latency in seconds
+  virtual float GetAvgLatency(    int flow ) const = 0; // average packet latency in seconds
   virtual float GetAvgLoss( int flow ) const = 0; // avg packet loss[0..1]
   virtual float GetAvgChoke( int flow ) const = 0; // avg packet choke[0..1]
   virtual float GetAvgData( int flow ) const = 0; // data flow in bytes/sec
@@ -1534,22 +1522,15 @@ class INetChannelInfo {
   virtual int GetSequenceNr( int flow ) const = 0; // last send seq number
   virtual bool IsValidPacket( int flow, int frame_number )
   const = 0; // true if packet was not lost/dropped/chocked/flushed
-  virtual float GetPacketTime(
-    int flow, int frame_number ) const = 0; // time when packet was send
-  virtual int GetPacketBytes( int flow, int frame_number,
-                              int group ) const = 0; // group size of this packet
+  virtual float GetPacketTime(    int flow, int frame_number ) const = 0; // time when packet was send
+  virtual int GetPacketBytes( int flow, int frame_number, int group ) const = 0; // group size of this packet
   virtual bool GetStreamProgress( int flow, int *received, int *total )
   const = 0; // TCP progress if transmitting
-  virtual float GetTimeSinceLastReceived(
-    void ) const = 0; // get time since last recieved packet in seconds
-  virtual float GetCommandInterpolationAmount( int flow,
-      int frame_number ) const = 0;
-  virtual void GetPacketResponseLatency( int flow, int frame_number,
-                                         int *pnLatencyMsecs,
-                                         int *pnChoke ) const = 0;
-  virtual void GetRemoteFramerate(
-    float *pflFrameTime, float *pflFrameTimeStdDeviation,
-    float *pflFrameStartTimeStdDeviation ) const = 0;
+  virtual float GetTimeSinceLastReceived(    void ) const = 0; // get time since last recieved packet in seconds
+  virtual float GetCommandInterpolationAmount( int flow, int frame_number ) const = 0;
+  virtual void GetPacketResponseLatency( int flow, int frame_number, int *pnLatencyMsecs, int *pnChoke ) const = 0;
+  virtual void GetRemoteFramerate(    float *pflFrameTime, float *pflFrameTimeStdDeviation, 
+  float *pflFrameStartTimeStdDeviation ) const = 0;
     
   virtual float GetTimeoutSeconds() const = 0;
 };
@@ -1575,22 +1556,11 @@ class INetChannel : public INetChannelInfo {
   virtual bool ProcessStream( void ) = 0;
   virtual void ProcessPacket( struct netpacket_s *packet, bool bHasHeader ) = 0;
   
-  virtual bool SendNetMsg( INetMessage &msg, bool bForceReliable = false,
-                           bool bVoice = false ) = 0;
-#ifdef POSIX
-  FORCEINLINE bool SendNetMsg( INetMessage const &msg,
-                               bool bForceReliable = false,
-                               bool bVoice = false ) {
-    return SendNetMsg( *( ( INetMessage * )&msg ), bForceReliable, bVoice );
-  }
-#endif
+  virtual bool SendNetMsg( INetMessage &msg, bool bForceReliable = false, bool bVoice = false ) = 0;
   // virtual bool SendData(bf_write &msg, bool bReliable = true) = 0;
   virtual bool SendFile( const char *filename, unsigned int transferID ) = 0;
   virtual void DenyFile( const char *filename, unsigned int transferID ) = 0;
-  virtual void RequestFile_OLD(
-    const char *filename,
-    unsigned int
-    transferID ) = 0; // get rid of this function when we version the
+  virtual void RequestFile_OLD(    const char *filename, unsigned int    transferID ) = 0; // get rid of this function when we version the
   virtual void SetChoked( void ) = 0;
   virtual int SendDatagram( bf_write *data ) = 0;
   virtual bool Transmit( bool onlyReliable = false ) = 0;
@@ -1600,10 +1570,8 @@ class INetChannel : public INetChannelInfo {
   virtual int GetDropNumber( void ) const = 0;
   virtual int GetSocket( void ) const = 0;
   virtual unsigned int GetChallengeNr( void ) const = 0;
-  virtual void GetSequenceData( int &nOutSequenceNr, int &nInSequenceNr,
-                                int &nOutSequenceNrAck ) = 0;
-  virtual void SetSequenceData( int nOutSequenceNr, int nInSequenceNr,
-                                int nOutSequenceNrAck ) = 0;
+  virtual void GetSequenceData( int &nOutSequenceNr, int &nInSequenceNr, int &nOutSequenceNrAck ) = 0;
+  virtual void SetSequenceData( int nOutSequenceNr, int nInSequenceNr, int nOutSequenceNrAck ) = 0;
                                 
   virtual void UpdateMessageStats( int msggroup, int bits ) = 0;
   virtual bool CanPacket( void ) const = 0;
@@ -1617,14 +1585,12 @@ class INetChannel : public INetChannelInfo {
   float GetTimeSinceLastReceived(
     void ) const override = 0; // get time since last received packet in seconds
     
-  virtual void SetMaxBufferSize( bool bReliable, int nBYTEs,
-                                 bool bVoice = false ) = 0;
+  virtual void SetMaxBufferSize( bool bReliable, int nBYTEs, bool bVoice = false ) = 0;
                                  
   virtual bool IsNull() const = 0;
   virtual int GetNumBitsWritten( bool bReliable ) = 0;
   virtual void SetInterpolationAmount( float flInterpolationAmount ) = 0;
-  virtual void SetRemoteFramerate( float flFrameTime,
-                                   float flFrameTimeStdDeviation ) = 0;
+  virtual void SetRemoteFramerate( float flFrameTime, float flFrameTimeStdDeviation ) = 0;
                                    
   // Max # of payload BYTEs before we must split/fragment the packet
   virtual void SetMaxRoutablePayloadSize( int nSplitSize ) = 0;
@@ -1641,31 +1607,21 @@ class INetMessage {
   // Use these to setup who can hear whose voice.
   // Pass in client indices (which are their ent indices - 1).
   
-  virtual void SetNetChannel(
-    INetChannel *netchan ) = 0; // netchannel this message is from/for
-  virtual void SetReliable(
-    bool state ) = 0; // set to true if it's a reliable message
+  virtual void SetNetChannel(    INetChannel *netchan ) = 0; // netchannel this message is from/for
+  virtual void SetReliable(    bool state ) = 0; // set to true if it's a reliable message
     
-  virtual bool Process(
-    void ) = 0; // calles the recently set handler to process this message
+  virtual bool Process(    void ) = 0; // calles the recently set handler to process this message
     
-  virtual bool ReadFromBuffer(
-    uintptr_t &buffer ) = 0; // returns true if parsing was OK
-  virtual bool WriteToBuffer(
-    uintptr_t &buffer ) = 0; // returns true if writing was OK
+  virtual bool ReadFromBuffer(    uintptr_t &buffer ) = 0; // returns true if parsing was OK
+  virtual bool WriteToBuffer(    uintptr_t &buffer ) = 0; // returns true if writing was OK
     
-  virtual bool IsReliable(
-    void ) const = 0; // true, if message needs reliable handling
+  virtual bool IsReliable(    void ) const = 0; // true, if message needs reliable handling
     
-  virtual int GetType(
-    void ) const = 0; // returns module specific header tag eg svc_serverinfo
-  virtual int GetGroup(
-    void ) const = 0; // returns net message group of this message
-  virtual const char *GetName(
-    void ) const = 0; // returns network message name, eg "svc_serverinfo"
+  virtual int GetType(    void ) const = 0; // returns module specific header tag eg svc_serverinfo
+  virtual int GetGroup(    void ) const = 0; // returns net message group of this message
+  virtual const char *GetName(    void ) const = 0; // returns network message name, eg "svc_serverinfo"
   virtual INetChannel *GetNetChannel( void ) const = 0;
-  virtual const char *ToString(
-    void ) const = 0; // returns a human readable string about message content
+  virtual const char *ToString(    void ) const = 0; // returns a human readable string about message content
 };
 
 class INetChannelHandler {
@@ -1673,36 +1629,23 @@ class INetChannelHandler {
   virtual ~INetChannelHandler( void ) {
   };
   
-  virtual void ConnectionStart(
-    INetChannel
-    * chan ) = 0; // called first time network channel is established
+  virtual void ConnectionStart(    INetChannel    * chan ) = 0; // called first time network channel is established
     
-  virtual void ConnectionClosing(
-    const char
-    * reason ) = 0; // network channel is being closed by remote site
+  virtual void ConnectionClosing(    const char    * reason ) = 0; // network channel is being closed by remote site
     
-  virtual void ConnectionCrashed(
-    const char *reason ) = 0; // network error occured
+  virtual void ConnectionCrashed(    const char *reason ) = 0; // network error occured
     
-  virtual void PacketStart(
-    int incoming_sequence,
-    int outgoing_acknowledged ) = 0; // called each time a new packet arrived
+  virtual void PacketStart(    int incoming_sequence, int outgoing_acknowledged ) = 0; // called each time a new packet arrived
     
   virtual void PacketEnd( void ) = 0; // all messages has been parsed
   
-  virtual void FileRequested(
-    const char *fileName,
-    unsigned int transferID ) = 0; // other side request a file for download
+  virtual void FileRequested(    const char *fileName, unsigned int transferID ) = 0; // other side request a file for download
     
-  virtual void FileReceived( const char *fileName,
-                             unsigned int transferID ) = 0; // we received a file
+  virtual void FileReceived( const char *fileName, unsigned int transferID ) = 0; // we received a file
                              
-  virtual void FileDenied(
-    const char *fileName,
-    unsigned int transferID ) = 0; // a file request was denied by other side
+  virtual void FileDenied(    const char *fileName, unsigned int transferID ) = 0; // a file request was denied by other side
     
-  virtual void FileSent( const char *fileName,
-                         unsigned int transferID ) = 0; // we sent a file
+  virtual void FileSent( const char *fileName, unsigned int transferID ) = 0; // we sent a file
 };
 
 class CNetChan : public INetChannel {
@@ -1945,13 +1888,7 @@ class EngineClient {
     typedef bool( __thiscall * OriginalFn )( PVOID );
     return getvfunc<OriginalFn>( this, 85 )( this );
   }
-  
-  /*
-  DWORD *GetNetChannelInfo( void ) {
-    typedef DWORD* ( __thiscall * OriginalFn )( PVOID );
-    return getvfunc<OriginalFn>( this, 72 )( this );
-  }
-  */
+ 
   void ClientCmd( const char *szCommandString ) {
     typedef void( __thiscall * ClientCmdFn )( void *, const char * );
     return getvfunc<ClientCmdFn>( this, 7 )( this, szCommandString );
@@ -1981,12 +1918,12 @@ class IPanel {
   }
   
   void SetMouseInputEnabled( unsigned int panel, bool state ) {
-    getvfunc<void( __thiscall * )( void *, int, bool )>( this, 32 )( this, panel,
+    getvfunc<void( __thiscall * )( void *, int, bool )>( this, 32 )( this, panel, 
         state );
   }
   
   void SetTopmostPopup( unsigned int panel, bool state ) {
-    getvfunc<void( __thiscall * )( void *, int, bool )>( this, 59 )( this, panel,
+    getvfunc<void( __thiscall * )( void *, int, bool )>( this, 59 )( this, panel, 
         state );
   }
 };
@@ -2013,12 +1950,9 @@ class ISurface {
     return getvfunc<OriginalFn>( this, 37 )( this, procedural );
   }
   
-  void DrawSetTextureRGBA( int id, unsigned char const *rgba, int wide, int tall,
-                           int hardwareFilter = 0, bool forceReload = false ) {
-    typedef void( __thiscall * OriginalFn )( void *, int, unsigned char const *,
-        int, int, int, bool );
-    return getvfunc<OriginalFn>( this, 31 )( this, id, rgba, wide, tall,
-           hardwareFilter, forceReload );
+  void DrawSetTextureRGBA( int id, unsigned char const *rgba, int wide, int tall, int hardwareFilter = 0, bool forceReload = false ) {
+    typedef void( __thiscall * OriginalFn )( void *, int, unsigned char const *, int, int, int, bool );
+    return getvfunc<OriginalFn>( this, 31 )( this, id, rgba, wide, tall, hardwareFilter, forceReload );
   }
   
   void DrawSetTexture( int id ) {
@@ -2037,8 +1971,7 @@ class ISurface {
   }
   
   void GetCursorPosition( int &x, int &y ) {
-    return getvfunc<void( __thiscall * )( void *, int &, int & )>( this, 96 )( this, x,
-           y );
+    return getvfunc<void( __thiscall * )( void *, int &, int & )>( this, 96 )( this, x, y );
   }
   
   void DrawLine( int x0, int y0, int x1, int y1 ) {
@@ -2071,19 +2004,13 @@ class ISurface {
     return getvfunc<OriginalFn>( this, 66 )( this );
   }
   
-  void SetFontGlyphSet( unsigned long &font, const char *windowsFontName,
-                        int tall, int weight, int blur, int scanlines,
-                        int flags ) {
-    typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const char *,
-        int, int, int, int, int, int, int );
-    getvfunc<OriginalFn>( this, 67 )( this, font, windowsFontName, tall, weight,
-                                      blur, scanlines, flags, 0, 0 );
+  void SetFontGlyphSet( unsigned long &font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags ) {
+    typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const char *, int, int, int, int, int, int, int );
+    getvfunc<OriginalFn>( this, 67 )( this, font, windowsFontName, tall, weight, blur, scanlines, flags, 0, 0 );
   }
   
-  void GetTextSize( unsigned long font, const wchar_t *text, int &wide,
-                    int &tall ) {
-    typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const wchar_t *,
-        int &, int & );
+  void GetTextSize( unsigned long font, const wchar_t *text, int &wide, int &tall ) {
+    typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const wchar_t *, int &, int & );
     getvfunc<OriginalFn>( this, 75 )( this, font, text, wide, tall );
   }
 };
@@ -2173,22 +2100,22 @@ struct csurface_t {
 };
 
 enum SurfaceFlags_t {
-  DISPSURF_FLAG_SURFACE = ( 1 << 0 ),
-  DISPSURF_FLAG_WALKABLE = ( 1 << 1 ),
-  DISPSURF_FLAG_BUILDABLE = ( 1 << 2 ),
-  DISPSURF_FLAG_SURFPROP1 = ( 1 << 3 ),
-  DISPSURF_FLAG_SURFPROP2 = ( 1 << 4 ),
+  DISPSURF_FLAG_SURFACE = ( 1 << 0 ), 
+  DISPSURF_FLAG_WALKABLE = ( 1 << 1 ), 
+  DISPSURF_FLAG_BUILDABLE = ( 1 << 2 ), 
+  DISPSURF_FLAG_SURFPROP1 = ( 1 << 3 ), 
+  DISPSURF_FLAG_SURFPROP2 = ( 1 << 4 ), 
 };
 
 enum TraceType_t {
-  TRACE_EVERYTHING = 0,
-  TRACE_WORLD_ONLY,
+  TRACE_EVERYTHING = 0, 
+  TRACE_WORLD_ONLY, 
   // NOTE: This does *not* test static props!!!
-  TRACE_ENTITIES_ONLY,
+  TRACE_ENTITIES_ONLY, 
   // NOTE: This version will *not* test static props
-  TRACE_EVERYTHING_FILTER_PROPS,
+  TRACE_EVERYTHING_FILTER_PROPS, 
   // NOTE: This version will pass the
-  // IHandleEntity for props through the filter,
+  // IHandleEntity for props through the filter, 
   // unlike all other filters
 };
 
@@ -2295,13 +2222,10 @@ class CGameTrace : public CBaseTrace {
 
 class IEngineTrace {
  public: // We really only need this I guess...
-  void TraceRay( const Ray_t &ray, unsigned int fMask,
-                 ITraceFilter *pTraceFilter, trace_t *pTrace ) {
+  void TraceRay( const Ray_t &ray, unsigned int fMask, ITraceFilter *pTraceFilter, trace_t *pTrace ) {
     // 5
-    typedef void( __thiscall * TraceRayFn )( void *, const Ray_t &, unsigned int,
-        ITraceFilter *, trace_t * );
-    return getvfunc<TraceRayFn>( this, 4 )( this, ray, fMask, pTraceFilter,
-                                            pTrace );
+    typedef void( __thiscall * TraceRayFn )( void *, const Ray_t &, unsigned int, ITraceFilter *, trace_t * );
+    return getvfunc<TraceRayFn>( this, 4 )( this, ray, fMask, pTraceFilter, pTrace );
   }
 };
 
@@ -2329,232 +2253,232 @@ class IVModelInfo {
 };
 
 enum playercontrols {
-  IN_ATTACK = ( 1 << 0 ),
-  IN_JUMP = ( 1 << 1 ),
-  IN_DUCK = ( 1 << 2 ),
-  IN_FORWARD = ( 1 << 3 ),
-  IN_BACK = ( 1 << 4 ),
-  IN_USE = ( 1 << 5 ),
-  IN_CANCEL = ( 1 << 6 ),
-  IN_LEFT = ( 1 << 7 ),
-  IN_RIGHT = ( 1 << 8 ),
-  IN_MOVELEFT = ( 1 << 9 ),
-  IN_MOVERIGHT = ( 1 << 10 ),
-  IN_ATTACK2 = ( 1 << 11 ),
-  IN_RUN = ( 1 << 12 ),
-  IN_RELOAD = ( 1 << 13 ),
-  IN_ALT1 = ( 1 << 14 ),
-  IN_ALT2 = ( 1 << 15 ),
-  IN_SCORE = ( 1 << 16 ),
+  IN_ATTACK = ( 1 << 0 ), 
+  IN_JUMP = ( 1 << 1 ), 
+  IN_DUCK = ( 1 << 2 ), 
+  IN_FORWARD = ( 1 << 3 ), 
+  IN_BACK = ( 1 << 4 ), 
+  IN_USE = ( 1 << 5 ), 
+  IN_CANCEL = ( 1 << 6 ), 
+  IN_LEFT = ( 1 << 7 ), 
+  IN_RIGHT = ( 1 << 8 ), 
+  IN_MOVELEFT = ( 1 << 9 ), 
+  IN_MOVERIGHT = ( 1 << 10 ), 
+  IN_ATTACK2 = ( 1 << 11 ), 
+  IN_RUN = ( 1 << 12 ), 
+  IN_RELOAD = ( 1 << 13 ), 
+  IN_ALT1 = ( 1 << 14 ), 
+  IN_ALT2 = ( 1 << 15 ), 
+  IN_SCORE = ( 1 << 16 ), 
   // Used by client.dll for when scoreboard is held down
-  IN_SPEED = ( 1 << 17 ),
+  IN_SPEED = ( 1 << 17 ), 
   // Player is holding the speed key
-  IN_WALK = ( 1 << 18 ),
+  IN_WALK = ( 1 << 18 ), 
   // Player holding walk key
-  IN_ZOOM = ( 1 << 19 ),
+  IN_ZOOM = ( 1 << 19 ), 
   // Zoom key for HUD zoom
-  IN_WEAPON1 = ( 1 << 20 ),
+  IN_WEAPON1 = ( 1 << 20 ), 
   // weapon defines these bits
-  IN_WEAPON2 = ( 1 << 21 ),
+  IN_WEAPON2 = ( 1 << 21 ), 
   // weapon defines these bits
-  IN_BULLRUSH = ( 1 << 22 ),
+  IN_BULLRUSH = ( 1 << 22 ), 
 };
 
 enum tf_cond {
-  TFCond_Slowed = ( 1 << 0 ),
+  TFCond_Slowed = ( 1 << 0 ), 
   // Toggled when a player is slowed down.
-  TFCond_Zoomed = ( 1 << 1 ),
+  TFCond_Zoomed = ( 1 << 1 ), 
   // Toggled when a player is zoomed.
-  TFCond_Disguising = ( 1 << 2 ),
+  TFCond_Disguising = ( 1 << 2 ), 
   // Toggled when a Spy is disguising.
-  TFCond_Disguised = ( 1 << 3 ),
+  TFCond_Disguised = ( 1 << 3 ), 
   // Toggled when a Spy is disguised.
-  TFCond_Cloaked = ( 1 << 4 ),
+  TFCond_Cloaked = ( 1 << 4 ), 
   // Toggled when a Spy is invisible.
-  TFCond_Ubercharged = ( 1 << 5 ),
+  TFCond_Ubercharged = ( 1 << 5 ), 
   // Toggled when a player is ÜberCharged.
-  TFCond_TeleportedGlow = ( 1 << 6 ),
+  TFCond_TeleportedGlow = ( 1 << 6 ), 
   // Toggled when someone leaves a teleporter
   // and has glow beneath their feet.
-  TFCond_Taunting = ( 1 << 7 ),
+  TFCond_Taunting = ( 1 << 7 ), 
   // Toggled when a player is taunting.
-  TFCond_UberchargeFading = ( 1 << 8 ),
+  TFCond_UberchargeFading = ( 1 << 8 ), 
   // Toggled when the ÜberCharge is fading.
   TFCond_CloakFlicker =
-    ( 1 << 9 ),
+    ( 1 << 9 ), 
   // Toggled when a Spy is visible during cloak.
   TFCond_Teleporting =
-    ( 1 << 10 ),
+    ( 1 << 10 ), 
   // Only activates for a brief second when the player is being
   // teleported; not very useful.
   TFCond_Kritzkrieged =
     ( 1
-      << 11 ),
+      << 11 ), 
   // Toggled when a player is being crit buffed by the KritzKrieg.
-  TFCond_TmpDamageBonus = ( 1 << 12 ),
+  TFCond_TmpDamageBonus = ( 1 << 12 ), 
   // Unknown what this is for. Name taken
   // from the AlliedModders SDK.
-  TFCond_DeadRingered = ( 1 << 13 ),
+  TFCond_DeadRingered = ( 1 << 13 ), 
   // Toggled when a player is taking reduced
   // damage from the Deadringer.
-  TFCond_Bonked = ( 1 << 14 ),
+  TFCond_Bonked = ( 1 << 14 ), 
   // Toggled when a player is under the effects of
   // The Bonk! Atomic Punch.
-  TFCond_Stunned = ( 1 << 15 ),
+  TFCond_Stunned = ( 1 << 15 ), 
   // Toggled when a player's speed is reduced from
   // airblast or a Sandman ball.
-  TFCond_Buffed = ( 1 << 16 ),
+  TFCond_Buffed = ( 1 << 16 ), 
   // Toggled when a player is within range of an
   // activated Buff Banner.
   TFCond_Charging =
-    ( 1 << 17 ),
+    ( 1 << 17 ), 
   // Toggled when a Demoman charges with the shield.
   TFCond_DemoBuff =
-    ( 1 << 18 ),
+    ( 1 << 18 ), 
   // Toggled when a Demoman has heads from the Eyelander.
-  TFCond_CritCola = ( 1 << 19 ),
+  TFCond_CritCola = ( 1 << 19 ), 
   // Toggled when the player is under the effect
   // of The Crit-a-Cola.
   TFCond_InHealRadius =
-    ( 1 << 20 ),
+    ( 1 << 20 ), 
   // Unused condition, name taken from AlliedModders SDK.
-  TFCond_Healing = ( 1 << 21 ),
+  TFCond_Healing = ( 1 << 21 ), 
   // Toggled when someone is being healed by a
   // medic or a dispenser.
-  TFCond_OnFire = ( 1 << 22 ),
+  TFCond_OnFire = ( 1 << 22 ), 
   // Toggled when a player is on fire.
-  TFCond_Overhealed = ( 1 << 23 ),
+  TFCond_Overhealed = ( 1 << 23 ), 
   // Toggled when a player has >100% health.
   TFCond_Jarated =
-    ( 1 << 24 ),
+    ( 1 << 24 ), 
   // Toggled when a player is hit with a Sniper's Jarate.
   TFCond_Bleeding =
-    ( 1 << 25 ),
+    ( 1 << 25 ), 
   // Toggled when a player is taking bleeding damage.
-  TFCond_DefenseBuffed = ( 1 << 26 ),
+  TFCond_DefenseBuffed = ( 1 << 26 ), 
   // Toggled when a player is within range of
   // an activated Battalion's Backup.
-  TFCond_Milked = ( 1 << 27 ),
+  TFCond_Milked = ( 1 << 27 ), 
   // Player was hit with a jar of Mad Milk.
   TFCond_MegaHeal =
-    ( 1 << 28 ),
+    ( 1 << 28 ), 
   // Player is under the effect of Quick-Fix charge.
   TFCond_RegenBuffed =
-    ( 1 << 29 ),
+    ( 1 << 29 ), 
   // Toggled when a player is within a Concheror's range.
   TFCond_MarkedForDeath =
-    ( 1 << 30 ),
+    ( 1 << 30 ), 
   // Player is marked for death by a Fan O'War hit. Effects are
   // similar to TFCond_Jarated.
-  TFCond_NoHealingDamageBuff = ( 1 << 31 ),
+  TFCond_NoHealingDamageBuff = ( 1 << 31 ), 
   // Unknown what this is used for.
   
   TFCondEx_SpeedBuffAlly =
-    ( 1 << 0 ),
+    ( 1 << 0 ), 
   // Toggled when a player gets hit with the disciplinary action.
   TFCondEx_HalloweenCritCandy =
-    ( 1 << 1 ),
+    ( 1 << 1 ), 
   // Only for Scream Fortress event maps that drop crit candy.
   TFCondEx_CritCanteen =
-    ( 1 << 2 ),
+    ( 1 << 2 ), 
   // Player is getting a crit boost from a MVM canteen.
-  TFCondEx_CritDemoCharge = ( 1 << 3 ),
+  TFCondEx_CritDemoCharge = ( 1 << 3 ), 
   // From demo's shield
-  TFCondEx_CritHype = ( 1 << 4 ),
+  TFCondEx_CritHype = ( 1 << 4 ), 
   // Soda Popper crits.
-  TFCondEx_CritOnFirstBlood = ( 1 << 5 ),
+  TFCondEx_CritOnFirstBlood = ( 1 << 5 ), 
   // Arena first blood crit buff.
-  TFCondEx_CritOnWin = ( 1 << 6 ),
+  TFCondEx_CritOnWin = ( 1 << 6 ), 
   // End of round crits.
-  TFCondEx_CritOnFlagCapture = ( 1 << 7 ),
+  TFCondEx_CritOnFlagCapture = ( 1 << 7 ), 
   // CTF intelligence capture crits.
-  TFCondEx_CritOnKill = ( 1 << 8 ),
+  TFCondEx_CritOnKill = ( 1 << 8 ), 
   // Unknown what this is for.
-  TFCondEx_RestrictToMelee = ( 1 << 9 ),
+  TFCondEx_RestrictToMelee = ( 1 << 9 ), 
   // Unknown what this is for.
-  TFCondEx_DefenseBuffNoCritBlock = ( 1 << 10 ),
+  TFCondEx_DefenseBuffNoCritBlock = ( 1 << 10 ), 
   // MvM Buff.
-  TFCondEx_Reprogrammed = ( 1 << 11 ),
+  TFCondEx_Reprogrammed = ( 1 << 11 ), 
   // MvM Bot has been reprogrammed.
   TFCondEx_PyroCrits =
-    ( 1 << 12 ),
+    ( 1 << 12 ), 
   // Player is getting crits from the Mmmph charge.
   TFCondEx_PyroHeal =
-    ( 1 << 13 ),
+    ( 1 << 13 ), 
   // Player is being healed from the Mmmph charge.
-  TFCondEx_FocusBuff = ( 1 << 14 ),
+  TFCondEx_FocusBuff = ( 1 << 14 ), 
   // Player is getting a focus buff.
-  TFCondEx_DisguisedRemoved = ( 1 << 15 ),
+  TFCondEx_DisguisedRemoved = ( 1 << 15 ), 
   // Disguised remove from a bot.
   TFCondEx_MarkedForDeathSilent =
-    ( 1 << 16 ),
+    ( 1 << 16 ), 
   // Player is under the effects of the Escape Plan/Equalizer or
   // GRU.
-  TFCondEx_DisguisedAsDispenser = ( 1 << 17 ),
+  TFCondEx_DisguisedAsDispenser = ( 1 << 17 ), 
   // Bot is disguised as dispenser.
-  TFCondEx_Sapped = ( 1 << 18 ),
+  TFCondEx_Sapped = ( 1 << 18 ), 
   // MvM bot is being sapped.
-  TFCondEx_UberchargedHidden = ( 1 << 19 ),
+  TFCondEx_UberchargedHidden = ( 1 << 19 ), 
   // MvM Related
   TFCondEx_UberchargedCanteen =
-    ( 1 << 20 ),
+    ( 1 << 20 ), 
   // Player is receiving ÜberCharge from a canteen.
   TFCondEx_HalloweenBombHead =
-    ( 1 << 21 ),
+    ( 1 << 21 ), 
   // Player has a bomb on their head from Merasmus.
   TFCondEx_HalloweenThriller =
-    ( 1 << 22 ),
+    ( 1 << 22 ), 
   // Players are forced to dance from Merasmus.
   TFCondEx_BulletCharge =
-    ( 1 << 26 ),
+    ( 1 << 26 ), 
   // Player is receiving 75% reduced damage from bullets.
   TFCondEx_ExplosiveCharge =
-    ( 1 << 27 ),
+    ( 1 << 27 ), 
   // Player is receiving 75% reduced damage from explosives.
   TFCondEx_FireCharge =
-    ( 1 << 28 ),
+    ( 1 << 28 ), 
   // Player is receiving 75% reduced damage from fire.
   TFCondEx_BulletResistance =
-    ( 1 << 29 ),
+    ( 1 << 29 ), 
   // Player is receiving 10% reduced damage from bullets.
   TFCondEx_ExplosiveResistance =
-    ( 1 << 30 ),
+    ( 1 << 30 ), 
   // Player is receiving 10% reduced damage from explosives.
   TFCondEx_FireResistance =
-    ( 1 << 31 ),
+    ( 1 << 31 ), 
   // Player is receiving 10% reduced damage from fire.
   
-  TFCondEx2_Stealthed = ( 1 << 0 ),
-  TFCondEx2_MedigunDebuff = ( 1 << 1 ),
-  TFCondEx2_StealthedUserBuffFade = ( 1 << 2 ),
-  TFCondEx2_BulletImmune = ( 1 << 3 ),
-  TFCondEx2_BlastImmune = ( 1 << 4 ),
-  TFCondEx2_FireImmune = ( 1 << 5 ),
-  TFCondEx2_PreventDeath = ( 1 << 6 ),
-  TFCondEx2_MVMBotRadiowave = ( 1 << 7 ),
+  TFCondEx2_Stealthed = ( 1 << 0 ), 
+  TFCondEx2_MedigunDebuff = ( 1 << 1 ), 
+  TFCondEx2_StealthedUserBuffFade = ( 1 << 2 ), 
+  TFCondEx2_BulletImmune = ( 1 << 3 ), 
+  TFCondEx2_BlastImmune = ( 1 << 4 ), 
+  TFCondEx2_FireImmune = ( 1 << 5 ), 
+  TFCondEx2_PreventDeath = ( 1 << 6 ), 
+  TFCondEx2_MVMBotRadiowave = ( 1 << 7 ), 
   TFCondEx2_HalloweenSpeedBoost =
-    ( 1 << 8 ),
+    ( 1 << 8 ), 
   // Wheel has granted player speed boost.
   TFCondEx2_HalloweenQuickHeal =
-    ( 1 << 9 ),
+    ( 1 << 9 ), 
   // Wheel has granted player quick heal.
-  TFCondEx2_HalloweenGiant = ( 1 << 10 ),
+  TFCondEx2_HalloweenGiant = ( 1 << 10 ), 
   // Wheel has granted player giant mode.
-  TFCondEx2_HalloweenTiny = ( 1 << 11 ),
+  TFCondEx2_HalloweenTiny = ( 1 << 11 ), 
   // Wheel has granted player tiny mode.
   TFCondEx2_HalloweenInHell =
-    ( 1 << 12 ),
+    ( 1 << 12 ), 
   // Wheel has granted player in hell mode.
   TFCondEx2_HalloweenGhostMode =
-    ( 1 << 13 ),
+    ( 1 << 13 ), 
   // Wheel has granted player ghost mode.
-  TFCondEx2_Parachute = ( 1 << 16 ),
+  TFCondEx2_Parachute = ( 1 << 16 ), 
   // Player has deployed the BASE Jumper.
-  TFCondEx2_BlastJumping = ( 1 << 17 ),
+  TFCondEx2_BlastJumping = ( 1 << 17 ), 
   // Player has sticky or rocket jumped.
   
-  TFCond_MiniCrits = ( TFCond_Buffed | TFCond_CritCola ),
-  TFCond_IgnoreStates = ( TFCond_Ubercharged | TFCond_Bonked ),
+  TFCond_MiniCrits = ( TFCond_Buffed | TFCond_CritCola ), 
+  TFCond_IgnoreStates = ( TFCond_Ubercharged | TFCond_Bonked ), 
   TFCondEx_IgnoreStates = ( TFCondEx_PyroHeal )
 };
 
@@ -2570,10 +2494,8 @@ class IGameEventListener2 {
 
 class IGameEventManager2 {
  public:
-  bool AddListener( IGameEventListener2 *listener, const char *name,
-                    bool bServerSide ) {
-    typedef bool( __thiscall * OriginalFn )( PVOID, IGameEventListener2 *,
-        const char *, bool );
+  bool AddListener( IGameEventListener2 *listener, const char *name, bool bServerSide ) {
+    typedef bool( __thiscall * OriginalFn )( PVOID, IGameEventListener2 *, const char *, bool );
     return getvfunc<OriginalFn>( this, 3 )( this, listener, name, bServerSide );
   }
 };
@@ -2581,11 +2503,11 @@ class IGameEventManager2 {
 
 
 enum source_lifestates {
-  LIFE_ALIVE,
-  LIFE_DYING,
-  LIFE_DEAD,
-  LIFE_RESPAWNABLE,
-  LIFE_DISCARDBODY,
+  LIFE_ALIVE, 
+  LIFE_DYING, 
+  LIFE_DEAD, 
+  LIFE_RESPAWNABLE, 
+  LIFE_DISCARDBODY, 
 };
 
 class ClientModeShared {
@@ -2603,57 +2525,57 @@ class ClientModeShared {
 };
 
 enum MaterialVarFlags_t {
-  MATERIAL_VAR_DEBUG = ( 1 << 0 ),
-  MATERIAL_VAR_NO_DEBUG_OVERRIDE = ( 1 << 1 ),
-  MATERIAL_VAR_NO_DRAW = ( 1 << 2 ),
-  MATERIAL_VAR_USE_IN_FILLRATE_MODE = ( 1 << 3 ),
-  MATERIAL_VAR_VERTEXCOLOR = ( 1 << 4 ),
-  MATERIAL_VAR_VERTEXALPHA = ( 1 << 5 ),
-  MATERIAL_VAR_SELFILLUM = ( 1 << 6 ),
-  MATERIAL_VAR_ADDITIVE = ( 1 << 7 ),
-  MATERIAL_VAR_ALPHATEST = ( 1 << 8 ),
-  MATERIAL_VAR_ZNEARER = ( 1 << 10 ),
-  MATERIAL_VAR_MODEL = ( 1 << 11 ),
-  MATERIAL_VAR_FLAT = ( 1 << 12 ),
-  MATERIAL_VAR_NOCULL = ( 1 << 13 ),
-  MATERIAL_VAR_NOFOG = ( 1 << 14 ),
-  MATERIAL_VAR_IGNOREZ = ( 1 << 15 ),
-  MATERIAL_VAR_DECAL = ( 1 << 16 ),
-  MATERIAL_VAR_ENVMAPSPHERE = ( 1 << 17 ),
+  MATERIAL_VAR_DEBUG = ( 1 << 0 ), 
+  MATERIAL_VAR_NO_DEBUG_OVERRIDE = ( 1 << 1 ), 
+  MATERIAL_VAR_NO_DRAW = ( 1 << 2 ), 
+  MATERIAL_VAR_USE_IN_FILLRATE_MODE = ( 1 << 3 ), 
+  MATERIAL_VAR_VERTEXCOLOR = ( 1 << 4 ), 
+  MATERIAL_VAR_VERTEXALPHA = ( 1 << 5 ), 
+  MATERIAL_VAR_SELFILLUM = ( 1 << 6 ), 
+  MATERIAL_VAR_ADDITIVE = ( 1 << 7 ), 
+  MATERIAL_VAR_ALPHATEST = ( 1 << 8 ), 
+  MATERIAL_VAR_ZNEARER = ( 1 << 10 ), 
+  MATERIAL_VAR_MODEL = ( 1 << 11 ), 
+  MATERIAL_VAR_FLAT = ( 1 << 12 ), 
+  MATERIAL_VAR_NOCULL = ( 1 << 13 ), 
+  MATERIAL_VAR_NOFOG = ( 1 << 14 ), 
+  MATERIAL_VAR_IGNOREZ = ( 1 << 15 ), 
+  MATERIAL_VAR_DECAL = ( 1 << 16 ), 
+  MATERIAL_VAR_ENVMAPSPHERE = ( 1 << 17 ), 
   // OBSOLETE
-  MATERIAL_VAR_ENVMAPCAMERASPACE = ( 1 << 19 ),
+  MATERIAL_VAR_ENVMAPCAMERASPACE = ( 1 << 19 ), 
   // OBSOLETE
-  MATERIAL_VAR_BASEALPHAENVMAPMASK = ( 1 << 20 ),
-  MATERIAL_VAR_TRANSLUCENT = ( 1 << 21 ),
-  MATERIAL_VAR_NORMALMAPALPHAENVMAPMASK = ( 1 << 22 ),
-  MATERIAL_VAR_NEEDS_SOFTWARE_SKINNING = ( 1 << 23 ),
+  MATERIAL_VAR_BASEALPHAENVMAPMASK = ( 1 << 20 ), 
+  MATERIAL_VAR_TRANSLUCENT = ( 1 << 21 ), 
+  MATERIAL_VAR_NORMALMAPALPHAENVMAPMASK = ( 1 << 22 ), 
+  MATERIAL_VAR_NEEDS_SOFTWARE_SKINNING = ( 1 << 23 ), 
   // OBSOLETE
-  MATERIAL_VAR_OPAQUETEXTURE = ( 1 << 24 ),
-  MATERIAL_VAR_ENVMAPMODE = ( 1 << 25 ),
+  MATERIAL_VAR_OPAQUETEXTURE = ( 1 << 24 ), 
+  MATERIAL_VAR_ENVMAPMODE = ( 1 << 25 ), 
   // OBSOLETE
-  MATERIAL_VAR_SUPPRESS_DECALS = ( 1 << 26 ),
-  MATERIAL_VAR_HALFLAMBERT = ( 1 << 27 ),
-  MATERIAL_VAR_WIREFRAME = ( 1 << 28 ),
-  MATERIAL_VAR_ALLOWALPHATOCOVERAGE = ( 1 << 29 ),
-  MATERIAL_VAR_ALPHA_MODIFIED_BY_PROXY = ( 1 << 30 ),
-  MATERIAL_VAR_VERTEXFOG = ( 1 << 31 ),
+  MATERIAL_VAR_SUPPRESS_DECALS = ( 1 << 26 ), 
+  MATERIAL_VAR_HALFLAMBERT = ( 1 << 27 ), 
+  MATERIAL_VAR_WIREFRAME = ( 1 << 28 ), 
+  MATERIAL_VAR_ALLOWALPHATOCOVERAGE = ( 1 << 29 ), 
+  MATERIAL_VAR_ALPHA_MODIFIED_BY_PROXY = ( 1 << 30 ), 
+  MATERIAL_VAR_VERTEXFOG = ( 1 << 31 ), 
 };
 
 enum MaterialPropertyTypes_t {
-  MATERIAL_PROPERTY_NEEDS_LIGHTMAP = 0,
+  MATERIAL_PROPERTY_NEEDS_LIGHTMAP = 0, 
   // bool
-  MATERIAL_PROPERTY_OPACITY,
+  MATERIAL_PROPERTY_OPACITY, 
   // int (enum MaterialPropertyOpacityTypes_t)
-  MATERIAL_PROPERTY_REFLECTIVITY,
+  MATERIAL_PROPERTY_REFLECTIVITY, 
   // vec3_t
   MATERIAL_PROPERTY_NEEDS_BUMPED_LIGHTMAPS // bool
 };
 
 enum OverrideType_t {
-  OVERRIDE_NORMAL = 0,
-  OVERRIDE_BUILD_SHADOWS,
-  OVERRIDE_DEPTH_WRITE,
-  OVERRIDE_SSAO_DEPTH_WRITE,
+  OVERRIDE_NORMAL = 0, 
+  OVERRIDE_BUILD_SHADOWS, 
+  OVERRIDE_DEPTH_WRITE, 
+  OVERRIDE_SSAO_DEPTH_WRITE, 
 };
 
 struct ModelRenderInfo_t {
@@ -2690,22 +2612,19 @@ class IMaterial {
   // This is the sort of image that you would use for a thumbnail view
   // of a material, or in WorldCraft until it uses materials to render.
   // separate this for the tools maybe
-  virtual DWORD GetPreviewImageProperties( int *width, int *height,
-      DWORD *imageFormat,
-      bool *isTranslucent ) const = 0;
+  virtual DWORD GetPreviewImageProperties( int *width, int *height, DWORD *imageFormat, bool *isTranslucent ) const = 0;
       
   // Get a preview image at the specified width/height and bitDepth.
   // Will do resampling if necessary.(not yet!!! :) )
   // Will do color format conversion. (works now.)
-  virtual DWORD GetPreviewImage( unsigned char *data, int width, int height,
-                                 DWORD imageFormat ) const = 0;
+  virtual DWORD GetPreviewImage( unsigned char *data, int width, int height, DWORD imageFormat ) const = 0;
   //
   virtual int GetMappingWidth() = 0;
   virtual int GetMappingHeight() = 0;
   
   virtual int GetNumAnimationFrames() = 0;
   
-  // For material subrects (material pages).  Offset(u,v) and scale(u,v) are
+  // For material subrects (material pages).  Offset(u, v) and scale(u, v) are
   // normalized to texture.
   virtual bool InMaterialPage( void ) = 0;
   virtual void GetMaterialOffset( float *pOffset ) = 0;
@@ -2716,8 +2635,7 @@ class IMaterial {
   // This is how game code affects how a material is rendered.
   // The game code must know about the params that are used by
   // the shader for the material that it is trying to affect.
-  virtual IMaterialVar *FindVar( const char *varName, bool *found,
-                                 bool complain = true ) = 0;
+  virtual IMaterialVar *FindVar( const char *varName, bool *found, bool complain = true ) = 0;
                                  
   // The user never allocates or deallocates materials.  Reference counting is
   // used instead.  Garbage collection is done upon a call to
@@ -2761,10 +2679,8 @@ class IMaterial {
   
   virtual bool NeedsTangentSpace( void ) = 0;
   
-  virtual bool NeedsPowerOfTwoFrameBufferTexture(
-    bool bCheckSpecificToThisFrame = true ) = 0;
-  virtual bool NeedsFullFrameBufferTexture(
-    bool bCheckSpecificToThisFrame = true ) = 0;
+  virtual bool NeedsPowerOfTwoFrameBufferTexture(    bool bCheckSpecificToThisFrame = true ) = 0;
+  virtual bool NeedsFullFrameBufferTexture(    bool bCheckSpecificToThisFrame = true ) = 0;
     
   // returns true if the shader doesn't do skinning itself and requires
   // the data that is sent to it to be preskinned.
@@ -2825,13 +2741,11 @@ class IMaterial {
   virtual void GetColorModulation( float *r, float *g, float *b ) = 0;
   
   // Is this translucent given a particular alpha modulation?
-  virtual bool IsTranslucentUnderModulation(
-    float fAlphaModulation = 1.0f ) const = 0;
+  virtual bool IsTranslucentUnderModulation(    float fAlphaModulation = 1.0f ) const = 0;
     
   // fast find that stores the index of the found var in the string table in
   // local cache
-  virtual IMaterialVar *FindVarFast( char const *pVarName,
-                                     unsigned int *pToken ) = 0;
+  virtual IMaterialVar *FindVarFast( char const *pVarName, unsigned int *pToken ) = 0;
                                      
   // Sets new VMT shader parameters for the material
   virtual void SetShaderAndParams( void *pKeyValues ) = 0;
@@ -2893,11 +2807,11 @@ class CModelRender {
     return getvfunc<OriginalFn>( this, 1 )( this, mat, type );
   }
   
-  void DrawModelExecute( void *state, ModelRenderInfo_t &pInfo,
+  void DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, 
                          matrix3x4 *pCustomBoneToWorld ) {
-    typedef void( __thiscall * OriginalFn )( PVOID, void *, ModelRenderInfo_t &,
+    typedef void( __thiscall * OriginalFn )( PVOID, void *, ModelRenderInfo_t &, 
         matrix3x4 * );
-    return getvfunc<OriginalFn>( this, 19 )( this, state, pInfo,
+    return getvfunc<OriginalFn>( this, 19 )( this, state, pInfo, 
            pCustomBoneToWorld );
   }
   
@@ -2912,17 +2826,14 @@ class CRenderView {
   // Draw normal brush model.
   // If pMaterialOverride is non-null, then all the faces of the bmodel will
   // set this material rather than their regular material.
-  virtual void DrawBrushModel( CBaseEntity *baseentity, model_t *model,
-                               const Vector &origin, const Vector &angles,
-                               bool sort ) = 0;
+  virtual void DrawBrushModel( CBaseEntity *baseentity, model_t *model, const Vector &origin, const Vector &angles, bool sort ) = 0;
                                
   // Draw brush model that has no origin/angles change ( uses identity transform
   // )
   // FIXME, Material proxy CBaseEntity *baseentity is unused right now, use
   // DrawBrushModel for brushes with
   //  proxies for now.
-  virtual void DrawIdentityBrushModel( IWorldRenderList *pList,
-                                       model_t *model ) = 0;
+  virtual void DrawIdentityBrushModel( IWorldRenderList *pList, model_t *model ) = 0;
                                        
   // Mark this dynamic light as having changed this frame ( so light maps
   // affected will be recomputed )
@@ -2942,8 +2853,7 @@ class CRenderView {
   virtual void SceneEnd( void ) = 0;
   
   // Gets the fog volume for a particular point
-  virtual void GetVisibleFogVolume( const Vector &eyePoint,
-                                    VisibleFogVolumeInfo_t *pInfo ) = 0;
+  virtual void GetVisibleFogVolume( const Vector &eyePoint, VisibleFogVolumeInfo_t *pInfo ) = 0;
                                     
   // Wraps world drawing
   // If iForceViewLeaf is not -1, then it uses the specified leaf as your
@@ -2953,15 +2863,9 @@ class CRenderView {
   // portal, so our view effectively originates under the water.
   virtual IWorldRenderList *CreateWorldList() = 0;
   
-  virtual void BuildWorldLists( IWorldRenderList *pList, WorldListInfo_t *pInfo,
-                                int iForceFViewLeaf,
-                                const VisOverrideData_t *pVisData = nullptr,
-                                bool bShadowDepth = false,
-                                float *pReflectionWaterHeight = nullptr ) = 0;
-  virtual void DrawWorldLists( IWorldRenderList *pList, unsigned long flags,
-                               float waterZAdjust ) = 0;
-  virtual int GetNumIndicesForWorldLists( IWorldRenderList *pList,
-                                          unsigned long nFlags ) = 0;
+  virtual void BuildWorldLists( IWorldRenderList *pList, WorldListInfo_t *pInfo, int iForceFViewLeaf, const VisOverrideData_t *pVisData = nullptr, bool bShadowDepth = false, float *pReflectionWaterHeight = nullptr ) = 0;
+  virtual void DrawWorldLists( IWorldRenderList *pList, unsigned long flags, float waterZAdjust ) = 0;
+  virtual int GetNumIndicesForWorldLists( IWorldRenderList *pList, unsigned long nFlags ) = 0;
                                           
   // Optimization for top view
   virtual void DrawTopView( bool enable ) = 0;
@@ -2973,16 +2877,14 @@ class CRenderView {
   virtual void DrawMaskEntities( void ) = 0;
   
   // Draw surfaces with alpha, don't call in shadow depth pass
-  virtual void DrawTranslucentSurfaces( IWorldRenderList *pList, int *pSortList,
-                                        int sortCount, unsigned long flags ) = 0;
+  virtual void DrawTranslucentSurfaces( IWorldRenderList *pList, int *pSortList, int sortCount, unsigned long flags ) = 0;
                                         
   // Draw Particles ( just draws the linefine for debugging map leaks )
   virtual void DrawLineFile( void ) = 0;
   // Draw lightmaps
   virtual void DrawLightmaps( IWorldRenderList *pList, int pageId ) = 0;
   // Wraps view render sequence, sets up a view
-  virtual void ViewSetupVis( bool novis, int numorigins,
-                             const Vector origin[] ) = 0;
+  virtual void ViewSetupVis( bool novis, int numorigins, const Vector origin[] ) = 0;
                              
   // Return true if any of these leaves are visible in the current PVS.
   virtual bool AreAnyLeavesVisible( int *leafList, int nLeaves ) = 0;
@@ -3013,16 +2915,11 @@ class CRenderView {
   virtual void DrawBrushModelShadow( IClientRenderable *pRenderable ) = 0;
   
   // Does the leaf contain translucent surfaces?
-  virtual bool LeafContainsTranslucentSurfaces( IWorldRenderList *pList,
-      int sortIndex,
-      unsigned long flags ) = 0;
+  virtual bool LeafContainsTranslucentSurfaces( IWorldRenderList *pList, int sortIndex, unsigned long flags ) = 0;
       
-  virtual bool DoesBoxIntersectWaterVolume( const Vector &mins,
-      const Vector &maxs,
-      int leafWaterDataID ) = 0;
+  virtual bool DoesBoxIntersectWaterVolume( const Vector &mins, const Vector &maxs, int leafWaterDataID ) = 0;
       
-  virtual void SetAreaState( unsigned char chAreaBits[69],
-                             unsigned char chAreaPortalBits[69] ) = 0;
+  virtual void SetAreaState( unsigned char chAreaBits[69], unsigned char chAreaPortalBits[69] ) = 0;
                              
   // See i
   virtual void VGui_Paint( int mode ) = 0;
@@ -3118,6 +3015,17 @@ class IPrediction {
   }
 };
 
+enum ObserverModes_t
+{
+  OBS_MODE_NONE = 0,		// not in spectator mode
+  OBS_MODE_DEATHCAM,		// special mode for death cam animation
+  OBS_MODE_FREEZECAM,		// zooms to a target, and freeze-frames on them
+  OBS_MODE_FIXED,			// view from a fixed camera position
+  OBS_MODE_FIRSTPERSON,	// follow a player in first person view
+  OBS_MODE_THIRDPERSON,	// follow a player in third person view
+  OBS_MODE_ROAMING,		// free roaming
+};
+
 struct CInterfaces {
   CEntList *EntList;
   EngineClient *Engine;
@@ -3155,11 +3063,11 @@ struct CHooks {
 };
 
 enum gOffsets {
-  DrawModelExecute = 19,
-  CreateMove = 21,
-  FrameStageNotifyThink = 35,
-  PaintTraverse = 41,
-  SendDatagram = 46,
+  DrawModelExecute = 19, 
+  CreateMove = 21, 
+  FrameStageNotifyThink = 35, 
+  PaintTraverse = 41, 
+  SendDatagram = 46, 
 };
 
 extern CInterfaces gInts;

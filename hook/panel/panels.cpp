@@ -4,7 +4,7 @@
 #include "../../menu/gui/menu.h"
 #include "../../sdk/cmat/cmat.h"
 #include "../../tools/signature/csignature.h"
-CScreenSize gScreenSize;
+CScreenSize gScreen;
 
 void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiPanel, bool forceRepaint, bool allowForce ) {
   try {
@@ -32,9 +32,9 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
       gInts.Panels->SetTopmostPopup( vguiPanel, true );
       //resolution change fix
       CScreenSize newSize;
-      gInts.Engine->GetScreenSize( newSize.iScreenWidth, newSize.iScreenHeight );
+      gInts.Engine->GetScreenSize( newSize.Width, newSize.Height );
       
-      if( newSize.iScreenWidth != gScreenSize.iScreenWidth || newSize.iScreenHeight != gScreenSize.iScreenHeight ) {
+      if( newSize.Width != gScreen.Width || newSize.Height != gScreen.Height ) {
         DrawManager::Reload();
       }
       

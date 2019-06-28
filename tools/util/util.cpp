@@ -3,15 +3,8 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 namespace Util {
-  float Distance( Vector vOrigin, Vector vLocalOrigin ) {
-    Vector Delta = vOrigin - vLocalOrigin;
-    float Dist = sqrt( Delta.Length() );
-    
-    if( Dist < 1.0f ) {
-      return 1.0f;
-    }
-    
-    return Dist;
+  float Distance( const Vector &vOrigin, const Vector &vLocalOrigin ) {
+      return fmax( 1.0f , sqrt( (vOrigin - vLocalOrigin).Length() ) );
   }
   
   void vector_transform( const Vector &vSome, const matrix3x4 &vMatrix, Vector &vOut ) {
@@ -27,26 +20,18 @@ namespace Util {
     vOut.z = vSome.Dot( zm ) + vMatrix[2][3];
   }
   
-  float VectorialDistanceToGround( Vector origin ) {
+  float DistanceToGround(CBaseEntity* ent){
+    return DistanceToGround(ent->GetVecOrigin(), ent->GetCollideableMins());
+  }
+
+  float DistanceToGround(Vector origin, Vector mins){
     trace_t ground_trace;
     Ray_t ray;
     Vector endpos = origin;
     endpos.z -= 8192;
-    ray.Init( origin, endpos );
-    gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, nullptr, &ground_trace );
-    return 8192.0f * ground_trace.fraction;
-  }
-  float DistanceToGround( CBaseEntity *ent ) {
-    if( ent->GetFlags() & FL_ONGROUND ) {
-      return 0;
-    }
-    
-    Vector origin = ent->GetVecOrigin();
-    float v1 = VectorialDistanceToGround( origin + Vector( 10.0f, 10.0f, 0.0f ) );
-    float v2 = VectorialDistanceToGround( origin + Vector( -10.0f, 10.0f, 0.0f ) );
-    float v3 = VectorialDistanceToGround( origin + Vector( 10.0f, -10.0f, 0.0f ) );
-    float v4 = VectorialDistanceToGround( origin + Vector( -10.0f, -10.0f, 0.0f ) );
-    return MIN( v1, MIN( v2, MIN( v3, v4 ) ) );
+    ray.Init(origin, endpos, mins, mins);
+    gInts.EngineTrace->TraceRay(ray, MASK_PLAYERSOLID, nullptr, &ground_trace);
+    return std::fabs(origin.z - ground_trace.endpos.z);
   }
   float DistanceToGround( Vector origin ) {
     trace_t ground_trace;
@@ -55,7 +40,7 @@ namespace Util {
     endpos.z -= 8192;
     ray.Init( origin, endpos );
     gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, nullptr, &ground_trace );
-    return 8192.0f * ground_trace.fraction;
+    return std::fabs(origin.z - ground_trace.endpos.z);
   }
   
   void FixMove( CUserCmd *pCmd, Vector m_vOldAngles, float m_fOldForward, float m_fOldSidemove ) {
@@ -128,13 +113,13 @@ namespace Util {
     
     return vAngle;
   }
-  float GetFOV( Vector viewAngle, const Vector &aimAngle ) {
+  float GetFOV( const Vector &viewAngle, const Vector &aimAngle ) {
     Vector ang, aim;
     AngleVectors( viewAngle, &aim );
     AngleVectors( aimAngle, &ang );
     return RAD2DEG( acos( aim.Dot( ang ) / aim.LengthSqr() ) );
   }
-  float GetClockwiseAngle( Vector viewAngle, const Vector &aimAngle ) {
+  float GetClockwiseAngle( const  Vector &viewAngle, const Vector &aimAngle ) {
     Vector ang, aim;
     AngleVectors( viewAngle, &aim );
     AngleVectors( aimAngle, &ang );
@@ -178,7 +163,7 @@ namespace Util {
   //from_angle = pCommand->viewangles
   //to_angle = enemy->GetEyeAngles()
   //wsc_spy_to_victim = enemy->GetWorldSpaceCenter() - local->GetWorldSpaceCenter()
-  bool canBackstab( Vector from_angle, Vector to_angle, Vector wsc_spy_to_victim ) {
+  bool canBackstab( const Vector &from_angle, const Vector &to_angle, Vector wsc_spy_to_victim ) {
     wsc_spy_to_victim.z = 0;
     wsc_spy_to_victim.NormalizeInPlace();
     Vector eye_spy;
@@ -690,8 +675,6 @@ namespace Util {
       bestpos.z += ( 400 * besttime * besttime * gravitymod );
     }
     
-    // S = at^2/2 ; t = sqrt(2S/a)*/
-    
     return bestpos;
   }
   Vector EnginePrediction( CBaseEntity *entity, float time ) {
@@ -760,11 +743,6 @@ namespace Util {
     Vector bestpos = origin;
     Vector current = origin;
     int maxsteps = 40;
-    bool onground = false;
-    
-    if( pEntity->GetCond() & FL_ONGROUND ) {
-      onground = true;
-    }
     
     float steplength = ( ( float )( 2 * range ) / ( float )maxsteps );
     
@@ -772,7 +750,7 @@ namespace Util {
       pEntity->SetVecOrigin( current );
       current = EnginePrediction( pEntity, steplength );
       
-      if( onground ) {
+      if(pEntity->GetFlags() & FL_ONGROUND) {
         float toground = DistanceToGround( current );
         current.z -= toground;
       }

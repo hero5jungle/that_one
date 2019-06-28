@@ -19,7 +19,7 @@ namespace DrawManager {
       return;
     }
     
-    gInts.Engine->GetScreenSize( gScreenSize.iScreenWidth, gScreenSize.iScreenHeight );
+    gInts.Engine->GetScreenSize( gScreen.Width, gScreen.Height );
     gFonts.Reload();
     gTex.Reload();
   }
@@ -80,8 +80,8 @@ namespace DrawManager {
     
     if( w > 0.001 ) { //If the object is within view.
       float fl1DBw = 1 / w; //Divide 1 by the angle.
-      vScreen.x = ( gScreenSize.iScreenWidth / 2 ) + ( 0.5 * ( ( worldToScreen[0][0] * vOrigin[0] + worldToScreen[0][1] * vOrigin[1] + worldToScreen[0][2] * vOrigin[2] + worldToScreen[0][3] ) * fl1DBw ) * gScreenSize.iScreenWidth + 0.5 ); //Get the X dimension and push it in to the Vector.
-      vScreen.y = ( gScreenSize.iScreenHeight / 2 ) - ( 0.5 * ( ( worldToScreen[1][0] * vOrigin[0] + worldToScreen[1][1] * vOrigin[1] + worldToScreen[1][2] * vOrigin[2] + worldToScreen[1][3] ) * fl1DBw ) * gScreenSize.iScreenHeight + 0.5 ); //Get the Y dimension and push it in to the Vector.
+      vScreen.x = ( gScreen.Width / 2 ) + ( 0.5 * ( ( worldToScreen[0][0] * vOrigin[0] + worldToScreen[0][1] * vOrigin[1] + worldToScreen[0][2] * vOrigin[2] + worldToScreen[0][3] ) * fl1DBw ) * gScreen.Width + 0.5 ); //Get the X dimension and push it in to the Vector.
+      vScreen.y = ( gScreen.Height / 2 ) - ( 0.5 * ( ( worldToScreen[1][0] * vOrigin[0] + worldToScreen[1][1] * vOrigin[1] + worldToScreen[1][2] * vOrigin[2] + worldToScreen[1][3] ) * fl1DBw ) * gScreen.Height + 0.5 ); //Get the Y dimension and push it in to the Vector.
       return true;
     }
     

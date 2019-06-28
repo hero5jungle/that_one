@@ -1,4 +1,5 @@
 #include "esp.h"
+#include "../../hook/panel/panels.h"
 #include "../../tools/draw/cdrawmanager.h"
 #include "../../tools/util/util.h"
 #include <unordered_map>
@@ -8,14 +9,12 @@ namespace ESP {
     if( !gCvars.ESP_enable.value ) {
       return;
     }
-    
+
     if( gCvars.ESP_fov.value || gCvars.ESP_around_fov.value ) {
-      int iWidth, iHeight;
-      gInts.Engine->GetScreenSize( iWidth, iHeight );
-      float cx = ( float )iWidth / 2.0f;
-      float cy = ( float )iHeight / 2.0f;
+      float cx = ( float )gScreen.Width / 2.0f;
+      float cy = ( float )gScreen.Height / 2.0f;
       
-      int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.sniper_nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * iWidth;
+      int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.sniper_nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * gScreen.Width;
       
       if( gCvars.ESP_fov.value == 1 ) {
         DrawManager::DrawCircle( cx, cy, radius, 16.0f, gCvars.color_fov.get_color() );
@@ -95,7 +94,6 @@ namespace ESP {
           DrawManager::DrawRect( draw0.x - 5, draw0.y - 5, 10, 10, gCvars.color_aim.get_color() );
         }
     }
-    
     
     if( gCvars.ESP_building_text.value || gCvars.ESP_item_text.value ) {
       for( int i = 1; i <= gInts.EntList->GetHighestEntityIndex(); i++ ) {
@@ -246,6 +244,45 @@ namespace ESP {
             }
           }
           
+        }
+      }
+    }
+  
+    if (gCvars.ESP_spectators.value) {
+      int SpectatorCount = 2;
+      DrawManager::DrawString(15, 15, Colors::White, L"Spectators:");
+      for (int i = 1; i <= gInts.Engine->GetMaxClients(); i++) {
+
+        CBaseEntity* pEntity = GetBaseEntity(i);
+
+        if (!pEntity || pEntity->IsDormant() || pEntity->GetLifeState() == LIFE_ALIVE) {
+          continue;
+        }
+
+        player_info_t PlayerInfo;
+
+        if (!gInts.Engine->GetPlayerInfo(pEntity->GetIndex(), &PlayerInfo))
+          continue;
+
+        CBaseEntity* pObserverTarget = GetBaseEntityFromHandle( pEntity->ObserverTarget() );
+
+        if (pObserverTarget == nullptr || pObserverTarget->IsDormant())
+          continue;
+
+        if (pObserverTarget == pLocal && pObserverTarget->GetLifeState() == LIFE_ALIVE){
+          int nObserverMode = pEntity->ObserverMode();
+
+          if (nObserverMode == OBS_MODE_FIRSTPERSON || nObserverMode == OBS_MODE_THIRDPERSON){
+            string name = PlayerInfo.name;
+
+            if (nObserverMode == OBS_MODE_FIRSTPERSON) {
+              name += " - firstperson"s;
+            } else if (nObserverMode == OBS_MODE_THIRDPERSON) {
+              name += " - thirdperson"s;
+            }
+
+            DrawManager::DrawString(15, SpectatorCount++ * 15, Colors::White, name);
+          }
         }
       }
     }
