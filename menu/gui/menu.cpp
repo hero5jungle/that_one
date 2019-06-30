@@ -211,7 +211,7 @@ LRESULT __stdcall Hooked_WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
     break;
   }
   
-  return CallWindowProc( gMenu.windowProc, hWnd, uMsg, wParam, lParam );
+  return CallWindowProcW( gMenu.windowProc, hWnd, uMsg, wParam, lParam );
 }
 void Menu::OpenDialog( Dialog &dlg ) {
   dialogs.push_back( &dlg );

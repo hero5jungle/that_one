@@ -33,11 +33,11 @@ namespace Signatures {
     return NULL;
   }
   
-  HMODULE GetModuleHandleSafe( const char *pszModuleName ) {
+  HMODULE GetModuleHandleSafe( const wchar_t *pszModuleName ) {
     HMODULE hmModuleHandle = nullptr;
     
     do {
-      hmModuleHandle = GetModuleHandle( pszModuleName );
+      hmModuleHandle = GetModuleHandleW( pszModuleName );
       Sleep( 1 );
     } while( hmModuleHandle == nullptr );
     
@@ -45,14 +45,14 @@ namespace Signatures {
   }
   
   DWORD GetClientSignature( char *chPattern ) {
-    static HMODULE hmModule = GetModuleHandleSafe( "client.dll" );
+    static HMODULE hmModule = GetModuleHandleSafe( L"client.dll" );
     static PIMAGE_DOS_HEADER pDOSHeader = ( PIMAGE_DOS_HEADER )hmModule;
     static PIMAGE_NT_HEADERS pNTHeaders = ( PIMAGE_NT_HEADERS )( ( ( DWORD )hmModule ) + pDOSHeader->e_lfanew );
     return dwFindPattern( ( ( DWORD )hmModule ) + pNTHeaders->OptionalHeader.BaseOfCode, ( ( DWORD )hmModule ) + pNTHeaders->OptionalHeader.SizeOfCode, chPattern );
   }
   
   DWORD GetEngineSignature( char *chPattern ) {
-    static HMODULE hmModule = GetModuleHandleSafe( "engine.dll" );
+    static HMODULE hmModule = GetModuleHandleSafe( L"engine.dll" );
     static PIMAGE_DOS_HEADER pDOSHeader = ( PIMAGE_DOS_HEADER )hmModule;
     static PIMAGE_NT_HEADERS pNTHeaders = ( PIMAGE_NT_HEADERS )( ( ( DWORD )hmModule ) + pDOSHeader->e_lfanew );
     return dwFindPattern( ( ( DWORD )hmModule ) + pNTHeaders->OptionalHeader.BaseOfCode, ( ( DWORD )hmModule ) + pNTHeaders->OptionalHeader.SizeOfCode, chPattern );

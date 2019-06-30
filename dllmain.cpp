@@ -19,7 +19,7 @@ HWND window;
 
 DWORD WINAPI dwMainThread(LPVOID lpArguments) {
 	//Client
-	CreateInterfaceFn ClientFactory = Interface("client.dll");
+	CreateInterfaceFn ClientFactory = Interface(L"client.dll");
 	gInts.Client = (CHLClient*)(ClientFactory("VClient017", nullptr));
 	gInts.EntList = (CEntList*)(ClientFactory("VClientEntityList003", nullptr));
 	gInts.Prediction = (IPrediction*)(ClientFactory("VClientPrediction001", nullptr));
@@ -29,7 +29,7 @@ DWORD WINAPI dwMainThread(LPVOID lpArguments) {
 	XASSERT(gInts.Prediction);
 	XASSERT(gInts.GameMovement);
 	//Engine
-	CreateInterfaceFn EngineFactory = Interface("engine.dll");
+	CreateInterfaceFn EngineFactory = Interface(L"engine.dll");
 	gInts.Engine = (EngineClient*)(EngineFactory("VEngineClient013", nullptr));
 	gInts.EngineTrace = (IEngineTrace*)(EngineFactory("EngineTraceClient003", nullptr));
 	gInts.ModelInfo = (IVModelInfo*)(EngineFactory("VModelInfoClient006", nullptr));
@@ -43,18 +43,18 @@ DWORD WINAPI dwMainThread(LPVOID lpArguments) {
 	XASSERT(gInts.RenderView);
 	XASSERT(gInts.MdlRender);
 	//Surface
-	CreateInterfaceFn VGUIFactory = Interface("vguimatsurface.dll");
+	CreateInterfaceFn VGUIFactory = Interface(L"vguimatsurface.dll");
 	gInts.Surface = (ISurface*)(VGUIFactory("VGUI_Surface030", nullptr));
 	XASSERT(gInts.Surface);
 	//Cvar
-	CreateInterfaceFn CvarFactory = Interface("vstdlib.dll");
+	CreateInterfaceFn CvarFactory = Interface(L"vstdlib.dll");
 	gInts.cvar = (ICvar*)(CvarFactory("VEngineCvar004", nullptr));
 	XASSERT(gInts.cvar);
 	//Materials
-	CreateInterfaceFn MatSysFactory = Interface("materialsystem.dll");
+	CreateInterfaceFn MatSysFactory = Interface(L"materialsystem.dll");
 	gInts.MatSystem = (CMaterialSystem*)(MatSysFactory("VMaterialSystem081", nullptr));
 	XASSERT(gInts.MatSystem);
-	CreateInterfaceFn VGUI2Factory = Interface("vgui2.dll");
+	CreateInterfaceFn VGUI2Factory = Interface(L"vgui2.dll");
 	gInts.Panels = (IPanel*)(VGUI2Factory("VGUI_Panel009", nullptr));
 	XASSERT(gInts.Panels);
 	//globals
@@ -79,7 +79,7 @@ DWORD WINAPI dwMainThread(LPVOID lpArguments) {
 	gEvents.InitEvents();
 
 	while (true) {
-		if ((window = FindWindow("Valve001", nullptr))) {
+		if ((window = FindWindowW(L"Valve001", nullptr))) {
 			break;
 		}
 	}
@@ -97,12 +97,9 @@ void WINAPI detach_loop(HMODULE hInstance) {
   }
 
   gInts.Panels->SetMouseInputEnabled(FocusOverlayPanel, false);
-  
-  gHooks.detach();
-  gEvents.UndoEvents();
-  
+
   //wndproc undo
-  SetWindowLong(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(gMenu.windowProc));
+  SetWindowLongW(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(gMenu.windowProc));
 
   FreeLibraryAndExitThread(hInstance, 0);
 }

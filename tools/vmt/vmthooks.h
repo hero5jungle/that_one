@@ -20,6 +20,10 @@ public:
 		*baseclass = current.get();
 	};
 
+  ~vmt_hook() {
+    restore();
+  }
+
 	template <typename Fn>
 	const inline Fn get_original(const int index) {
 		return reinterpret_cast<Fn>(original[index]);
@@ -50,6 +54,10 @@ public:
 		vmt_hook::setup(base);
 		rehook();
 	};
+
+  ~vmt_single() {
+    vmt_hook::restore();
+  }
 
 	const inline Fn get_original() {
 		return vmt_hook::get_original<Fn>(Index);

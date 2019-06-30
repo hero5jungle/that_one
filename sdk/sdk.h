@@ -3067,13 +3067,6 @@ struct CHooks {
   vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
   vmt_single<PaintTraverseFn> PaintTraverse;
   vmt_single<SendDatagramFn> SendDatagram;
-  void detach() {
-    CreateMove.restore();
-    DrawModelExecute.restore();
-    FrameStageNotifyThink.restore();
-    PaintTraverse.restore();
-    SendDatagram.restore();
-  }
 };
 
 enum gOffsets {
