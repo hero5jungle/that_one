@@ -1,6 +1,5 @@
 #include "util.h"
 #include "../signature/csignature.h"
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 namespace Util {
   float Distance( const Vector &vOrigin, const Vector &vLocalOrigin ) {

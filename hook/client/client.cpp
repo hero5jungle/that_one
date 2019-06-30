@@ -57,7 +57,6 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
   }
   
   if( !pLocal->IsDormant() && pLocal->GetLifeState() == LIFE_ALIVE ) {
-    try {
       Misc::Run( pLocal, cmd );
       EnginePred::Start( pLocal, cmd );
       Backtrack::Run( pLocal, ch );
@@ -65,9 +64,6 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
       Airblast::Run( pLocal, cmd );
       DemoSticky::Run( pLocal, cmd );
       EnginePred::End( pLocal, cmd );
-    } catch( ... ) {
-      Fatal( "Failed CreateMove" );
-    }
   }
   
   qLASTTICK = cmd->viewangles;
@@ -193,18 +189,13 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
     CBaseEntity *pEntity = ( CBaseEntity * )gInts.EntList->GetClientEntity( pInfo.entity_index );
     CBaseEntity *pLocal = ( CBaseEntity * )gInts.EntList->GetClientEntity( gInts.Engine->GetLocalPlayer() );
     
-    if( !pEntity || !pLocal ) {
+    if( (!pEntity || !pLocal) || (gCvars.ESP_hat.value && strstr(model_name, "player/items")) ) {
       gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
       gHooks.DrawModelExecute.rehook();
       return;
     }
     
-    Color team_color = Util::team_color( pLocal, pEntity );
-    
-    if( gCvars.ESP_hat.value && strstr( model_name, "player/items" ) ) {
-      return;
-    }
-    
+    Color team_color = Util::team_color(pLocal, pEntity);
     IMaterial *wanted_material = gCvars.ESP_cham_mat.value ? wanted_material = Materials::glow : Materials::shaded;
     
     if( wanted_material ) {
@@ -274,22 +265,26 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
       if( gCvars.ESP_building_cham.value ) {
         if( pEntity ) {
           const auto is_building = []( const classId id, const char *model_name ) {
-            bool blueprint = strstr( model_name, "blueprint" );
-            bool dispenser = id == classId::CObjectDispenser;
-            bool sentry = id == classId::CObjectSentrygun ;
-            bool teleporter = id == classId::CObjectTeleporter;
-            bool intel = id == classId::CCaptureFlag;
-            return !blueprint && ( dispenser || sentry || teleporter || intel );
+            switch (id) {
+              case classId::CObjectDispenser:
+              case classId::CObjectSentrygun:
+              case classId::CObjectTeleporter:
+              case classId::CCaptureFlag: {
+                return !strstr(model_name, "blueprint");
+              }
+              default:
+                return false;
+            }
           };
           
           if( is_building( ( classId )pEntity->GetClassId(), model_name ) ) {
             if( !pEntity->IsDormant() )
               if( pEntity->GetLifeState() == LIFE_ALIVE ) {
-                //Hidden UnUnLit
+                //Hidden
                 wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
                 Materials::ForceMaterial( wanted_material, team_color );
                 gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-                //Visible UnUnLit
+                //Visible
                 wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
                 Materials::ForceMaterial( wanted_material, team_color );
               }
@@ -308,11 +303,11 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
         
         if( is_object( model_name ) ) {
           Color RGBA = gCvars.color_items.get_color();
-          //Hidden UnUnLit
+          //Hidden
           wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
           Materials::ForceMaterial( wanted_material, RGBA );
           gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-          //Visible UnUnLit
+          //Visible
           wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
           Materials::ForceMaterial( wanted_material, RGBA );
         }
@@ -337,11 +332,11 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
           
           if( should_cham_proj( pLocal, pEntity, pEntity->GetClientClass()->classId ) ) {
             Color RGBA = gCvars.color_items.get_color();
-            //Hidden Lit
+            //Hidden
             wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
             Materials::ForceMaterial( wanted_material, RGBA );
             gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-            //Visible UnLit
+            //Visible
             wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
             Materials::ForceMaterial( wanted_material, RGBA );
           }

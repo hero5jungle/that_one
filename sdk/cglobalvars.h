@@ -7,6 +7,12 @@ bool checkExists(string file);
 void SaveToJson();
 void LoadFromJson();
 
+static bool detach = false;
+
+inline void detach_start() {
+  detach = true;
+}
+
 struct CGlobalVariables {
 	int aim_index = -1;
 	int backtrack_tick = 0;
@@ -300,12 +306,15 @@ struct CGlobalVariables {
 	KeyBind Thirdperson{ "Third person", 0x54, e_kbmode::disabled };
 	Functionbox Dump_classId{ "Dump classId", Dumps::dumpClassIds };
 	Functionbox Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
+  Functionbox Detach{ "Detach", detach_start };
+
 
 	Tab Testing{ "Testing", {
 		&Sv_cheat,
 		&Thirdperson,
 		&Dump_classId,
-		&Dump_netvar
+		&Dump_netvar,
+    &Detach
 	  }
 	};
 

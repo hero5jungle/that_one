@@ -1944,6 +1944,11 @@ class ISurface {
     typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
     getvfunc<OriginalFn>( this, 14 )( this, x0, y0, x1, y1 );
   }
+
+  void DrawFilledRectFade(int x0, int y0, int x1, int y1, unsigned int alpha0, unsigned int alpha1, bool bHorizontal){
+    typedef void(__thiscall * OriginalFn)(void*, int, int, int, int, unsigned int, unsigned int, bool);
+    getvfunc<OriginalFn>(this, 118)(this, x0, y0, x1, y1, alpha0, alpha1, bHorizontal);
+  }
   
   int CreateNewTextureID( bool procedural = true ) {
     typedef int( __thiscall * OriginalFn )( void *, bool );
@@ -2484,19 +2489,22 @@ enum tf_cond {
 
 class IGameEventListener2 {
  public:
-  virtual ~IGameEventListener2( void ) {
-  };
+  virtual ~IGameEventListener2( void ) {};
   
   // FireEvent is called by EventManager if event just occured
   // KeyValue memory will be freed by manager if not needed anymore
   virtual void FireGameEvent( IGameEvent *event ) = 0;
 };
 
-class IGameEventManager2 {
- public:
+struct IGameEventManager2 {
   bool AddListener( IGameEventListener2 *listener, const char *name, bool bServerSide ) {
     typedef bool( __thiscall * OriginalFn )( PVOID, IGameEventListener2 *, const char *, bool );
     return getvfunc<OriginalFn>( this, 3 )( this, listener, name, bServerSide );
+  }
+
+  void RemoveListener( IGameEventListener2* listener ) {
+    typedef void( __thiscall * OriginalFn )( PVOID, IGameEventListener2* );
+    return getvfunc<OriginalFn>( this, 5 )( this, listener );
   }
 };
 
@@ -3059,7 +3067,13 @@ struct CHooks {
   vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
   vmt_single<PaintTraverseFn> PaintTraverse;
   vmt_single<SendDatagramFn> SendDatagram;
-  
+  void detach() {
+    CreateMove.restore();
+    DrawModelExecute.restore();
+    FrameStageNotifyThink.restore();
+    PaintTraverse.restore();
+    SendDatagram.restore();
+  }
 };
 
 enum gOffsets {

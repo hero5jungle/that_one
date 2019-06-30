@@ -1,8 +1,6 @@
 #include "../gui/menu.h"
 #include "../../tools/draw/cdrawmanager.h"
 Menu gMenu;
-
-
 CKey gKey;
 
 // - Feel free to use whatever default width you want
@@ -10,6 +8,22 @@ CKey gKey;
 
 void Menu::CreateGUI() {
   Tabs = gCvars.tf2;
+
+  try {
+    if (checkExists("that_one.json")) {
+      LoadFromJson();
+    } else {
+      SaveToJson();
+    }
+  } catch (...) {
+    if (rename("that_one.json", "that_one.backup")) { //non zero on fail
+      remove("that_one.backup");
+      rename("that_one.json", "that_one.backup");
+    }
+
+    SaveToJson();
+    MessageBoxA(nullptr, "An update changed the config\r\nfind your old config renamed as that_one.backup", "FATAL ERROR", MB_ICONERROR | MB_TOPMOST);
+  }
 }
 
 #define TAB_WIDTH 150

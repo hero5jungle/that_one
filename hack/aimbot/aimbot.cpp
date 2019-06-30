@@ -3,7 +3,6 @@
 #include "../../tools/util/util.h"
 #include "../backtrack/backtrack.h"
 #include "../event/event.h"
-#define TIME_TO_TICKS(dt) ((int)(0.5f + (float)(dt) / gInts.globals->interval_per_tick))
 
 namespace Aimbot {
 void Run(CBaseEntity* pLocal, CUserCmd* pCommand) {
@@ -220,11 +219,7 @@ void Run(CBaseEntity* pLocal, CUserCmd* pCommand) {
         }
       } else if (wpn->GetClassId() == (int)classId::CTFKnife) {
         if (gCvars.backtrack_arr != -1) {
-          if (Util::canBackstab(
-                  pCommand->viewangles,
-                  BacktrackData[index][gCvars.backtrack_arr].angle,
-                  BacktrackData[index][gCvars.backtrack_arr].wsc -
-                      pLocal->GetWorldSpaceCenter())) {
+          if (Util::canBackstab(pCommand->viewangles, BacktrackData[index][gCvars.backtrack_arr].angle, BacktrackData[index][gCvars.backtrack_arr].wsc - pLocal->GetWorldSpaceCenter())) {
             pCommand->buttons |= IN_ATTACK;
           }
         } else {
@@ -362,8 +357,7 @@ int GetBestTarget(CBaseEntity* pLocal, CUserCmd* pCommand) {
               best_score = melee ? distance : fov;
               best_target = i;
               gCvars.backtrack_arr = t;
-              gCvars.backtrack_tick =
-                  TIME_TO_TICKS(BacktrackData[i][t].simtime);
+              gCvars.backtrack_tick = (int)(0.5f + (float)(BacktrackData[i][t].simtime) / gInts.globals->interval_per_tick);
             }
           }
         }

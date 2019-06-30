@@ -7,10 +7,16 @@
 #include "tools/vmt/vmthooks.h"
 #include "tools/signature/csignature.h"
 #include "sdk/cmat/keyvalues.h"
+#include <thread>
+#include <chrono>
+
 CGlobalVariables gCvars;
 CInterfaces gInts;
 CHooks gHooks;
+HWND window;
+
 #define Interface(dll) (CreateInterfaceFn)(GetProcAddress(Signatures::GetModuleHandleSafe( dll ), "CreateInterface"))
+
 DWORD WINAPI dwMainThread(LPVOID lpArguments) {
 	//Client
 	CreateInterfaceFn ClientFactory = Interface("client.dll");
@@ -48,17 +54,9 @@ DWORD WINAPI dwMainThread(LPVOID lpArguments) {
 	CreateInterfaceFn MatSysFactory = Interface("materialsystem.dll");
 	gInts.MatSystem = (CMaterialSystem*)(MatSysFactory("VMaterialSystem081", nullptr));
 	XASSERT(gInts.MatSystem);
-
-	if (!gInts.Panels) {
-		CreateInterfaceFn VGUI2Factory = Interface("vgui2.dll");
-		gInts.Panels = (IPanel*)(VGUI2Factory("VGUI_Panel009", nullptr));
-		XASSERT(gInts.Panels);
-
-		if (gInts.Panels) {
-			gHooks.PaintTraverse.setup(gInts.Panels, gOffsets::PaintTraverse, &Hooked_PaintTraverse);
-		}
-	}
-
+	CreateInterfaceFn VGUI2Factory = Interface("vgui2.dll");
+	gInts.Panels = (IPanel*)(VGUI2Factory("VGUI_Panel009", nullptr));
+	XASSERT(gInts.Panels);
 	//globals
 	gInts.globals = *(CGlobals * *)(Signatures::GetEngineSignature("A1 ? ? ? ? 8B 11 68") + 8);
 	XASSERT(gInts.globals);
@@ -70,33 +68,55 @@ DWORD WINAPI dwMainThread(LPVOID lpArguments) {
 	// material stuff
 	Keyvalues::GetOffsets();
 	//
-	gHooks.FrameStageNotifyThink.setup(gInts.Client, gOffsets::FrameStageNotifyThink, &Hooked_FrameStageNotifyThink);
+  gHooks.PaintTraverse.setup(gInts.Panels, gOffsets::PaintTraverse, &Hooked_PaintTraverse);
+  //
+  gHooks.FrameStageNotifyThink.setup(gInts.Client, gOffsets::FrameStageNotifyThink, &Hooked_FrameStageNotifyThink);
 	//
 	gHooks.CreateMove.setup(gInts.ClientMode, gOffsets::CreateMove, &Hooked_CreateMove);
 	//
 	gHooks.DrawModelExecute.setup(gInts.MdlRender, gOffsets::DrawModelExecute, &Hooked_DrawModelExecute);
 	//
 	gEvents.InitEvents();
-	HWND thisWindow;
 
 	while (true) {
-		if ((thisWindow = FindWindow("Valve001", nullptr))) {
+		if ((window = FindWindow("Valve001", nullptr))) {
 			break;
 		}
 	}
 
-	if (thisWindow) {
-		gMenu.windowProc = (WNDPROC)(SetWindowLongPtr(thisWindow, GWLP_WNDPROC, (LONG_PTR)(&Hooked_WndProc)));
+	if (window) {
+		gMenu.windowProc = (WNDPROC)(SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)(&Hooked_WndProc)));
 	}
 
 	return 0;
 }
 
+void WINAPI detach_loop(HMODULE hInstance) {
+  while (!detach) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  }
+
+  gInts.Panels->SetMouseInputEnabled(FocusOverlayPanel, false);
+  
+  gHooks.detach();
+  gEvents.UndoEvents();
+  
+  //wndproc undo
+  SetWindowLong(window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(gMenu.windowProc));
+
+  FreeLibraryAndExitThread(hInstance, 0);
+}
+
+
 BOOL APIENTRY DllMain(HMODULE hInstance, DWORD dwReason, LPVOID lpReserved) {
 	if (dwReason == DLL_PROCESS_ATTACH) {
-		DisableThreadLibraryCalls(hInstance);
-		CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)(dwMainThread), nullptr, 0, nullptr);
-	}
+    if (HANDLE handle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)(dwMainThread), nullptr, 0, nullptr)) {
+      CloseHandle(handle);
+    }
+    if (HANDLE handle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)(detach_loop), hInstance, 0, nullptr)) {
+      CloseHandle(handle);
+    }
+  }
 
-	return true;
+	return TRUE;
 }

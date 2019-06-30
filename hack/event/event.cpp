@@ -7,6 +7,9 @@ void CEvents::InitEvents() {
   gInts.EventManager->AddListener( this, "player_hurt", false );
   gInts.EventManager->AddListener( this, "player_death", false );
 }
+void CEvents::UndoEvents() {
+  gInts.EventManager->RemoveListener(this);
+}
 
 void CEvents::FireGameEvent( IGameEvent *event ) {
   if( strstr( event->GetName(), "player_hurt" ) ) {

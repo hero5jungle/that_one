@@ -4,7 +4,9 @@
 #include "../../menu/gui/menu.h"
 #include "../../sdk/cmat/cmat.h"
 #include "../../tools/signature/csignature.h"
+
 CScreenSize gScreen;
+unsigned int FocusOverlayPanel = 0;
 
 void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiPanel, bool forceRepaint, bool allowForce ) {
   try {
@@ -15,7 +17,6 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
     }
     
     gHooks.PaintTraverse.get_original()( pPanels, vguiPanel, forceRepaint, allowForce );
-    static unsigned int FocusOverlayPanel = 0;
     
     if( !FocusOverlayPanel ) {
       if( strstr( panel_name, "FocusOverlayPanel" ) ) {
@@ -62,32 +63,11 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
 }
 
 void Intro() {
-  try {
     DrawManager::Initialize();
     gMenu.CreateGUI();
-    
-    try {
-      if( checkExists( "that_one.json" ) ) {
-        LoadFromJson();
-      } else {
-        SaveToJson();
-      }
-    } catch( ... ) {
-      if( rename( "that_one.json", "that_one.backup" ) ) { //non zero on fail
-        remove( "that_one.backup" );
-        rename( "that_one.json", "that_one.backup" );
-      }
-      
-      SaveToJson();
-      MessageBoxA( nullptr, "An update changed the config\r\nfind your old config renamed as that_one.backup", "FATAL ERROR", MB_ICONERROR | MB_TOPMOST );
-    }
-    
     gNetVars.Initialize();
     Materials::Initialize();
     InitTextures();
     gInts.Engine->ClientCmd_Unrestricted( "toggleconsole" );
     gInts.cvar->ConsoleColorPrintf( Colors::Yellow, "that_one Injected\n" );
-  } catch( ... ) {
-    Fatal( "Failed Intro" );
-  }
 }

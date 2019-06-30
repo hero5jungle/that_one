@@ -1,5 +1,4 @@
 #pragma once
-#include <cassert>
 //written by a pleb
 class vmt_hook {
 private:
@@ -23,19 +22,20 @@ public:
 
 	template <typename Fn>
 	const inline Fn get_original(const int index) {
-		assert(index <= size);
 		return reinterpret_cast<Fn>(original[index]);
 	}
 
 	const inline void hook(const int index, void* function) {
-		assert(index <= size);
 		current[index] = reinterpret_cast<uintptr_t>(function);
 	}
 
-	const inline void unhook(const int index) {
-		assert(index <= size);
-		current[index] = original[index];
-	}
+  const inline void unhook(const int index) {
+    current[index] = original[index];
+  }
+  const inline void restore() {
+    if(original)
+      *baseclass = original;
+  }
 };
 // a quick and dirty wrapper for tables with only one function to hook.
 template<typename Fn>
@@ -62,4 +62,7 @@ public:
 	const inline void unhook() {
 		vmt_hook::unhook(Index);
 	}
+  const inline void restore() {
+    vmt_hook::restore();
+  }
 };
