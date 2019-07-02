@@ -773,20 +773,20 @@ namespace Util {
   }
   
   Color team_color( CBaseEntity *pLocal, CBaseEntity *pEntity ) {
+    if (gCvars.aim_index == pEntity->GetIndex() && gCvars.ESP_target.value > 1) {
+      return gCvars.color_aim.get_color();
+    }
+
     if( gCvars.color_type.value == 0 ) { //red/blue
-      if( gCvars.aim_index == pEntity->GetIndex() && ( gCvars.ESP_target.value > 1 ) ) {
-        return gCvars.color_aim.get_color();
-      } else if( pEntity->GetTeamNum() == 2 || ( pEntity->GetTeamNum() == 3 && gCvars.Ignore_E_disguise.value &&  pEntity->GetCond() & TFCond_Disguised ) ) {
-        return gCvars.color_red.get_color();
-      } else if( pEntity->GetTeamNum() == 3 || ( pEntity->GetTeamNum() == 2 && gCvars.Ignore_E_disguise.value &&  pEntity->GetCond() & TFCond_Disguised ) ) {
-        return gCvars.color_blue.get_color();
-      }
-      
-      return Colors::White;
+        if (pEntity->GetTeamNum() == 2 || (gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised)) {
+          return gCvars.color_red.get_color();
+        } else if (pEntity->GetTeamNum() == 3 || (gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised)) {
+          return gCvars.color_blue.get_color();
+        }
+
+        return Colors::White;
     } else { //ally/enemy
-      if( gCvars.aim_index == pEntity->GetIndex() && ( gCvars.ESP_target.value > 1 ) ) {
-        return gCvars.color_aim.get_color();
-      } else if( pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
+      if( pEntity->GetTeamNum() == pLocal->GetTeamNum() || (gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised)) {
         return gCvars.color_ally.get_color();
       } else {
         return gCvars.color_enemy.get_color();

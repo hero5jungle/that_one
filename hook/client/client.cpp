@@ -185,12 +185,18 @@ void __stdcall Hooked_DrawModelExecute( void *state, ModelRenderInfo_t &pInfo, m
   
   if( gCvars.ESP_cham.value ) {
   
-    const char *model_name = gInts.ModelInfo->GetModelName( pInfo.pModel );
-    CBaseEntity *pEntity = ( CBaseEntity * )gInts.EntList->GetClientEntity( pInfo.entity_index );
-    CBaseEntity *pLocal = ( CBaseEntity * )gInts.EntList->GetClientEntity( gInts.Engine->GetLocalPlayer() );
+    CBaseEntity *pEntity = GetBaseEntity( pInfo.entity_index );
+    CBaseEntity *pLocal = GetBaseEntity( me );
     
-    if( (!pEntity || !pLocal) || (gCvars.ESP_hat.value && strstr(model_name, "player/items")) ) {
+    if( !pEntity || !pLocal ) {
       gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+      gHooks.DrawModelExecute.rehook();
+      return;
+    }
+    
+    const char* model_name = gInts.ModelInfo->GetModelName(pInfo.pModel);
+
+    if( gCvars.ESP_hat.value && strstr(model_name, "player/items") ) {
       gHooks.DrawModelExecute.rehook();
       return;
     }
