@@ -1,5 +1,6 @@
 #include "sdk.h"
 #include "../tools/util/Util.h"
+#include "../tools/signature/csignature.h"
 
 bool CBaseEntity::CanSee( CBaseEntity *pEntity, const Vector &pos ) {
   trace_t tr;
@@ -27,6 +28,13 @@ int CBaseEntity::GetCanSeeHitbox( CBaseEntity *pEntity, const Vector &pos ) {
   }
   
   return -1;
+}
+
+void CBaseEntity::RemoveNoDraw() {
+  *(byte*)(this + 0x7C) &= ~32;//m_fEffects
+  static auto add_to_leaf_system = (int(__thiscall*)(void*, int))(Signatures::GetClientSignature("55 8B EC 56 FF 75 08 8B F1 B8"));
+  if (add_to_leaf_system)
+    add_to_leaf_system(this, 7);
 }
 
 Vector CBaseEntity::GetHitbox( int hitbox ) {

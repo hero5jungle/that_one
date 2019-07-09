@@ -78,34 +78,30 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void *_this, Clie
   
   if( gInts.Engine->IsInGame() && Stage == FRAME_RENDER_START ) {
     CBaseEntity *pLocal = GetBaseEntity( me );
-    int m_flFOVRate = 0xE5C;
-    int &fovPtr = *( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iFOV" ) );
-    int defaultFov = *( int * )( pLocal + gNetVars.get_offset( "DT_BasePlayer", "m_iDefaultFOV" ) );
-    
+
     if( gCvars.sniper_nozoom.value ) {
-      fovPtr = defaultFov;
-      pLocal->set( m_flFOVRate, 0.0f );
+      pLocal->SetFov( pLocal->GetDefaultFov() );
+      pLocal->set( 0xE5C, 0.0f );//m_flFOVRate
     }
     
     if( gCvars.NoRecoil.value ) {
       pLocal->set( 0xE8C, Vector() );
     }
-    
+
     static bool Thirdperson_enabled = false;
-    bool *thirdperson = ( bool * )( ( DWORD )( pLocal ) + gNetVars.get_offset( "DT_TFPlayer", "m_nForceTauntCam" ) );
     
     if( gCvars.Thirdperson.KeyDown() ) {
-      auto *yaw = ( float * )( ( DWORD )( pLocal ) + gNetVars.get_offset( "DT_BasePlayer", "pl", "deadflag" ) + 4 );
-      auto *pitch = ( float * )( ( DWORD )( pLocal ) + gNetVars.get_offset( "DT_BasePlayer", "pl", "deadflag" ) + 8 );
-      *yaw = qLASTTICK.x;
-      *pitch = qLASTTICK.y;
+      pLocal->SetThirdpersonView(qLASTTICK);
       
       if( pLocal->GetLifeState() == LIFE_ALIVE ) {
-        *thirdperson = true;
+        pLocal->SetThirdperson(true);
         Thirdperson_enabled = true;
+        if (gCvars.Thirdperson_scoped.value && pLocal->GetCond() & TFCond_Zoomed){
+          pLocal->RemoveNoDraw();
+        }
       }
     } else if( !Thirdperson_enabled || !gCvars.Thirdperson.KeyDown() ) {
-      *thirdperson = false;
+      pLocal->SetThirdperson(false);
       Thirdperson_enabled = false;
     }
   }

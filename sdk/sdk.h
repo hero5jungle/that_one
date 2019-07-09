@@ -226,16 +226,15 @@ enum tf_classes {
   TF2_Spy = 8, 
 };
 
-class CBaseEntity {
- public:
+struct CBaseEntity {
   template <typename T>
-  T get( uint32_t off ) {
-    return *( T * )( ( uint32_t )this + off );
+  T get( uintptr_t off ) {
+    return *( T * )( ( uintptr_t )this + off );
   }
-  
+
   template <typename T>
-  void set( uint32_t off, T val ) {
-    ( *( T * )( ( uint32_t )this + off ) ) = val;
+  void set( uintptr_t off, T val ) {
+    ( *( T * )( ( uintptr_t )this + off ) ) = val;
   }
   
   Vector GetViewOffset() {
@@ -468,12 +467,35 @@ class CBaseEntity {
   Vector GetAbsEyePosition() {
     DYNVAR_RETURN( Vector, this, "DT_BasePlayer", "localdata", "m_vecViewOffset[0]" );
   }
-  
+
+  int GetFov() {
+    DYNVAR_RETURN(int, this, "DT_BasePlayer", "m_iFOV");
+  }
+
+  void SetFov(int fov) {
+    DYNVAR_SET(int, this, fov, "DT_BasePlayer", "m_iFOV");
+  }
+
+  int GetDefaultFov() {
+    DYNVAR_RETURN(int, this, "DT_BasePlayer", "m_iDefaultFOV");
+  }
+
+  void SetThirdperson(bool thirdperson) {
+    DYNVAR_SET(bool, this, thirdperson, "DT_TFPlayer", "m_nForceTauntCam");
+  }
+
+  void SetThirdpersonView(Vector &view) {
+    static intptr_t offset = gNetVars.get_offset("DT_BasePlayer", "pl", "deadflag");
+    set<float>(offset+4, view.x);
+    set<float>(offset+8, view.y);
+  }
+
   //CBaseEntity.cpp
   Vector GetHitbox( int hitbox );
   CBaseCombatWeapon *GetActiveWeapon();
   bool CanSee( CBaseEntity *pEntity, const Vector &pos );
   int GetCanSeeHitbox( CBaseEntity *pEntity, const Vector &pos );
+  void RemoveNoDraw();
 };
 
 class CObject : public CBaseEntity {

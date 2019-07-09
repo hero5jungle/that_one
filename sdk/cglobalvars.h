@@ -303,7 +303,8 @@ struct CGlobalVariables {
 	};
 
 	Checkbox Sv_cheat{ "Sv_cheat 1" };
-	KeyBind Thirdperson{ "Third person", 0x54, e_kbmode::disabled };
+	KeyBind Thirdperson{ "Thirdperson", 0x54, e_kbmode::disabled };
+  Checkbox Thirdperson_scoped{ "Draw scoped player" };
 	Functionbox Dump_classId{ "Dump classId", Dumps::dumpClassIds };
 	Functionbox Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
   Functionbox Detach{ "Detach", detach_start };
@@ -312,6 +313,7 @@ struct CGlobalVariables {
 	Tab Testing{ "Testing", {
 		&Sv_cheat,
 		&Thirdperson,
+    &Thirdperson_scoped,
 		&Dump_classId,
 		&Dump_netvar,
     &Detach
