@@ -98,6 +98,9 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void *_this, Clie
         Thirdperson_enabled = true;
         if (gCvars.Thirdperson_scoped.value && pLocal->GetCond() & TFCond_Zoomed){
           pLocal->RemoveNoDraw();
+          if (auto wpn = pLocal->GetActiveWeapon()) {
+            wpn->RemoveNoDraw();
+          }
         }
       }
     } else if( !Thirdperson_enabled || !gCvars.Thirdperson.KeyDown() ) {
