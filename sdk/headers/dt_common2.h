@@ -92,102 +92,102 @@ class SendProp;
 
 
 typedef enum {
-  DPT_Int = 0,
-  DPT_Float,
-  DPT_Vector,
-  DPT_VectorXY,
-  DPT_String,
-  DPT_Array,  // An array of the base types (can't be of datatables).
-  DPT_DataTable,
+	DPT_Int = 0,
+	DPT_Float,
+	DPT_Vector,
+	DPT_VectorXY,
+	DPT_String,
+	DPT_Array,  // An array of the base types (can't be of datatables).
+	DPT_DataTable,
 #if 0 // We can't ship this since it changes the size of DTVariant to be 20 bytes instead of 16 and that breaks MODs!!!
-  DPT_Quaternion,
+	DPT_Quaternion,
 #endif
-  DPT_NUMSendPropTypes
+	DPT_NUMSendPropTypes
 } SendPropType;
 
 
 class DVariant {
- public:
-  DVariant() {
-    m_Type = DPT_Float;
-  }
-  DVariant( float val ) {
-    m_Type = DPT_Float;
-    m_Float = val;
-  }
-  
-  const char *ToString() {
-    static char text[128];
-    
-    switch( m_Type ) {
-    case DPT_Int:
-      sprintf_s( text, sizeof( text ), "%i", m_Int );
-      break;
-      
-    case DPT_Float:
-      sprintf_s( text, sizeof( text ), "%.3f", m_Float );
-      break;
-      
-    case DPT_Vector:
-      sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f)",
-                 m_Vector[0], m_Vector[1], m_Vector[2] );
-      break;
-#if 0 // We can't ship this since it changes the size of DTVariant to be 20 bytes instead of 16 and that breaks MODs!!!
-      
-    case DPT_Quaternion:
-      sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f %.3f)",
-                 m_Vector[0], m_Vector[1], m_Vector[2], m_Vector[3] );
-      break;
-#endif
-      
-    case DPT_String:
-      if( m_pString ) {
-        return m_pString;
-      } else {
-        return "NULL";
-      }
-      
-      break;
-      
-    case DPT_Array:
-      sprintf_s( text, sizeof( text ), "Array" );
-      break;
-      
-    case DPT_DataTable:
-      sprintf_s( text, sizeof( text ), "DataTable" );
-      break;
-      
-    default:
-      sprintf_s( text, sizeof( text ), "DVariant type %i unknown", m_Type );
-      break;
-    }
-    
-    return text;
-  }
-  
-  union {
-    float m_Float;
-    long  m_Int;
-    char  *m_pString;
-    void  *m_pData; // For DataTables.
-#if 0 // We can't ship this since it changes the size of DTVariant to be 20 bytes instead of 16 and that breaks MODs!!!
-    float m_Vector[4];
-#else
-    float m_Vector[3];
-#endif
-  };
-  SendPropType  m_Type;
+	public:
+	DVariant() {
+		m_Type = DPT_Float;
+	}
+	DVariant( float val ) {
+		m_Type = DPT_Float;
+		m_Float = val;
+	}
+
+	const char* ToString() {
+		static char text[128];
+
+		switch( m_Type ) {
+			case DPT_Int:
+				sprintf_s( text, sizeof( text ), "%i", m_Int );
+				break;
+
+			case DPT_Float:
+				sprintf_s( text, sizeof( text ), "%.3f", m_Float );
+				break;
+
+			case DPT_Vector:
+				sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f)",
+									 m_Vector[0], m_Vector[1], m_Vector[2] );
+				break;
+			#if 0 // We can't ship this since it changes the size of DTVariant to be 20 bytes instead of 16 and that breaks MODs!!!
+
+			case DPT_Quaternion:
+				sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f %.3f)",
+									 m_Vector[0], m_Vector[1], m_Vector[2], m_Vector[3] );
+				break;
+			#endif
+
+			case DPT_String:
+				if( m_pString ) {
+					return m_pString;
+				} else {
+					return "NULL";
+				}
+
+				break;
+
+			case DPT_Array:
+				sprintf_s( text, sizeof( text ), "Array" );
+				break;
+
+			case DPT_DataTable:
+				sprintf_s( text, sizeof( text ), "DataTable" );
+				break;
+
+			default:
+				sprintf_s( text, sizeof( text ), "DVariant type %i unknown", m_Type );
+				break;
+		}
+
+		return text;
+	}
+
+	union {
+		float m_Float;
+		long  m_Int;
+		char* m_pString;
+		void* m_pData; // For DataTables.
+	#if 0 // We can't ship this since it changes the size of DTVariant to be 20 bytes instead of 16 and that breaks MODs!!!
+		float m_Vector[4];
+	#else
+		float m_Vector[3];
+	#endif
+	};
+	SendPropType  m_Type;
 };
 
 
 // This can be used to set the # of bits used to transmit a number between 0 and nMaxElements-1.
 inline int NumBitsForCount( int nMaxElements ) {
-  int nBits = 0;
-  
-  while( nMaxElements > 0 ) {
-    ++nBits;
-    nMaxElements >>= 1;
-  }
-  
-  return nBits;
+	int nBits = 0;
+
+	while( nMaxElements > 0 ) {
+		++nBits;
+		nMaxElements >>= 1;
+	}
+
+	return nBits;
 }

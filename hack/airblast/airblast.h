@@ -4,6 +4,6 @@
 
 namespace Airblast {
 
-  void Run( CBaseEntity *pLocal, CUserCmd *g_pUserCmd );
-  
+	void Run( CBaseEntity* pLocal, CUserCmd* g_pUserCmd );
+
 }

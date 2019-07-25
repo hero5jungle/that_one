@@ -3,6 +3,6 @@
 
 namespace ESP {
 
-  void Run( CBaseEntity *pLocal );
-  
+	void Run( CBaseEntity* pLocal );
+
 }

@@ -2,36 +2,37 @@
 #include "../menu/base/controls.h"
 #include "headers/vector.h"
 #include "../tools/dumps/dumps.h"
-
-bool checkExists(string file);
+#include <utility>
+bool checkExists( string file );
 void SaveToJson();
 void LoadFromJson();
 
 static bool detach = false;
 
 inline void detach_start() {
-  detach = true;
+	detach = true;
 }
 
 struct CGlobalVariables {
-	int aim_index = -1;
 	int backtrack_tick = 0;
 	int backtrack_arr = 0;
+	int aim_index = -1;
+	int aim_mode = -1;
+	Vector aim_spot;
+
 	bool spyalert = false;
-	Vector aim;
 	int hitbox = -1;
 	int last_cmd_number = 0;
 
 	Checkbox Aimbot_enable{ "Enable aimbot", true };
 	Slider   Aimbot_fov{ "Fov", 5, 1, 180, 1 };
 	Checkbox Aimbot_proj_lazy{ "Lazy proj fov", true };
-	Listbox  Aimbot_proj_mode{ "Proj mode", {"Velocity", "Engine"}, 1 };
 	Listbox  Aimbot_hitbox{ "Hitbox", { "nearest mouse", "first visible", "head", "body" }, 1, 130 };
 	Checkbox Aimbot_silent{ "Silent", true };
-	Slider   Aimbot_smooth{ "Smooting", 0, 0, 16, 1 };
 	Checkbox Aimbot_range{ "Range check", true };
 	Slider   Aimbot_ranges{ "Shotgun range", 26, 1, 100, 1 };
 	Checkbox Aimbot_melee{ "Melee aim", true };
+	Checkbox Aimbot_multipoint{ "Multipoint", true };
 	Checkbox Backtrack{ "Backtrack", true };
 	KeyBind  Aimbot_auto_aim{ "Aim key", VK_SHIFT, e_kbmode::always };
 	KeyBind  Aimbot_auto_shoot{ "Shoot key", VK_SHIFT, e_kbmode::always };
@@ -40,17 +41,16 @@ struct CGlobalVariables {
 		&Aimbot_enable,
 		&Aimbot_fov,
 		&Aimbot_proj_lazy,
-		&Aimbot_proj_mode,
 		&Aimbot_hitbox,
 		&Aimbot_silent,
-		&Aimbot_smooth,
 		&Aimbot_range,
 		&Aimbot_ranges,
 		&Aimbot_melee,
+		&Aimbot_multipoint,
 		&Backtrack,
 		&Aimbot_auto_aim,
 		&Aimbot_auto_shoot
-	  }, 170
+		}, 170
 	};
 
 	Checkbox pyro_lazy{ "Lazy pyro primary", true };
@@ -60,7 +60,6 @@ struct CGlobalVariables {
 	Checkbox demo_sticky{ "Auto sticky", true };
 
 	Checkbox sniper_zoomed{ "Zoomed only", true };
-	Checkbox sniper_body{ "Sniper bodyshot if kill", true };
 	Checkbox sniper_delay{ "Wait for headshot", true };
 	Checkbox sniper_nozoom{ "No zoom" };
 	Checkbox sniper_noscope{ "No scope", true };
@@ -68,32 +67,31 @@ struct CGlobalVariables {
 	Groupbox PYRO{ "--Pyro--", {
 		&pyro_lazy,
 		&Airblast_enable, &Airblast_silent
-	  }
+		}
 	};
 
 	Groupbox DEMOMAN{ "--Demoman--", {
 		&demo_sticky
-	  }
+		}
 	};
 
 	Groupbox SNIPER{ "--Sniper--", {
 		&sniper_zoomed,
-		&sniper_body,
 		&sniper_delay,
 		&sniper_nozoom,
 		&sniper_noscope
-	  }
+		}
 	};
 
-	Checkbox Ignore_A_cloak{    "ignore cloak", true };
+	Checkbox Ignore_A_cloak{ "ignore cloak", true };
 	Checkbox Ignore_A_disguise{ "ignore disguise", true };
-	Checkbox Ignore_A_taunt{    "ignore taunt" };
+	Checkbox Ignore_A_taunt{ "ignore taunt" };
 
 	Groupbox IGNORE_A{ "--Ignore--", {
 		&Ignore_A_cloak,
 		&Ignore_A_disguise,
 		&Ignore_A_taunt
-	  }
+		}
 	};
 
 	Tab Aimbot{ "Aimbot", {
@@ -102,7 +100,7 @@ struct CGlobalVariables {
 		&DEMOMAN,
 		&SNIPER,
 		&IGNORE_A
-	  }
+		}
 	};
 
 	Checkbox ESP_enable{ "Enable ESP", true };
@@ -111,7 +109,7 @@ struct CGlobalVariables {
 	Groupbox ESP_BASE{ "--ESP--", {
 		&ESP_enable,
 		&ESP_enemy
-	  }
+		}
 	};
 
 	Checkbox ESP_building_text{ "Building text", true };
@@ -120,42 +118,40 @@ struct CGlobalVariables {
 	Groupbox ESP_TEXT{ "--Text esp--", {
 		&ESP_building_text,
 		&ESP_item_text
-	  }
+		}
 	};
 
-	Checkbox ESP_cham{ "Enable chams", true };
 	Listbox  ESP_cham_mat{ "Cham material", { "shaded", "glow"}, 0 };
 	Checkbox ESP_object_cham{ "Object cham", true };
-	Checkbox ESP_building_cham{ "Building cham", true };
-	Checkbox ESP_player_cham{ "Player cham", true };
+	Listbox  ESP_building{ "Building esp",{"none","cham","glow"}, 1 };
+	Listbox  ESP_player{ "Player esp",{"none","cham","glow"}, 1 };
 	Checkbox ESP_backtrack{ "Backtrack cham", true };
 	Checkbox ESP_proj_cham{ "Projectile cham", true };
 	Checkbox ESP_hat{ "No player items" };
 	Listbox  ESP_hand{ "Hands", { "normal", "none", "transparent", "mat" }, 0 };
 
 	Groupbox ESP_CHAM{ "--Chams--", {
-		&ESP_cham,
 		&ESP_cham_mat,
 		&ESP_object_cham,
-		&ESP_building_cham,
-		&ESP_player_cham,
+		&ESP_building,
+		&ESP_player,
 		&ESP_backtrack,
 		&ESP_proj_cham,
 		&ESP_hat,
 		&ESP_hand,
-	  } };
+		} };
 
 	Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
 	Listbox  ESP_target{ "Target highlight", { "Off", "line", "color", "both" }, 1 };
 	Checkbox ESP_around_fov{ "Out of fov esp", true };
-  Checkbox ESP_spectators{ "Spectator list", true };
+	Checkbox ESP_spectators{ "Spectator list", true };
 
-  Groupbox ESP_MISC{ "--Misc--", {
-    &ESP_fov,
-    &ESP_target,
-    &ESP_around_fov,
-    &ESP_spectators
-	  }
+	Groupbox ESP_MISC{ "--Misc--", {
+		&ESP_fov,
+		&ESP_target,
+		&ESP_around_fov,
+		&ESP_spectators
+		}
 	};
 
 	Checkbox Ignore_E_cloak{ "ignore cloak", true };
@@ -164,7 +160,7 @@ struct CGlobalVariables {
 	Groupbox IGNORE_E{ "--Ignore--", {
 		&Ignore_E_cloak,
 		&Ignore_E_disguise
-	  }
+		}
 	};
 
 	Tab ESP{ "ESP", {
@@ -173,7 +169,7 @@ struct CGlobalVariables {
 		&ESP_CHAM,
 		&ESP_MISC,
 		&IGNORE_E
-	  }
+		}
 	};
 
 	ColorPicker color_items{ "Items", Colors::Green };
@@ -182,7 +178,7 @@ struct CGlobalVariables {
 	Groupbox color_world_obj{ "--World obj cham--", {
 		&color_items,
 		&color_building
-	  }
+		}
 	};
 
 	Listbox     color_type{ "Cham color type", { "red/blue", "enemy/ally" } };
@@ -197,7 +193,7 @@ struct CGlobalVariables {
 		&color_blue,
 		&color_enemy,
 		&color_ally
-	  }
+		}
 	};
 
 	ColorPicker color_cham_history{ "Backtrack history", Colors::White };
@@ -206,7 +202,7 @@ struct CGlobalVariables {
 	Groupbox color_backtrack{ "--Backtrack cham--", {
 		&color_cham_history,
 		&color_cham_tick
-	  }
+		}
 	};
 
 	ColorPicker color_aim{ "Target color", Colors::Violet };
@@ -215,18 +211,18 @@ struct CGlobalVariables {
 	Groupbox color_misc{ "--Misc color--", {
 		&color_aim,
 		&color_fov
-	  }
+		}
 	};
 
 	Checkbox    world_enabled{ "World/Sky color" };
-	ColorPicker world_clr{ "World color", Color(200) };
-	ColorPicker sky_clr{ "Sky color", Color(200) };
+	ColorPicker world_clr{ "World color", Color( 200 ) };
+	ColorPicker sky_clr{ "Sky color", Color( 200 ) };
 
 	Groupbox color_world{ "--World color--", {
 		&world_enabled,
 		&world_clr,
 		&sky_clr
-	  }
+		}
 	};
 
 	Tab Colors{ "Color", {
@@ -235,7 +231,7 @@ struct CGlobalVariables {
 		&color_backtrack,
 		&color_misc,
 		&color_world
-	  }
+		}
 	};
 
 	Checkbox Bunnyhop{ "Bunny hop", true };
@@ -244,7 +240,7 @@ struct CGlobalVariables {
 	Groupbox MOVEMENT{ "--Movement--", {
 		&Bunnyhop,
 		&Autostrafe
-	  }
+		}
 	};
 
 	Checkbox NoRecoil{ "No visual recoil", true };
@@ -253,7 +249,7 @@ struct CGlobalVariables {
 	Groupbox MISC{ "--Misc--", {
 		&NoRecoil,
 		&NoPush
-	  }
+		}
 	};
 
 	Checkbox engine{ "Engine prediction", true };
@@ -261,7 +257,7 @@ struct CGlobalVariables {
 	Groupbox ENGINE{ "--Engine pred--", {
 		&engine,
 		&engine_edgejump
-	  }
+		}
 	};
 
 	Checkbox latency{ "Latency" };
@@ -272,7 +268,7 @@ struct CGlobalVariables {
 		&latency,
 		&latency_amount,
 		&ping_diff,
-	  } };
+		} };
 	Checkbox explanation1{ "200 ping for 400ms backtrack", comment };
 	Checkbox explanation2{ "or 800 ping for the 1 sec backtrack", comment };
 
@@ -283,7 +279,7 @@ struct CGlobalVariables {
 		&LATENCY,
 		&explanation1,
 		&explanation2
-	  }
+		}
 	};
 
 	Checkbox    loadbyclass{ "Load based on class" };
@@ -294,30 +290,30 @@ struct CGlobalVariables {
 		&loadbyclass,
 		&savejson,
 		&loadjson
-	  }, 200
+		}, 200
 	};
 
 	Tab Config{ "Config", {
 		&CONFIG
-	  }
+		}
 	};
 
 	Checkbox Sv_cheat{ "Sv_cheat 1" };
 	KeyBind Thirdperson{ "Thirdperson", 0x54, e_kbmode::disabled };
-  Checkbox Thirdperson_scoped{ "Draw scoped player" };
+	Checkbox Thirdperson_scoped{ "Draw scoped player" };
 	Functionbox Dump_classId{ "Dump classId", Dumps::dumpClassIds };
 	Functionbox Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
-  Functionbox Detach{ "Detach", detach_start };
+	Functionbox Detach{ "Detach", detach_start };
 
 
 	Tab Testing{ "Testing", {
 		&Sv_cheat,
 		&Thirdperson,
-    &Thirdperson_scoped,
+		&Thirdperson_scoped,
 		&Dump_classId,
 		&Dump_netvar,
-    &Detach
-	  }
+		&Detach
+		}
 	};
 
 	TabGroup tf2{ {
@@ -327,6 +323,6 @@ struct CGlobalVariables {
 		&Colors,
 		&Config,
 		&Testing
-	  }
+		}
 	};
 };

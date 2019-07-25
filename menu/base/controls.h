@@ -10,12 +10,12 @@ using namespace std;
 void InitTextures();
 
 class Dialog {
-public:
+	public:
 	int x = 0, y = 0, w = 200, h = 200;
 	void(*Draw)(void* data, size_t Index);
 	void* data = nullptr;
 
-	Dialog(void(*DrawFunction)(void* data, size_t Index), int W = 200, int H = 200) {
+	Dialog( void(*DrawFunction)(void* data, size_t Index), int W = 200, int H = 200 ) {
 		Draw = DrawFunction;
 		w = W, h = H;
 	}
@@ -46,10 +46,10 @@ enum class e_control {
 };
 
 class BaseControl {
-protected:
+	protected:
 	int w = 0, h = 0;
 
-public:
+	public:
 	vector<BaseControl*> children;
 
 	const char* name = nullptr;
@@ -58,16 +58,16 @@ public:
 	int x = 0, y = 0;
 	bool* visible = nullptr;
 
-	void SetX(int X) {
+	void SetX( int X ) {
 		x = X;
 	}
-	void SetY(int Y) {
+	void SetY( int Y ) {
 		y = Y;
 	}
-	void SetPos(int X, int Y) {
+	void SetPos( int X, int Y ) {
 		x = X, y = Y;
 	}
-	void SetPos(POINT pos) {
+	void SetPos( POINT pos ) {
 		x = pos.x, y = pos.y;
 	}
 	POINT GetPos() {
@@ -81,46 +81,46 @@ public:
 		return h;
 	}
 
-	inline void SetWidth(int W) {
-		if (flags & scale_width) {
+	inline void SetWidth( int W ) {
+		if( flags & scale_width ) {
 			w = W;
 		}
 	}
-	inline void SetHeight(int H) {
-		if (flags & scale_height) {
+	inline void SetHeight( int H ) {
+		if( flags & scale_height ) {
 			h = H;
 		}
 	}
-	inline void SetScale(int W, int H) {
-		if (flags & scale_width) {
+	inline void SetScale( int W, int H ) {
+		if( flags & scale_width ) {
 			w = W;
 		}
 
-		if (flags & scale_height) {
+		if( flags & scale_height ) {
 			h = H;
 		}
 	}
 
-	inline void SetChildren(const vector<BaseControl*>& Children) {
+	inline void SetChildren( const vector<BaseControl*>& Children ) {
 		children = Children;
 	}
 	inline vector<BaseControl*> GetChildren() {
 		return children;
 	}
 
-	virtual int Draw(bool mouseOver = false) {
+	virtual int Draw( bool mouseOver = false ) {
 		return NULL;
 	}
 	virtual void HandleInput() {}
 
 	// - Automatically handles input and drawing
-	void RunControl(int Index = 0);
+	void RunControl( int Index = 0 );
 };
 
 class Space : public BaseControl {
-public:
+	public:
 	// - Amount: Extra spacing, zero is fine.
-	Space(int Amount = 0) {
+	Space( int Amount = 0 ) {
 		type = e_control::space;
 		h = Amount;
 		flags = scale_width | scale_height | noinput;
@@ -130,13 +130,13 @@ public:
 #define GetTabHeight 30
 
 class Tab : public BaseControl {
-public:
+	public:
 	bool enabled = false;
 
-	int Draw(bool mouseOver);
+	int Draw( bool mouseOver );
 	void HandleInput() {}
 
-	Tab(const char* Name, const vector<BaseControl*>& Children, int W = NULL) {
+	Tab( const char* Name, const vector<BaseControl*>& Children, int W = NULL ) {
 		type = e_control::tab;
 		name = Name, children = Children, w = W, h = GetTabHeight;
 		flags = scale_width;
@@ -144,25 +144,25 @@ public:
 };
 
 class TabGroup : public BaseControl {
-public:
+	public:
 	vector<Tab*> tabs;
 
 	int spacing = 5;
 	Tab* active = nullptr;
 
-	void AddTab(Tab* tab) {
-		if (!tabs.size()) {
+	void AddTab( Tab* tab ) {
+		if( !tabs.size() ) {
 			active = tab;
 		}
 
-		tabs.push_back(tab);
+		tabs.push_back( tab );
 	}
 
 	int Count() {
 		return tabs.size();
 	}
 
-	Tab* operator[](int i) const {
+	Tab* operator[]( int i ) const {
 		return tabs[i];
 	}
 
@@ -170,9 +170,9 @@ public:
 		return tabs.size() > 0 ? (tabs.size() * GetTabHeight) + (spacing * (tabs.size() - 1)) : 0;
 	}
 
-	int Draw(bool mouseOver);
+	int Draw( bool mouseOver );
 	void HandleInput();
-	TabGroup(const vector<Tab*>& Tabs, int W = 200, int Spacing = 5) {
+	TabGroup( const vector<Tab*>& Tabs, int W = 200, int Spacing = 5 ) {
 		type = e_control::tabgroup;
 		tabs = Tabs, w = W, h = tabs.size() * GetTabHeight + Spacing * (tabs.size() - 1), spacing = Spacing;
 		active = tabs[0];
@@ -185,14 +185,14 @@ public:
 };
 
 class Groupbox : public BaseControl {
-public:
-	int Draw(bool mouseOver);
+	public:
+	int Draw( bool mouseOver );
 	void HandleInput();
 
 	int GetHeight();
 
 	// Leaving the default height parameter will auto-fit all children controls
-	Groupbox(const char* Name, const vector<BaseControl*>& Children, int W = 180, int H = NULL) {
+	Groupbox( const char* Name, const vector<BaseControl*>& Children, int W = 180, int H = NULL ) {
 		type = e_control::groupbox;
 		name = Name, children = Children, w = W, h = H;
 		flags = scale_width;
@@ -200,15 +200,15 @@ public:
 };
 #define comment -1
 class Checkbox : public BaseControl {
-public:
+	public:
 	int value;
 
-	int Draw(bool mouseOver = false);
+	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	bool QuickReturn(bool Value, int X, int Y, int W = -1);
+	bool QuickReturn( bool Value, int X, int Y, int W = -1 );
 
-	Checkbox(const char* Name, int Value = false, int W = 100, int X = 0, int Y = 0) {
+	Checkbox( const char* Name, int Value = false, int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::slider;
 		name = Name, value = Value, x = X, y = Y;
 		flags = scale_width;
@@ -217,13 +217,13 @@ public:
 };
 
 class DrawPanel : public BaseControl {
-public:
+	public:
 	void(*draw)(int x, int y, int w, int h);
 
-	int Draw(bool mouseOver = false);
+	int Draw( bool mouseOver = false );
 	void HandleInput() {};
 
-	DrawPanel(const char* Name, void DrawFunction(int x, int y, int w, int h), int W = 200, int H = 200, int X = 0, int Y = 0) {
+	DrawPanel( const char* Name, void DrawFunction( int x, int y, int w, int h ), int W = 200, int H = 200, int X = 0, int Y = 0 ) {
 		type = e_control::custompanel, flags = scale_width | scale_height | noinput;
 		name = Name, draw = DrawFunction, x = X, y = Y;
 		w = W, h = H;
@@ -231,13 +231,13 @@ public:
 };
 
 class Slider : public BaseControl {
-public:
+	public:
 	int value = 0, min = 0, max = 0, step = 0;
 
-	int Draw(bool mouseOver = false);
+	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	Slider(const char* Name, int Value, int Min, int Max, int Step, int W = 100, int X = 0, int Y = 0) {
+	Slider( const char* Name, int Value, int Min, int Max, int Step, int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::slider, flags = scale_width;
 		name = Name, value = Value, x = X, y = Y;
 		min = Min, max = Max, step = Step;
@@ -246,28 +246,28 @@ public:
 };
 
 class Listbox : public BaseControl {
-public:
+	public:
 	size_t value = 0;
 	vector<string> list = {};
-	int Draw(bool mouseOver = false);
+	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	Listbox(const char* Name, vector<string> List, int Value = 0, int W = 100, int X = 0, int Y = 0) {
+	Listbox( const char* Name, vector<string> List, int Value = 0, int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::listbox, flags = scale_width;
 		name = Name, value = Value, list = List, x = X, y = Y;
 		h = 15 + 15, w = W;
 	}
 };
 class ColorPicker : public BaseControl {
-public:
+	public:
 	Color color;
 	Color cDef;
 	bool bDef = true;
 	bool rainbow = false;
-	int Draw(bool mouseOver = false);
+	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	ColorPicker(const char* Name, Color defaultColor, bool Rainbow = false, int W = 100, int X = 0, int Y = 0) {
+	ColorPicker( const char* Name, Color defaultColor, bool Rainbow = false, int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::colorpicker, flags = scale_width;
 		name = Name, color = cDef = defaultColor, rainbow = Rainbow, x = X, y = Y;
 		h = 20, w = W;
@@ -284,17 +284,17 @@ enum class e_kbmode : byte {
 class KeyBind : public BaseControl {
 	bool keyHeld = false;
 	bool toggled = false;
-public:
+	public:
 	e_kbmode mode = e_kbmode::always;
 
 	byte key = NULL;
 	bool UpdateKeys();
 	bool KeyDown();
 
-	int Draw(bool mouseOver = false);
+	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	KeyBind(const char* Name, byte VirtualKey, e_kbmode Mode = e_kbmode::disabled, int W = 100, int X = 0, int Y = 0) {
+	KeyBind( const char* Name, byte VirtualKey, e_kbmode Mode = e_kbmode::disabled, int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::keybind, flags = scale_width;
 		name = Name, key = VirtualKey, mode = Mode, x = X, y = Y;
 		h = 15 + 15, w = W;
@@ -303,12 +303,12 @@ public:
 
 class Functionbox : public BaseControl {
 	void(*func)();
-public:
+	public:
 
-	int Draw(bool mouseOver = false);
+	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	Functionbox(const char* Name, void(*Func)(void), int W = 100, int X = 0, int Y = 0) {
+	Functionbox( const char* Name, void(*Func)(void), int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::func, flags = scale_width;
 		name = Name, func = Func, x = X, y = Y;
 		h = 15 + 15, w = W;
