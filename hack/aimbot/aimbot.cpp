@@ -39,7 +39,7 @@ namespace Aimbot {
 		gCvars.aim_spot = GetBestHitbox( pLocal, pCommand, wpn );
 
 		if( gCvars.aim_spot == Vector() ) {
-			return;
+			gCvars.aim_spot = GetBaseEntity( gCvars.aim_index )->GetWorldSpaceCenter();
 		}
 
 		weaponid id = wpn->GetItemDefinitionIndex();
@@ -203,7 +203,7 @@ namespace Aimbot {
 					iBestHitbox = 4;
 				}
 
-				Vector vEntity = pEntity->GetHitbox( iBestHitbox );
+				Vector vEntity = pEntity->GetHitbox( pLocal, iBestHitbox );
 
 				if( vEntity.IsZero() ) {
 					continue;
@@ -272,6 +272,7 @@ namespace Aimbot {
 
 			if( mp_friendlyfire->GetInt() == 0 && pEntity->GetTeamNum() == pLocal->GetTeamNum() )
 				continue;
+
 			Vector vEntity = pEntity->GetWorldSpaceCenter();
 			Vector angle = Util::CalcAngle( local_pos, vEntity );
 			float fov = Util::GetFOV( pCommand->viewangles, angle );
@@ -298,7 +299,7 @@ namespace Aimbot {
 		switch( gCvars.aim_mode ) {
 			case MODE::PLAYER:
 			{
-				if( wpn->GetSlot() == 2 ) return pEntity->GetHitbox( 4 );
+				if( wpn->GetSlot() == 2 ) return pEntity->GetHitbox( pLocal, 4 );
 
 				switch( gCvars.Aimbot_hitbox.value ) {
 					case 0:
@@ -309,7 +310,7 @@ namespace Aimbot {
 						Vector hitbox_pos;
 
 						for( int box = Util::isHeadshotWeapon( pLocal->GetClass(), wpn ) ? 0 : 4; box < 17; box++ ) {
-							hitbox_pos = gCvars.Aimbot_multipoint.value ? pEntity->GetMultipoint( pLocal, box ) : pEntity->GetHitbox( box );
+							hitbox_pos = gCvars.Aimbot_multipoint.value ? pEntity->GetMultipoint( pLocal, box ) : pEntity->GetHitbox( pLocal, box );
 							Vector angle = Util::CalcAngle( pLocal->GetEyePosition(), hitbox_pos );
 							float fov = Util::GetFOV( pCommand->viewangles, angle );
 
@@ -334,7 +335,7 @@ namespace Aimbot {
 						if( gCvars.Aimbot_multipoint.value )
 							return pEntity->GetMultipoint( pLocal, 0 );
 						else
-							return pEntity->GetHitbox( 0 );
+							return pEntity->GetHitbox( pLocal, 0 );
 					};
 
 					case 3:
@@ -342,7 +343,7 @@ namespace Aimbot {
 						if( gCvars.Aimbot_multipoint.value )
 							return pEntity->GetMultipoint( pLocal, 4 );
 						else
-							return pEntity->GetHitbox( 4 );
+							return pEntity->GetHitbox(pLocal, 4 );
 					};
 
 					default:
@@ -357,7 +358,7 @@ namespace Aimbot {
 				if( BacktrackData[gCvars.aim_index].size() > gCvars.backtrack_arr && Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][gCvars.backtrack_arr].simtime ) ) {
 					return BacktrackData[gCvars.aim_index][gCvars.backtrack_arr].hitbox;
 				} else if( !gCvars.latency.value ) {
-					return pEntity->GetHitbox( gCvars.hitbox );
+					return pEntity->GetHitbox( pLocal, gCvars.hitbox );
 				} else {
 					return Vector();
 				}

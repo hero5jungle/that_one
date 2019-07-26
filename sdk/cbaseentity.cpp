@@ -12,22 +12,26 @@ bool CBaseEntity::CanSee( CBaseEntity* pEntity, const Vector& pos ) {
 	if( tr.m_pEnt == nullptr || pEntity == nullptr ) {
 		return tr.fraction == 1.0f;
 	}
-
-	return (tr.m_pEnt->GetIndex() == pEntity->GetIndex());
+	return (tr.m_pEnt->GetIndex() == pEntity->GetIndex()) || (tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum());
 }
 
-int CBaseEntity::GetCanSeeHitbox( CBaseEntity* pEntity, const Vector& pos ) {
+Vector CBaseEntity::CanSeeSpot( CBaseEntity* pEntity, const Vector& pos ) {
 	trace_t tr;
 	Ray_t ray;
 	CTraceFilter filter;
 	ray.Init( this->GetEyePosition(), pos );
 	gInts.EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
 
-	if( tr.m_pEnt && tr.m_pEnt->GetIndex() == pEntity->GetIndex() ) {
-		return tr.hitbox;
+	if( tr.m_pEnt == nullptr || pEntity == nullptr ) {
+		if( tr.fraction == 1.0f )
+			return tr.endpos;
 	}
 
-	return -1;
+	if( (tr.m_pEnt->GetIndex() == pEntity->GetIndex()) || (tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum()) ) {
+		return tr.endpos;
+	}
+
+	return Vector();
 }
 
 void CBaseEntity::RemoveNoDraw() {
@@ -37,7 +41,26 @@ void CBaseEntity::RemoveNoDraw() {
 		add_to_leaf_system( this, 7 );
 }
 
-Vector CBaseEntity::GetHitbox( int hitbox ) {
+int CBaseEntity::registerGlowObject( Color color, bool bRenderWhenOccluded, bool bRenderWhenUnoccluded ) {
+
+	using registerFn = int( __thiscall* )(CGlowObjectManager*, CBaseEntity*, Vector&, float, bool, bool, int);
+	static DWORD dwFn = Signatures::GetClientSignature( "55 8B EC 51 53 56 8B F1 57 8B 5E 14" );
+	static registerFn Register = (registerFn)dwFn;
+
+	return Register( gInts.GlowManager, this, color.rgb(), color[3] / 255.0f, bRenderWhenOccluded, bRenderWhenUnoccluded, -1 );
+}
+
+bool CBaseEntity::HasGlowEffect() {
+	for( int n = 0; n < gInts.GlowManager->m_GlowObjectDefinitions.Count(); n++ ) {
+		GlowObjectDefinition_t& GlowObject = gInts.GlowManager->m_GlowObjectDefinitions[n];
+		CBaseEntity* ent = gInts.EntList->GetClientEntityFromHandle( GlowObject.m_hEntity );
+		if( ent == this )
+			return true;
+	}
+	return false;
+}
+
+Vector CBaseEntity::GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind ) {
 	DWORD* model = GetModel();
 
 	if( !model ) {
@@ -71,10 +94,16 @@ Vector CBaseEntity::GetHitbox( int hitbox ) {
 	Vector center = (box->bbmin + box->bbmax) * 0.5f;
 	Vector vHitbox;
 	Util::vector_transform( center, matrix[box->bone], vHitbox );
-	return vHitbox;
+	vHitbox = pLocal->CanSeeSpot( this, vHitbox );
+	if( blind || !vHitbox.IsZero() ) {
+		return vHitbox;
+	} else {
+		Util::vector_transform( center, matrix[box->bone], vHitbox );
+		return vHitbox;
+	}
 }
 
-Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox ) {
+Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind ) {
 	DWORD* model = GetModel();
 
 	if( !model ) {
@@ -109,12 +138,12 @@ Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox ) {
 	Vector max = box->bbmax * 0.7f;
 
 	Vector center = (min + max) * 0.5f;
-	Vector temp;
+	Vector vHitbox;
 
-	Util::vector_transform( center, matrix[box->bone], temp );
+	Util::vector_transform( center, matrix[box->bone], vHitbox );
 
-	if( pLocal->CanSee( this, temp ) )
-		return temp;
+	if( pLocal->CanSee( this, vHitbox ) )
+		return vHitbox;
 
 	Vector Points[8]{
 		Vector( max.x, min.y, max.z ),
@@ -128,12 +157,18 @@ Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox ) {
 	};
 
 	for( int i = 0; i < 8; i++ ) {
-		Util::vector_transform( Points[i], matrix[box->bone], temp );
-		if( pLocal->CanSee( this, temp ) )
-			return temp;
+		Util::vector_transform( Points[i], matrix[box->bone], vHitbox );
+		vHitbox = pLocal->CanSeeSpot( this, vHitbox );
+		if( !vHitbox.IsZero() )
+			return vHitbox;
 	}
 
-	return Vector();
+	if( blind ) {
+		Util::vector_transform( center, matrix[box->bone], vHitbox );
+		return vHitbox;
+	} else {
+		return Vector();
+	}
 }
 
 CBaseCombatWeapon* CBaseEntity::GetActiveWeapon() {

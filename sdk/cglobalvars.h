@@ -122,7 +122,7 @@ struct CGlobalVariables {
 	};
 
 	Listbox  ESP_cham_mat{ "Cham material", { "shaded", "glow"}, 0 };
-	Checkbox ESP_object_cham{ "Object cham", true };
+	Listbox  ESP_object{ "Object esp",{"none","cham","glow"}, 1 };
 	Listbox  ESP_building{ "Building esp",{"none","cham","glow"}, 1 };
 	Listbox  ESP_player{ "Player esp",{"none","cham","glow"}, 1 };
 	Checkbox ESP_backtrack{ "Backtrack cham", true };
@@ -132,7 +132,7 @@ struct CGlobalVariables {
 
 	Groupbox ESP_CHAM{ "--Chams--", {
 		&ESP_cham_mat,
-		&ESP_object_cham,
+		&ESP_object,
 		&ESP_building,
 		&ESP_player,
 		&ESP_backtrack,
@@ -172,11 +172,11 @@ struct CGlobalVariables {
 		}
 	};
 
-	ColorPicker color_items{ "Items", Colors::Green };
+	ColorPicker color_objects{ "Objects", Colors::Green };
 	ColorPicker color_building{ "Buildings", Colors::White };
 
 	Groupbox color_world_obj{ "--World obj cham--", {
-		&color_items,
+		&color_objects,
 		&color_building
 		}
 	};

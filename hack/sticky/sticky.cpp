@@ -66,7 +66,7 @@ namespace DemoSticky {
 						continue;
 					}
 
-					Vector vent = pEntity->GetHitbox( 4 );
+					Vector vent = pEntity->GetHitbox(pLocal, 4, true );
 					float dist = Util::Distance( sticky_loc, vent );
 
 					if( dist < closest_dist || closest_dist == 0 ) {

@@ -77,9 +77,10 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 		Latency::UpdateIncomingSequences();
 	}
 	if( gInts.Engine->IsInGame() ) {
-		if( gCvars.ESP_building.value == 2 || gCvars.ESP_player.value == 2 ) {
+		CBaseEntity* pLocal = GetBaseEntity( me );
+
+		if( gCvars.ESP_building.value == 2 || gCvars.ESP_player.value == 2 || gCvars.ESP_object.value == 2 ) {
 			if( Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START ) {
-				CBaseEntity* pLocal = GetBaseEntity( me );
 				int max = gInts.EntList->GetHighestEntityIndex();
 				for( int n = 1; n <= max; n++ ) {
 					CBaseEntity* pEntity = GetBaseEntity( n );
@@ -89,10 +90,14 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 
 					bool valid = !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE;
 					bool team = !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum();
+
 					switch( (classId)pEntity->GetClassId() ) {
 						case classId::CTFPlayer:
 						{
 							if( gCvars.ESP_player.value == 2 ) {
+								if( !pEntity->HasGlowEffect() ) {
+									pEntity->registerGlowObject( Util::team_color( pLocal, pEntity ), true, true );
+								}
 								pEntity->SetGlowEnabled( valid && team );
 							}
 
@@ -104,11 +109,24 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 						case classId::CObjectTeleporter:
 						{
 							if( gCvars.ESP_building.value == 2 ) {
-								pEntity->UpdateGlowEffect();
+								if( !pEntity->HasGlowEffect() ) {
+									pEntity->registerGlowObject( Util::team_color( pLocal, pEntity ), true, true );
+								}
 								pEntity->SetGlowEnabled( valid && team );
 							}
 
 							break;
+						}
+
+						case classId::CBaseAnimating:
+						case classId::CTFAmmoPack:
+						{
+							if( gCvars.ESP_object.value == 2 ) {
+								if( !pEntity->HasGlowEffect() ) {
+									pEntity->registerGlowObject( gCvars.color_objects.color, true, true );
+								}
+								pEntity->SetGlowEnabled( valid && team );
+							}
 						}
 
 						default:
@@ -116,57 +134,103 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 					}
 				}
 			}
-		}
 
-		if( Stage == FRAME_RENDER_START ) {
-			CBaseEntity* pLocal = GetBaseEntity( me );
-
-			if( gCvars.ESP_building.value == 2 || gCvars.ESP_player.value == 2 ) {
-				for( int n = 0; n < gInts.GlowManager->m_GlowObjectDefinitions.m_Size; n++ ) {
-					GlowObjectDefinition_t& GlowObject = gInts.GlowManager->m_GlowObjectDefinitions[n];
+			if( Stage == FRAME_RENDER_START ) {
+				for( int i = 0; i < gInts.GlowManager->m_GlowObjectDefinitions.Count(); i++ ) {
+					GlowObjectDefinition_t& GlowObject = gInts.GlowManager->m_GlowObjectDefinitions[i];
 
 					if( GlowObject.m_nNextFreeSlot != ENTRY_IN_USE )
 						continue;
 
 					CBaseEntity* pEntity = gInts.EntList->GetClientEntityFromHandle( GlowObject.m_hEntity );
-					Color team = Util::team_color( pLocal, pEntity );
-					GlowObject.m_vGlowColor = team.rgb();
-					GlowObject.m_flGlowAlpha = team[3] / 255.f;
-					GlowObject.m_bRenderWhenUnoccluded = true;
-					GlowObject.m_bRenderWhenOccluded = true;
-				}
-			}
+					if( pEntity ) {
+						Color color;
+						switch( (classId)pEntity->GetClassId() ) {
+							case classId::CTFPlayer:
+							{
+								if( gCvars.ESP_player.value == 2 ) {
+									color = Util::team_color( pLocal, pEntity );
+									GlowObject.m_vGlowColor = color.rgb();
+									GlowObject.m_flGlowAlpha = color[3] / 255.0f;
+								} else {
+									gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
+								}
+								break;
+							}
 
-			if( gCvars.sniper_nozoom.value ) {
-				pLocal->SetFov( pLocal->GetDefaultFov() );
-				pLocal->set( 0xE5C, 0.0f );//m_flFOVRate
-			}
-
-			if( gCvars.NoRecoil.value ) {
-				pLocal->set( 0xE8C, Vector() );
-			}
-
-			static bool Thirdperson_enabled = false;
-
-			if( gCvars.Thirdperson.KeyDown() ) {
-				pLocal->SetThirdpersonView( qLASTTICK );
-
-				if( pLocal->GetLifeState() == LIFE_ALIVE ) {
-					pLocal->SetThirdperson( true );
-					Thirdperson_enabled = true;
-					if( gCvars.Thirdperson_scoped.value && pLocal->GetCond() & TFCond_Zoomed ) {
-						pLocal->RemoveNoDraw();
-						if( auto wpn = pLocal->GetActiveWeapon() ) {
-							wpn->RemoveNoDraw();
+							case classId::CObjectSentrygun:
+							case classId::CObjectDispenser:
+							case classId::CObjectTeleporter:
+							{
+								if( gCvars.ESP_building.value == 2 ) {
+									color = Util::team_color( pLocal, pEntity );
+									GlowObject.m_vGlowColor = color.rgb();
+									GlowObject.m_flGlowAlpha = color[3] / 255.0f;
+								} else {
+									gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
+								}
+								break;
+							}
+							case classId::CBaseAnimating:
+							case classId::CTFAmmoPack:
+							{
+								if( gCvars.ESP_object.value == 2 ) {
+									color = gCvars.color_objects.color;
+									GlowObject.m_vGlowColor = color.rgb();
+									GlowObject.m_flGlowAlpha = color[3] / 255.0f;
+								} else {
+									gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
+								}
+								break;
+							}
+							default:
+								break;
 						}
+
+
+					} else {
+						gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
 					}
+
 				}
-			} else if( !Thirdperson_enabled || !gCvars.Thirdperson.KeyDown() ) {
-				pLocal->SetThirdperson( false );
-				Thirdperson_enabled = false;
+			}
+		} else {
+			if( gInts.GlowManager->m_GlowObjectDefinitions.Count() ) {
+				gInts.GlowManager->m_GlowObjectDefinitions.RemoveAll();
 			}
 		}
+
+		if( gCvars.sniper_nozoom.value ) {
+			pLocal->SetFov( pLocal->GetDefaultFov() );
+			pLocal->set( 0xE5C, 0.0f );//m_flFOVRate
+		}
+
+		if( gCvars.NoRecoil.value ) {
+			pLocal->set( 0xE8C, Vector() );
+		}
+
+		static bool Thirdperson_enabled = false;
+
+		if( gCvars.Thirdperson.KeyDown() ) {
+			pLocal->SetThirdpersonView( qLASTTICK );
+
+			if( pLocal->GetLifeState() == LIFE_ALIVE ) {
+				pLocal->SetThirdperson( true );
+				Thirdperson_enabled = true;
+				if( gCvars.Thirdperson_scoped.value && pLocal->GetCond() & TFCond_Zoomed ) {
+					pLocal->RemoveNoDraw();
+					if( auto wpn = pLocal->GetActiveWeapon() ) {
+						wpn->RemoveNoDraw();
+					}
+				}
+			}
+		} else if( !Thirdperson_enabled || !gCvars.Thirdperson.KeyDown() ) {
+			pLocal->SetThirdperson( false );
+			Thirdperson_enabled = false;
+		}
+
 	}
+
 	static unordered_map<MaterialHandle_t, Color> worldmats_new, worldmats_old;
 
 	if( (!gInts.Engine->IsInGame() || !gCvars.world_enabled.value) && worldmats_old.size() ) {
@@ -285,24 +349,27 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 						for( int tick = 0; tick < (int)BacktrackData[gCvars.aim_index].size() && ticks < 12; tick++ ) {
 							if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][tick].simtime ) ) {
 								ticks++;
-
 								if( BacktrackData[gCvars.aim_index][tick].valid && BacktrackData[gCvars.aim_index][tick].velocity.Length() > 45.0f ) {
-									Color tick_color = tick == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
-									//Hidden
-									wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
-									Materials::ForceMaterial( wanted_material, tick_color );
-									gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
-									//Visible
-									wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
-									Materials::ForceMaterial( wanted_material, tick_color );
-									gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+									if( gCvars.ESP_player.value == 1 ) {
+										Color tick_color = tick == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
+										//Hidden
+										wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
+										Materials::ForceMaterial( wanted_material, tick_color );
+										gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+										//Visible
+										wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
+										Materials::ForceMaterial( wanted_material, tick_color );
+										gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+										Materials::ResetMaterial();
+									} else {
+										gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+									}
 								}
 							}
 						}
 					}
 				}
 				if( gCvars.ESP_player.value == 1 ) {
-
 					//player
 					//Hidden
 					wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
@@ -311,6 +378,10 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 					//Visible
 					wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 					Materials::ForceMaterial( wanted_material, team_color );
+					gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+					Materials::ResetMaterial();
+				} else {
+					gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 				}
 			}
 			break;
@@ -332,8 +403,12 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 						//Visible
 						wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 						Materials::ForceMaterial( wanted_material, team_color );
+						gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+						Materials::ResetMaterial();
 					}
 				}
+			} else {
+				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			}
 			break;
 		}
@@ -344,7 +419,7 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 		case classId::CTFProjectile_Rocket:
 		{
 			if( gCvars.ESP_proj_cham.value ) {
-				Color RGBA = gCvars.color_items.get_color();
+				Color RGBA = gCvars.color_objects.get_color();
 				//Hidden
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
 				Materials::ForceMaterial( wanted_material, RGBA );
@@ -352,6 +427,10 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 				//Visible
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 				Materials::ForceMaterial( wanted_material, RGBA );
+				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Materials::ResetMaterial();
+			} else {
+				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			}
 			break;
 		}
@@ -359,8 +438,8 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 		case classId::CBaseAnimating:
 		case classId::CTFAmmoPack:
 		{
-			if( gCvars.ESP_object_cham.value ) {
-				Color RGBA = gCvars.color_items.get_color();
+			if( gCvars.ESP_object.value == 1 ) {
+				Color RGBA = gCvars.color_objects.get_color();
 				//Hidden
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
 				Materials::ForceMaterial( wanted_material, RGBA );
@@ -368,14 +447,20 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 				//Visible
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 				Materials::ForceMaterial( wanted_material, RGBA );
+				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Materials::ResetMaterial();
+			} else {
+				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			}
 			break;
 		}
+
 		default:
+		{
+			gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			break;
+		}
 	}
 
-	gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-	Materials::ResetMaterial();
 	gHooks.DrawModelExecute.rehook();
 }

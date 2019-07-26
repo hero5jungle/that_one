@@ -12,6 +12,7 @@
 #include "headers/studio.h"
 #include "headers/weaponlist.h"
 #include "headers/bspflags.h"
+#include "headers/utlvector.h"
 using namespace std;
 
 #define WIN32_LEAN_AND_MEAN
@@ -496,12 +497,14 @@ struct CBaseEntity {
 	}
 
 	//CBaseEntity.cpp
-	Vector GetHitbox( int hitbox );
-	Vector GetMultipoint( CBaseEntity* pLocal, int hitbox );
+	Vector GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind = false );
+	Vector GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind = false );
 	CBaseCombatWeapon* GetActiveWeapon();
 	bool CanSee( CBaseEntity* pEntity, const Vector& pos );
-	int GetCanSeeHitbox( CBaseEntity* pEntity, const Vector& pos );
+	Vector CanSeeSpot( CBaseEntity* pEntity, const Vector& pos );
 	void RemoveNoDraw();
+	int registerGlowObject( Color color, bool bRenderWhenOccluded, bool bRenderWhenUnoccluded );
+	bool HasGlowEffect();
 };
 
 class CObject : public CBaseEntity {
@@ -3032,30 +3035,6 @@ struct GlowObjectDefinition_t {
 	bool m_bRenderWhenUnoccluded;
 	int m_nSplitScreenSlot;
 	int m_nNextFreeSlot;
-};
-
-template <class T, class I = int> class CUtlMemory {
-	public:
-	T& operator[]( int i ) {
-		return m_pMemory[i];
-	};
-
-	T* m_pMemory;
-	int m_nAllocationCount;
-	int m_nGrowSize;
-};
-
-template <class T, class A = CUtlMemory<T>> class CUtlVector {
-	public:
-	typedef A CAllocator;
-
-	T& operator[]( int i ) {
-		return m_Memory[i];
-	};
-
-	CAllocator m_Memory;
-	int m_Size;
-	T* m_pElements;
 };
 
 class CGlowObjectManager {

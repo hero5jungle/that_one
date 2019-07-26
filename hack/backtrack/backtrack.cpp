@@ -24,7 +24,7 @@ namespace Backtrack {
 				continue;
 			}
 
-			Vector hitbox = pEntity->GetHitbox( gCvars.hitbox != -1 ? gCvars.hitbox : 0 );
+			Vector hitbox = pEntity->GetHitbox( pLocal, gCvars.hitbox != -1 ? gCvars.hitbox : 0, true );
 
 			BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ), hitbox, pEntity->GetEyeAngles(), pEntity->GetWorldSpaceCenter() } );
 
