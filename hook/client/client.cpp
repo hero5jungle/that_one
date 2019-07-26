@@ -186,12 +186,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 							default:
 								break;
 						}
-
-
-					} else {
-						gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
-					}
-
+					} 
 				}
 			}
 		} else {
