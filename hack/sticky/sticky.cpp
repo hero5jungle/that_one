@@ -61,12 +61,12 @@ namespace DemoSticky {
 					}
 
 					if( pEntity->GetCond() & TFCond_Ubercharged ||
-							pEntity->GetCond() & TFCond_UberchargeFading ||
-							pEntity->GetCond() & TFCond_Bonked ) {
+						pEntity->GetCond() & TFCond_UberchargeFading ||
+						pEntity->GetCond() & TFCond_Bonked ) {
 						continue;
 					}
 
-					Vector vent = pEntity->GetHitbox(pLocal, 4, true );
+					Vector vent = pEntity->GetHitbox( pLocal, 4, true );
 					float dist = Util::Distance( sticky_loc, vent );
 
 					if( dist < closest_dist || closest_dist == 0 ) {

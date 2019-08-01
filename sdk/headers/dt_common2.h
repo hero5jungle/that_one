@@ -107,7 +107,7 @@ typedef enum {
 
 
 class DVariant {
-	public:
+public:
 	DVariant() {
 		m_Type = DPT_Float;
 	}
@@ -130,13 +130,13 @@ class DVariant {
 
 			case DPT_Vector:
 				sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f)",
-									 m_Vector[0], m_Vector[1], m_Vector[2] );
+					m_Vector[0], m_Vector[1], m_Vector[2] );
 				break;
 			#if 0 // We can't ship this since it changes the size of DTVariant to be 20 bytes instead of 16 and that breaks MODs!!!
 
 			case DPT_Quaternion:
 				sprintf_s( text, sizeof( text ), "(%.3f,%.3f,%.3f %.3f)",
-									 m_Vector[0], m_Vector[1], m_Vector[2], m_Vector[3] );
+					m_Vector[0], m_Vector[1], m_Vector[2], m_Vector[3] );
 				break;
 			#endif
 

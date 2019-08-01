@@ -19,7 +19,7 @@ using namespace std;
 #pragma warning(disable:4996)
 #pragma warning(disable:4244)
 
-using CreateInterfaceFn = void* (*)(const char* pName, int* pReturnCode);
+using CreateInterfaceFn = void* ( * )( const char* pName, int* pReturnCode );
 
 class CGameTrace;
 class CUtil;
@@ -142,10 +142,10 @@ enum MoveType_t {
 };
 
 class ClientClass {
-	private:
+private:
 	BYTE padding[8];
 
-	public:
+public:
 	const char* name;
 	RecvTable* table;
 	ClientClass* next;
@@ -153,15 +153,15 @@ class ClientClass {
 };
 
 class CHLClient {
-	public:
+public:
 	ClientClass* GetAllClasses() {
-		using OriginalFn = ClientClass * (__thiscall*)(PVOID);
-		return getvfunc<OriginalFn>( this, 8 )(this);
+		using OriginalFn = ClientClass * ( __thiscall* )( PVOID );
+		return getvfunc<OriginalFn>( this, 8 )( this );
 	}
 };
 
 class CGlobals {
-	public:
+public:
 	float realtime;
 	int framecount;
 	float absoluteframetime;
@@ -175,8 +175,9 @@ class CGlobals {
 };
 
 class CUserCmd {
-	public:
-	virtual ~CUserCmd() {}; // Destructor 0
+public:
+	virtual ~CUserCmd() {
+	}; // Destructor 0
 	int command_number; // 4
 	int tick_count; // 8
 	Vector viewangles; // C
@@ -227,12 +228,12 @@ enum tf_classes {
 struct CBaseEntity {
 	template <typename T>
 	T get( uintptr_t off ) {
-		return *(T*)((uintptr_t)this + off);
+		return *(T*)( (uintptr_t)this + off );
 	}
 
 	template <typename T>
 	void set( uintptr_t off, T val ) {
-		(*(T*)((uintptr_t)this + off)) = val;
+		( *(T*)( (uintptr_t)this + off ) ) = val;
 	}
 
 	Vector GetViewOffset() {
@@ -256,8 +257,8 @@ struct CBaseEntity {
 	}
 
 	Vector& GetAbsOrigin() {
-		typedef Vector& (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( this, 9 )(this);
+		typedef Vector& ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 9 )( this );
 	}
 
 	int ammo() {
@@ -265,8 +266,8 @@ struct CBaseEntity {
 	}
 
 	bool IsBaseCombatWeapon() {
-		typedef bool( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 137 )(this);
+		typedef bool( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 137 )( this );
 	}
 
 	int GetHitboxSet() {
@@ -320,68 +321,68 @@ struct CBaseEntity {
 	}
 
 	void UpdateGlowEffect() {
-		typedef void( __thiscall * OriginalFn )(void*);
-		return getvfunc<OriginalFn>( this, 226 )(this);
+		typedef void( __thiscall * OriginalFn )( void* );
+		return getvfunc<OriginalFn>( this, 226 )( this );
 	}
 
 	Vector& GetAbsAngles() {
-		typedef Vector& (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( this, 10 )(this);
+		typedef Vector& ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 10 )( this );
 	}
 
 	Vector GetWorldSpaceCenter() {
 		Vector vMin, vMax;
 		this->GetRenderBounds( vMin, vMax );
 		Vector vWorldSpaceCenter = this->GetAbsOrigin();
-		vWorldSpaceCenter.z += (vMin.z + vMax.z) / 2;
+		vWorldSpaceCenter.z += ( vMin.z + vMax.z ) / 2;
 		return vWorldSpaceCenter;
 	}
 
 	DWORD* GetModel() {
-		PVOID pRenderable = (PVOID)(this + 0x4);
-		typedef DWORD* (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( pRenderable, 9 )(pRenderable);
+		PVOID pRenderable = (PVOID)( this + 0x4 );
+		typedef DWORD* ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( pRenderable, 9 )( pRenderable );
 	}
 
 	bool SetupBones( matrix3x4* pBoneToWorldOut, int nMaxBones, int boneMask, float currentTime ) {
-		PVOID pRenderable = (PVOID)(this + 0x4);
-		typedef bool( __thiscall * OriginalFn )(PVOID, matrix3x4*, int, int, float);
-		return getvfunc<OriginalFn>( pRenderable, 16 )(pRenderable, pBoneToWorldOut, nMaxBones, boneMask, currentTime);
+		PVOID pRenderable = (PVOID)( this + 0x4 );
+		typedef bool( __thiscall * OriginalFn )( PVOID, matrix3x4*, int, int, float );
+		return getvfunc<OriginalFn>( pRenderable, 16 )( pRenderable, pBoneToWorldOut, nMaxBones, boneMask, currentTime );
 	}
 
 	ClientClass* GetClientClass() {
-		PVOID pNetworkable = (PVOID)(this + 0x8);
-		typedef ClientClass* (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( pNetworkable, 2 )(pNetworkable);
+		PVOID pNetworkable = (PVOID)( this + 0x8 );
+		typedef ClientClass* ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( pNetworkable, 2 )( pNetworkable );
 	}
 
 	bool IsDormant() {
-		PVOID pNetworkable = (PVOID)(this + 0x8);
-		typedef bool( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( pNetworkable, 8 )(pNetworkable);
+		PVOID pNetworkable = (PVOID)( this + 0x8 );
+		typedef bool( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( pNetworkable, 8 )( pNetworkable );
 	}
 
 	int GetIndex() {
-		PVOID pNetworkable = (PVOID)(this + 0x8);
-		typedef int( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( pNetworkable, 9 )(pNetworkable);
+		PVOID pNetworkable = (PVOID)( this + 0x8 );
+		typedef int( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( pNetworkable, 9 )( pNetworkable );
 	}
 
 	void GetRenderBounds( Vector& mins, Vector& maxs ) {
-		PVOID pRenderable = (PVOID)(this + 0x4);
-		typedef void( __thiscall * OriginalFn )(PVOID, Vector&, Vector&);
-		getvfunc<OriginalFn>( pRenderable, 20 )(pRenderable, mins, maxs);
+		PVOID pRenderable = (PVOID)( this + 0x4 );
+		typedef void( __thiscall * OriginalFn )( PVOID, Vector&, Vector& );
+		getvfunc<OriginalFn>( pRenderable, 20 )( pRenderable, mins, maxs );
 	}
 
 	matrix3x4& GetRgflCoordinateFrame() {
-		PVOID pRenderable = (PVOID)(this + 0x4);
-		typedef matrix3x4& (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( pRenderable, 34 )(pRenderable);
+		PVOID pRenderable = (PVOID)( this + 0x4 );
+		typedef matrix3x4& ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( pRenderable, 34 )( pRenderable );
 	}
 
 	int GetMaxHealth() {
-		typedef int( __thiscall * OriginalFn )(void*);
-		return getvfunc<OriginalFn>( this, 107 )(this);
+		typedef int( __thiscall * OriginalFn )( void* );
+		return getvfunc<OriginalFn>( this, 107 )( this );
 	}
 	int GetGroundEntity() {
 		DYNVAR_RETURN( int, this, "DT_BasePlayer", "localdata", "m_hGroundEntity" );
@@ -508,9 +509,9 @@ struct CBaseEntity {
 };
 
 class CObject : public CBaseEntity {
-	public:
+public:
 	CObject* ToBaseObject( CBaseEntity* pBaseEntity ) {
-		return (CObject*)(pBaseEntity);
+		return (CObject*)( pBaseEntity );
 	}
 
 	CBaseEntity* GetOwner() {
@@ -555,14 +556,14 @@ class CObject : public CBaseEntity {
 };
 
 class CObjectDispenser : public CObject {
-	public:
+public:
 	int GetMetalReserve() {
 		DYNVAR_RETURN( int, this, "DT_ObjectDispenser", "m_iAmmoMetal" );
 	}
 };
 
 class CObjectSentryGun : public CObject {
-	public:
+public:
 	int GetRocket() {
 		if( GetLevel() == 3 ) {
 			DYNVAR_RETURN( int, this, "DT_ObjectSentrygun", "m_iAmmoRockets" );
@@ -733,7 +734,7 @@ enum ButtonCode_t {
 };
 
 class CObjectTeleporter : public CObject {
-	public:
+public:
 	char* GetStateString() {
 		switch( GetState() ) {
 			case 1:
@@ -763,7 +764,7 @@ class CObjectTeleporter : public CObject {
 
 	float GetRechargeTime() {
 		DYNVAR_RETURN( float, this, "DT_ObjectTeleporter",
-									 "m_flCurrentRechargeDuration" );
+			"m_flCurrentRechargeDuration" );
 	}
 
 	int GetYawToExit() {
@@ -772,20 +773,20 @@ class CObjectTeleporter : public CObject {
 };
 
 class CBaseCombatWeapon : public CBaseEntity {
-	public:
+public:
 	int GetSlot() {
-		typedef int( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 327 )(this);
+		typedef int( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 327 )( this );
 	}
 
 	char* GetName() {
-		typedef char* (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( this, 329 )(this);
+		typedef char* ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 329 )( this );
 	}
 
 	char* GetPrintName() {
-		typedef char* (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( this, 330 )(this);
+		typedef char* ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 330 )( this );
 	}
 
 	float GetChargeTime() {
@@ -800,16 +801,34 @@ class CBaseCombatWeapon : public CBaseEntity {
 		DYNVAR_RETURN( weaponid, this, "DT_EconEntity", "m_AttributeManager", "m_Item", "m_iItemDefinitionIndex" );
 	}
 
-	float m_flLastFireTime() {
+	float GetLastFireTime() {
 		DYNVAR_RETURN( float, this, "DT_TFWeaponBase", "LocalActiveTFWeaponData", "m_flLastFireTime" );
 	}
-	float GetSwingRange( CBaseEntity* pLocal ) {
-		typedef int( __thiscall * OriginalFn )(CBaseEntity*);
-		return  4.0f + (float)getvfunc<OriginalFn>( this, 451 )(pLocal) / 10.0f;
+
+	float GetNextFireTime() {
+		DYNVAR_RETURN( float, this, "DT_BaseCombatWeapon", "LocalActiveWeaponData", "m_flNextPrimaryAttack" );
 	}
+
+	int GetAmmo() {
+		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalActiveWeaponData", "DT_BasePlayer", "localdata", "m_iAmmo" );
+	}
+
+	int GetClip1() {
+		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalWeaponData", "m_iClip1" );
+	}
+
+	int GetClip2() {
+		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalWeaponData", "m_iClip2" );
+	}
+
+	float GetSwingRange( CBaseEntity* pLocal ) {
+		typedef int( __thiscall * OriginalFn )( CBaseEntity* );
+		return  4.0f + (float)getvfunc<OriginalFn>( this, 451 )( pLocal ) / 10.0f;
+	}
+
 	bool DoSwingTrace( CBaseEntity* pLocal, trace_t* trace ) {
-		typedef int( __thiscall * OriginalFn )(CBaseEntity*, trace_t*);
-		return getvfunc<OriginalFn>( this, 453 )(pLocal, trace);
+		typedef int( __thiscall * OriginalFn )( CBaseEntity*, trace_t* );
+		return getvfunc<OriginalFn>( this, 453 )( pLocal, trace );
 	}
 };
 
@@ -1179,7 +1198,7 @@ enum class classId : int {
 };
 
 class IGameEvent {
-	public:
+public:
 	virtual ~IGameEvent() {
 	};
 	virtual const char* GetName() const = 0; // get event name
@@ -1201,7 +1220,7 @@ class IGameEvent {
 };
 
 class IAppSystem {
-	public:
+public:
 	// Here's where the app systems get to learn about each other
 	virtual bool Connect( CreateInterfaceFn factory ) = 0;
 	virtual void Disconnect() = 0;
@@ -1220,7 +1239,7 @@ enum AnalogCode_t {
 };
 
 class IInputSystem : public IAppSystem {
-	public:
+public:
 	// Attach, detach input system from a particular window
 	// This window should be the root window for the application
 	// Only 1 window should be attached at any given time.
@@ -1324,7 +1343,7 @@ class IInputSystem : public IAppSystem {
 };
 
 class ICvar : public IAppSystem {
-	public:
+public:
 	// Allocate a unique DLL identifier
 	virtual int AllocateDLLIdentifier() = 0;
 
@@ -1379,10 +1398,10 @@ class ICvar : public IAppSystem {
 	virtual bool HasQueuedMaterialThreadConVarSets() const = 0;
 	virtual int ProcessQueuedMaterialThreadConVarSets() = 0;
 
-	protected:
+protected:
 	class ICVarIteratorInternal;
 
-	public:
+public:
 	/// Iteration over all cvars.
 	/// (THIS IS A SLOW OPERATION AND YOU SHOULD AVOID IT.)
 	/// usage:
@@ -1400,7 +1419,7 @@ class ICvar : public IAppSystem {
 	/// it's a custom, protected class with unusual semantics and is
 	/// prone to change.
 	class Iterator {
-		public:
+	public:
 		inline Iterator( ICvar* icvar );
 		inline ~Iterator( void );
 		inline void SetFirst( void );
@@ -1408,14 +1427,14 @@ class ICvar : public IAppSystem {
 		inline bool IsValid( void );
 		inline ConCommandBase* Get( void );
 
-		private:
+	private:
 		ICVarIteratorInternal* m_pIter;
 	};
 
-	protected:
+protected:
 	// internals for  ICVarIterator
 	class ICVarIteratorInternal {
-		public:
+	public:
 		// warning: delete called on 'ICvar::ICVarIteratorInternal' that is abstract
 		// but has non-virtual destructor [-Wdelete-non-virtual-dtor]
 		virtual ~ICVarIteratorInternal() {
@@ -1432,7 +1451,7 @@ class ICvar : public IAppSystem {
 };
 
 typedef struct netadr_s {
-	public:
+public:
 	netadr_s() {
 		SetIP( 0 );
 		SetPort( 0 );
@@ -1479,13 +1498,13 @@ typedef struct netadr_s {
 	unsigned long addr_htonl() const;
 
 	bool operator==( const netadr_s& netadr ) const {
-		return (CompareAdr( netadr ));
+		return ( CompareAdr( netadr ) );
 	}
 
 	bool operator<( const netadr_s& netadr ) const;
 
-	public: // members are public to avoid to much changes
- // netadrtype_t type;
+public: // members are public to avoid to much changes
+// netadrtype_t type;
 	unsigned char ip[4];
 	unsigned short port;
 } netadr_t;
@@ -1496,7 +1515,7 @@ typedef struct netadr_s {
 #define SUBCHANNEL_FREE 0  // subchannel is free to use
 
 class INetChannelInfo {
-	public:
+public:
 	enum {
 		GENERIC = 0,
 		// must be first and is default group
@@ -1566,7 +1585,7 @@ class INetChannelInfo {
 };
 
 class INetChannel : public INetChannelInfo {
-	public:
+public:
 	virtual ~INetChannel( void ) {
 	};
 
@@ -1630,7 +1649,7 @@ class INetChannel : public INetChannelInfo {
 };
 
 class INetMessage {
-	public:
+public:
 	virtual ~INetMessage() {
 	};
 
@@ -1655,7 +1674,7 @@ class INetMessage {
 };
 
 class INetChannelHandler {
-	public:
+public:
 	virtual ~INetChannelHandler( void ) {
 	};
 
@@ -1679,7 +1698,7 @@ class INetChannelHandler {
 };
 
 class CNetChan : public INetChannel {
-	public: // netchan structurs
+public: // netchan structurs
 	typedef struct dataFragments_s {
 		FileHandle_t file; // open file handle
 		char filename[MAX_OSPATH]; // filename
@@ -1747,7 +1766,7 @@ class CNetChan : public INetChannel {
 		netframe_t* currentframe; // current frame
 	} netflow_t;
 
-	public:
+public:
 	bool m_bProcessingMessages;
 	bool m_bShouldDelete;
 
@@ -1848,226 +1867,226 @@ class CNetChan : public INetChannel {
 };
 
 class EngineClient {
-	public:
+public:
 	int GetPlayerForUserID( int UserID ) {
-		using Original = int( __thiscall* )(PVOID, int);
-		return getvfunc<Original>( this, 9 )(this, UserID);
+		using Original = int( __thiscall* )( PVOID, int );
+		return getvfunc<Original>( this, 9 )( this, UserID );
 	}
 
 	void GetScreenSize( int& width, int& height ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, int&, int&);
-		return getvfunc<OriginalFn>( this, 5 )(this, width, height);
+		typedef void( __thiscall * OriginalFn )( PVOID, int&, int& );
+		return getvfunc<OriginalFn>( this, 5 )( this, width, height );
 	}
 
 	bool GetPlayerInfo( int ent_num, player_info_t* pinfo ) {
-		typedef bool( __thiscall * OriginalFn )(PVOID, int, player_info_t*);
-		return getvfunc<OriginalFn>( this, 8 )(this, ent_num, pinfo);
+		typedef bool( __thiscall * OriginalFn )( PVOID, int, player_info_t* );
+		return getvfunc<OriginalFn>( this, 8 )( this, ent_num, pinfo );
 	}
 
 	bool Con_IsVisible( void ) {
-		typedef bool( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 11 )(this);
+		typedef bool( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 11 )( this );
 	}
 
 	int GetLocalPlayer( void ) {
-		typedef int( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 12 )(this);
+		typedef int( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 12 )( this );
 	}
 
 	float Time( void ) {
-		typedef float( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 14 )(this);
+		typedef float( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 14 )( this );
 	}
 
 	void GetViewAngles( Vector& va ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, Vector & va);
-		return getvfunc<OriginalFn>( this, 19 )(this, va);
+		typedef void( __thiscall * OriginalFn )( PVOID, Vector & va );
+		return getvfunc<OriginalFn>( this, 19 )( this, va );
 	}
 
 	void SetViewAngles( Vector& va ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, Vector & va);
-		return getvfunc<OriginalFn>( this, 20 )(this, va);
+		typedef void( __thiscall * OriginalFn )( PVOID, Vector & va );
+		return getvfunc<OriginalFn>( this, 20 )( this, va );
 	}
 
 	int GetMaxClients( void ) {
-		typedef int( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 21 )(this);
+		typedef int( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 21 )( this );
 	}
 
 	bool IsInGame( void ) {
-		typedef bool( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 26 )(this);
+		typedef bool( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 26 )( this );
 	}
 
 	bool IsConnected( void ) {
-		typedef bool( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 27 )(this);
+		typedef bool( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 27 )( this );
 	}
 
 	bool IsDrawingLoadingImage( void ) {
-		typedef bool( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 28 )(this);
+		typedef bool( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 28 )( this );
 	}
 
 	const matrix3x4& WorldToScreenMatrix( void ) {
-		typedef const matrix3x4& (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( this, 36 )(this);
+		typedef const matrix3x4& ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 36 )( this );
 	}
 
 	bool IsTakingScreenshot( void ) {
-		typedef bool( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 85 )(this);
+		typedef bool( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 85 )( this );
 	}
 
 	void ClientCmd( const char* szCommandString ) {
-		typedef void( __thiscall * ClientCmdFn )(void*, const char*);
-		return getvfunc<ClientCmdFn>( this, 7 )(this, szCommandString);
+		typedef void( __thiscall * ClientCmdFn )( void*, const char* );
+		return getvfunc<ClientCmdFn>( this, 7 )( this, szCommandString );
 	}
 
 	void ClientCmd_Unrestricted( const char* chCommandString ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, const char*);
-		return getvfunc<OriginalFn>( this, 106 )(this, chCommandString);
+		typedef void( __thiscall * OriginalFn )( PVOID, const char* );
+		return getvfunc<OriginalFn>( this, 106 )( this, chCommandString );
 	}
 
 	void ServerCmdKeyValues( PVOID kv ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, PVOID);
-		getvfunc<OriginalFn>( this, 127 )(this, kv);
+		typedef void( __thiscall * OriginalFn )( PVOID, PVOID );
+		getvfunc<OriginalFn>( this, 127 )( this, kv );
 	}
 
 	CNetChan* GetNetChannelInfo( void ) {
-		typedef CNetChan* (__thiscall * OriginalFn)(PVOID);
-		return getvfunc<OriginalFn>( this, 72 )(this);
+		typedef CNetChan* ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 72 )( this );
 	}
 };
 
 class IPanel {
-	public:
+public:
 	const char* GetName( unsigned int vguiPanel ) {
-		typedef const char* (__thiscall * OriginalFn)(PVOID, unsigned int);
-		return getvfunc<OriginalFn>( this, 36 )(this, vguiPanel);
+		typedef const char* ( __thiscall * OriginalFn )( PVOID, unsigned int );
+		return getvfunc<OriginalFn>( this, 36 )( this, vguiPanel );
 	}
 
 	void SetMouseInputEnabled( unsigned int panel, bool state ) {
-		getvfunc<void( __thiscall* )(void*, int, bool)>( this, 32 )(this, panel, state);
+		getvfunc<void( __thiscall* )( void*, int, bool )>( this, 32 )( this, panel, state );
 	}
 
 	void SetTopmostPopup( unsigned int panel, bool state ) {
-		getvfunc<void( __thiscall* )(void*, int, bool)>( this, 59 )(this, panel, state);
+		getvfunc<void( __thiscall* )( void*, int, bool )>( this, 59 )( this, panel, state );
 	}
 };
 
 class ISurface {
-	public:
+public:
 	void DrawSetColor( int r, int g, int b, int a ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, int, int, int, int);
-		getvfunc<OriginalFn>( this, 11 )(this, r, g, b, a);
+		typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+		getvfunc<OriginalFn>( this, 11 )( this, r, g, b, a );
 	}
 
 	void DrawFilledRect( int x0, int y0, int x1, int y1 ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, int, int, int, int);
-		getvfunc<OriginalFn>( this, 12 )(this, x0, y0, x1, y1);
+		typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+		getvfunc<OriginalFn>( this, 12 )( this, x0, y0, x1, y1 );
 	}
 
 	void DrawOutlinedRect( int x0, int y0, int x1, int y1 ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, int, int, int, int);
-		getvfunc<OriginalFn>( this, 14 )(this, x0, y0, x1, y1);
+		typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+		getvfunc<OriginalFn>( this, 14 )( this, x0, y0, x1, y1 );
 	}
 
 	void DrawFilledRectFade( int x0, int y0, int x1, int y1, unsigned int alpha0, unsigned int alpha1, bool bHorizontal ) {
-		typedef void( __thiscall * OriginalFn )(void*, int, int, int, int, unsigned int, unsigned int, bool);
-		getvfunc<OriginalFn>( this, 118 )(this, x0, y0, x1, y1, alpha0, alpha1, bHorizontal);
+		typedef void( __thiscall * OriginalFn )( void*, int, int, int, int, unsigned int, unsigned int, bool );
+		getvfunc<OriginalFn>( this, 118 )( this, x0, y0, x1, y1, alpha0, alpha1, bHorizontal );
 	}
 
 	int CreateNewTextureID( bool procedural = true ) {
-		typedef int( __thiscall * OriginalFn )(void*, bool);
-		return getvfunc<OriginalFn>( this, 37 )(this, procedural);
+		typedef int( __thiscall * OriginalFn )( void*, bool );
+		return getvfunc<OriginalFn>( this, 37 )( this, procedural );
 	}
 
 	void DrawSetTextureRGBA( int id, unsigned char const* rgba, int wide, int tall, int hardwareFilter = 0, bool forceReload = false ) {
-		typedef void( __thiscall * OriginalFn )(void*, int, unsigned char const*, int, int, int, bool);
-		return getvfunc<OriginalFn>( this, 31 )(this, id, rgba, wide, tall, hardwareFilter, forceReload);
+		typedef void( __thiscall * OriginalFn )( void*, int, unsigned char const*, int, int, int, bool );
+		return getvfunc<OriginalFn>( this, 31 )( this, id, rgba, wide, tall, hardwareFilter, forceReload );
 	}
 
 	void DrawSetTexture( int id ) {
-		typedef void( __thiscall * OriginalFn )(void*, int);
-		return getvfunc<OriginalFn>( this, 32 )(this, id);
+		typedef void( __thiscall * OriginalFn )( void*, int );
+		return getvfunc<OriginalFn>( this, 32 )( this, id );
 	}
 
 	bool IsTextureIDValid( int id ) {
-		typedef bool( __thiscall * OriginalFn )(void*, int);
-		return getvfunc<OriginalFn>( this, 35 )(this, id);
+		typedef bool( __thiscall * OriginalFn )( void*, int );
+		return getvfunc<OriginalFn>( this, 35 )( this, id );
 	}
 
 	void DrawTexturedRect( int x, int y, int width, int height ) {
-		typedef void( __thiscall * OriginalFn )(void*, int, int, int, int);
-		return getvfunc<OriginalFn>( this, 34 )(this, x, y, width, height);
+		typedef void( __thiscall * OriginalFn )( void*, int, int, int, int );
+		return getvfunc<OriginalFn>( this, 34 )( this, x, y, width, height );
 	}
 
 	void GetCursorPosition( int& x, int& y ) {
-		return getvfunc<void( __thiscall* )(void*, int&, int&)>( this, 96 )(this, x, y);
+		return getvfunc<void( __thiscall* )( void*, int&, int& )>( this, 96 )( this, x, y );
 	}
 
 	void DrawLine( int x0, int y0, int x1, int y1 ) {
-		typedef void( __thiscall * DrawLineFn )(void*, int, int, int, int);
-		getvfunc<DrawLineFn>( this, 15 )(this, x0, y0, x1, y1);
+		typedef void( __thiscall * DrawLineFn )( void*, int, int, int, int );
+		getvfunc<DrawLineFn>( this, 15 )( this, x0, y0, x1, y1 );
 	}
 
 	void DrawSetTextFont( unsigned long font ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, unsigned long);
-		getvfunc<OriginalFn>( this, 17 )(this, font);
+		typedef void( __thiscall * OriginalFn )( PVOID, unsigned long );
+		getvfunc<OriginalFn>( this, 17 )( this, font );
 	}
 
 	void DrawSetTextColor( int r, int g, int b, int a ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, int, int, int, int);
-		getvfunc<OriginalFn>( this, 19 )(this, r, g, b, a);
+		typedef void( __thiscall * OriginalFn )( PVOID, int, int, int, int );
+		getvfunc<OriginalFn>( this, 19 )( this, r, g, b, a );
 	}
 
 	void DrawSetTextPos( int x, int y ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, int, int);
-		getvfunc<OriginalFn>( this, 20 )(this, x, y);
+		typedef void( __thiscall * OriginalFn )( PVOID, int, int );
+		getvfunc<OriginalFn>( this, 20 )( this, x, y );
 	}
 
 	void DrawPrintText( const wchar_t* text, int textLen ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, const wchar_t*, int, int);
-		return getvfunc<OriginalFn>( this, 22 )(this, text, textLen, 0);
+		typedef void( __thiscall * OriginalFn )( PVOID, const wchar_t*, int, int );
+		return getvfunc<OriginalFn>( this, 22 )( this, text, textLen, 0 );
 	}
 
 	unsigned long CreateFont() {
-		typedef unsigned int( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 66 )(this);
+		typedef unsigned int( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 66 )( this );
 	}
 
 	void SetFontGlyphSet( unsigned long& font, const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, unsigned long, const char*, int, int, int, int, int, int, int);
-		getvfunc<OriginalFn>( this, 67 )(this, font, windowsFontName, tall, weight, blur, scanlines, flags, 0, 0);
+		typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const char*, int, int, int, int, int, int, int );
+		getvfunc<OriginalFn>( this, 67 )( this, font, windowsFontName, tall, weight, blur, scanlines, flags, 0, 0 );
 	}
 
 	void GetTextSize( unsigned long font, const wchar_t* text, int& wide, int& tall ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, unsigned long, const wchar_t*, int&, int&);
-		getvfunc<OriginalFn>( this, 75 )(this, font, text, wide, tall);
+		typedef void( __thiscall * OriginalFn )( PVOID, unsigned long, const wchar_t*, int&, int& );
+		getvfunc<OriginalFn>( this, 75 )( this, font, text, wide, tall );
 	}
 };
 
 class CEntList {
-	public:
+public:
 	CBaseEntity* GetClientEntity( int entnum ) {
-		typedef CBaseEntity* (__thiscall * OriginalFn)(PVOID, int);
-		return getvfunc<OriginalFn>( this, 3 )(this, entnum);
+		typedef CBaseEntity* ( __thiscall * OriginalFn )( PVOID, int );
+		return getvfunc<OriginalFn>( this, 3 )( this, entnum );
 	}
 
 	CBaseEntity* GetClientEntityFromHandle( int hEnt ) {
-		typedef CBaseEntity* (__thiscall * OriginalFn)(PVOID, int);
-		return getvfunc<OriginalFn>( this, 4 )(this, hEnt);
+		typedef CBaseEntity* ( __thiscall * OriginalFn )( PVOID, int );
+		return getvfunc<OriginalFn>( this, 4 )( this, hEnt );
 	}
 
 	int GetHighestEntityIndex( void ) {
-		typedef int( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 6 )(this);
+		typedef int( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 6 )( this );
 	}
 };
 
-class __declspec(align(16)) VectorAligned : public Vector {
-	public:
+class __declspec( align( 16 ) ) VectorAligned : public Vector {
+public:
 	VectorAligned( void ) {
 	};
 
@@ -2098,7 +2117,7 @@ struct Ray_t {
 
 	void Init( Vector start, Vector end ) {
 		m_Delta = end - start;
-		m_IsSwept = (m_Delta.LengthSqr() != 0);
+		m_IsSwept = ( m_Delta.LengthSqr() != 0 );
 		m_Extents.Init();
 		m_IsRay = true;
 		m_StartOffset.Init();
@@ -2107,10 +2126,10 @@ struct Ray_t {
 
 	void Init( Vector& start, Vector& end, Vector& mins, Vector& maxs ) {
 		m_Delta = end - start;
-		m_IsSwept = (m_Delta.LengthSqr() != 0);
+		m_IsSwept = ( m_Delta.LengthSqr() != 0 );
 		m_Extents = maxs - mins;
 		m_Extents *= 0.5f;
-		m_IsRay = (m_Extents.LengthSqr() < 1e-6);
+		m_IsRay = ( m_Extents.LengthSqr() < 1e-6 );
 		m_StartOffset = mins + maxs;
 		m_StartOffset *= 0.5f;
 		m_Start = start - m_StartOffset;
@@ -2133,11 +2152,11 @@ struct csurface_t {
 };
 
 enum SurfaceFlags_t {
-	DISPSURF_FLAG_SURFACE = (1 << 0),
-	DISPSURF_FLAG_WALKABLE = (1 << 1),
-	DISPSURF_FLAG_BUILDABLE = (1 << 2),
-	DISPSURF_FLAG_SURFPROP1 = (1 << 3),
-	DISPSURF_FLAG_SURFPROP2 = (1 << 4),
+	DISPSURF_FLAG_SURFACE = ( 1 << 0 ),
+	DISPSURF_FLAG_WALKABLE = ( 1 << 1 ),
+	DISPSURF_FLAG_BUILDABLE = ( 1 << 2 ),
+	DISPSURF_FLAG_SURFPROP1 = ( 1 << 3 ),
+	DISPSURF_FLAG_SURFPROP2 = ( 1 << 4 ),
 };
 
 enum TraceType_t {
@@ -2153,13 +2172,13 @@ enum TraceType_t {
 };
 
 class ITraceFilter {
-	public:
+public:
 	virtual bool ShouldHitEntity( void* pEntity, int contentsMask ) = 0;
 	virtual TraceType_t GetTraceType() const = 0;
 };
 
-class CTraceFilter : public ITraceFilter {
-	public:
+class CTraceFilterNothing : public ITraceFilter {
+public:
 	bool ShouldHitEntity( void* pEntityHandle, int contentsMask ) override {
 		CBaseEntity* pEntity = (CBaseEntity*)pEntityHandle;
 
@@ -2172,7 +2191,7 @@ class CTraceFilter : public ITraceFilter {
 				break;
 		}
 
-		return !(pEntityHandle == pSkip);
+		return !( pEntityHandle == pSkip );
 	}
 
 	TraceType_t GetTraceType() const override {
@@ -2182,29 +2201,53 @@ class CTraceFilter : public ITraceFilter {
 	void* pSkip;
 };
 
+class CTraceFilterPlayers : public ITraceFilter {
+public:
+	bool ShouldHitEntity( void* pEntityHandle, int contentsMask ) override {
+		CBaseEntity* pEntity = (CBaseEntity*)pEntityHandle;
+
+		switch( (classId)pEntity->GetClassId() ) {
+			case classId::CFuncAreaPortalWindow:
+			case classId::CFuncRespawnRoomVisualizer:
+			case classId::CSniperDot:
+			case classId::CTFMedigunShield:
+				return false;
+				break;
+		}
+
+		return !( pEntityHandle == pSkip );
+	}
+
+	TraceType_t GetTraceType() const override {
+		return TRACE_WORLD_ONLY;
+	}
+
+	void* pSkip;
+};
+
 class CBaseTrace {
-	public:
+public:
 	bool IsDispSurface( void ) {
-		return ((dispFlags & DISPSURF_FLAG_SURFACE) != 0);
+		return ( ( dispFlags & DISPSURF_FLAG_SURFACE ) != 0 );
 	}
 
 	bool IsDispSurfaceWalkable( void ) {
-		return ((dispFlags & DISPSURF_FLAG_WALKABLE) != 0);
+		return ( ( dispFlags & DISPSURF_FLAG_WALKABLE ) != 0 );
 	}
 
 	bool IsDispSurfaceBuildable( void ) {
-		return ((dispFlags & DISPSURF_FLAG_BUILDABLE) != 0);
+		return ( ( dispFlags & DISPSURF_FLAG_BUILDABLE ) != 0 );
 	}
 
 	bool IsDispSurfaceProp1( void ) {
-		return ((dispFlags & DISPSURF_FLAG_SURFPROP1) != 0);
+		return ( ( dispFlags & DISPSURF_FLAG_SURFPROP1 ) != 0 );
 	}
 
 	bool IsDispSurfaceProp2( void ) {
-		return ((dispFlags & DISPSURF_FLAG_SURFPROP2) != 0);
+		return ( ( dispFlags & DISPSURF_FLAG_SURFPROP2 ) != 0 );
 	}
 
-	public:
+public:
 	Vector startpos;
 	Vector endpos;
 	cplane_t plane;
@@ -2220,12 +2263,12 @@ class CBaseTrace {
 	CBaseTrace() {
 	}
 
-	private:
+private:
 	CBaseTrace( const CBaseTrace& vOther );
 };
 
 class CGameTrace : public CBaseTrace {
-	public:
+public:
 	bool DidHitWorld() const;
 
 	bool DidHitNonWorldEntity() const;
@@ -2236,7 +2279,7 @@ class CGameTrace : public CBaseTrace {
 		return fraction < 1 || allsolid || startsolid;
 	}
 
-	public:
+public:
 	float fractionleftsolid;
 	csurface_t surface;
 
@@ -2254,238 +2297,239 @@ class CGameTrace : public CBaseTrace {
 };
 
 class IEngineTrace {
-	public: // We really only need this I guess...
+public: // We really only need this I guess...
 	void TraceRay( const Ray_t& ray, unsigned int fMask, ITraceFilter* pTraceFilter, trace_t* pTrace ) {
 		// 5
-		typedef void( __thiscall * TraceRayFn )(void*, const Ray_t&, unsigned int, ITraceFilter*, trace_t*);
-		return getvfunc<TraceRayFn>( this, 4 )(this, ray, fMask, pTraceFilter, pTrace);
+		typedef void( __thiscall * TraceRayFn )( void*, const Ray_t&, unsigned int, ITraceFilter*, trace_t* );
+		return getvfunc<TraceRayFn>( this, 4 )( this, ray, fMask, pTraceFilter, pTrace );
 	}
 };
 
 class IVModelInfo {
-	public:
+public:
 	DWORD* GetModel( int index ) {
-		typedef DWORD* (__thiscall * GetModelFn)(void*, int);
-		return getvfunc<GetModelFn>( this, 1 )(this, index);
+		typedef DWORD* ( __thiscall * GetModelFn )( void*, int );
+		return getvfunc<GetModelFn>( this, 1 )( this, index );
 	}
 
 	int GetModelIndex( const char* name ) {
-		typedef int( __thiscall * GetModelIndexFn )(void*, const char*);
-		return getvfunc<GetModelIndexFn>( this, 2 )(this, name);
+		typedef int( __thiscall * GetModelIndexFn )( void*, const char* );
+		return getvfunc<GetModelIndexFn>( this, 2 )( this, name );
 	}
 
 	const char* GetModelName( const DWORD* model ) {
-		typedef const char* (__thiscall * GetModelNameFn)(void*, const DWORD*);
-		return getvfunc<GetModelNameFn>( this, 3 )(this, model);
+		typedef const char* ( __thiscall * GetModelNameFn )( void*, const DWORD* );
+		return getvfunc<GetModelNameFn>( this, 3 )( this, model );
 	}
 
 	studiohdr_t* GetStudiomodel( const DWORD* mod ) {
-		typedef studiohdr_t* (__thiscall * GetStudiomodelFn)(void*, const DWORD*);
-		return getvfunc<GetStudiomodelFn>( this, 28 )(this, mod);
+		typedef studiohdr_t* ( __thiscall * GetStudiomodelFn )( void*, const DWORD* );
+		return getvfunc<GetStudiomodelFn>( this, 28 )( this, mod );
 	}
 };
 
 enum playercontrols {
-	IN_ATTACK = (1 << 0),
-	IN_JUMP = (1 << 1),
-	IN_DUCK = (1 << 2),
-	IN_FORWARD = (1 << 3),
-	IN_BACK = (1 << 4),
-	IN_USE = (1 << 5),
-	IN_CANCEL = (1 << 6),
-	IN_LEFT = (1 << 7),
-	IN_RIGHT = (1 << 8),
-	IN_MOVELEFT = (1 << 9),
-	IN_MOVERIGHT = (1 << 10),
-	IN_ATTACK2 = (1 << 11),
-	IN_RUN = (1 << 12),
-	IN_RELOAD = (1 << 13),
-	IN_ALT1 = (1 << 14),
-	IN_ALT2 = (1 << 15),
-	IN_SCORE = (1 << 16),
+	IN_ATTACK = ( 1 << 0 ),
+	IN_JUMP = ( 1 << 1 ),
+	IN_DUCK = ( 1 << 2 ),
+	IN_FORWARD = ( 1 << 3 ),
+	IN_BACK = ( 1 << 4 ),
+	IN_USE = ( 1 << 5 ),
+	IN_CANCEL = ( 1 << 6 ),
+	IN_LEFT = ( 1 << 7 ),
+	IN_RIGHT = ( 1 << 8 ),
+	IN_MOVELEFT = ( 1 << 9 ),
+	IN_MOVERIGHT = ( 1 << 10 ),
+	IN_ATTACK2 = ( 1 << 11 ),
+	IN_RUN = ( 1 << 12 ),
+	IN_RELOAD = ( 1 << 13 ),
+	IN_ALT1 = ( 1 << 14 ),
+	IN_ALT2 = ( 1 << 15 ),
+	IN_SCORE = ( 1 << 16 ),
 	// Used by client.dll for when scoreboard is held down
-	IN_SPEED = (1 << 17),
+	IN_SPEED = ( 1 << 17 ),
 	// Player is holding the speed key
-	IN_WALK = (1 << 18),
+	IN_WALK = ( 1 << 18 ),
 	// Player holding walk key
-	IN_ZOOM = (1 << 19),
+	IN_ZOOM = ( 1 << 19 ),
 	// Zoom key for HUD zoom
-	IN_WEAPON1 = (1 << 20),
+	IN_WEAPON1 = ( 1 << 20 ),
 	// weapon defines these bits
-	IN_WEAPON2 = (1 << 21),
+	IN_WEAPON2 = ( 1 << 21 ),
 	// weapon defines these bits
-	IN_BULLRUSH = (1 << 22),
+	IN_BULLRUSH = ( 1 << 22 ),
 };
 
 enum tf_cond {
-	TFCond_Slowed = (1 << 0),
+	TFCond_Slowed = ( 1 << 0 ),
 	// Toggled when a player is slowed down.
-	TFCond_Zoomed = (1 << 1),
+	TFCond_Zoomed = ( 1 << 1 ),
 	// Toggled when a player is zoomed.
-	TFCond_Disguising = (1 << 2),
+	TFCond_Disguising = ( 1 << 2 ),
 	// Toggled when a Spy is disguising.
-	TFCond_Disguised = (1 << 3),
+	TFCond_Disguised = ( 1 << 3 ),
 	// Toggled when a Spy is disguised.
-	TFCond_Cloaked = (1 << 4),
+	TFCond_Cloaked = ( 1 << 4 ),
 	// Toggled when a Spy is invisible.
-	TFCond_Ubercharged = (1 << 5),
+	TFCond_Ubercharged = ( 1 << 5 ),
 	// Toggled when a player is ÜberCharged.
-	TFCond_TeleportedGlow = (1 << 6),
+	TFCond_TeleportedGlow = ( 1 << 6 ),
 	// Toggled when someone leaves a teleporter
 	// and has glow beneath their feet.
-	TFCond_Taunting = (1 << 7),
+	TFCond_Taunting = ( 1 << 7 ),
 	// Toggled when a player is taunting.
-	TFCond_UberchargeFading = (1 << 8),
+	TFCond_UberchargeFading = ( 1 << 8 ),
 	// Toggled when the ÜberCharge is fading.
-	TFCond_CloakFlicker = (1 << 9),
+	TFCond_CloakFlicker = ( 1 << 9 ),
 	// Toggled when a Spy is visible during cloak.
-	TFCond_Teleporting = (1 << 10),
+	TFCond_Teleporting = ( 1 << 10 ),
 	// Only activates for a brief second when the player is being
 	// teleported; not very useful.
-	TFCond_Kritzkrieged = (1 << 11),
+	TFCond_Kritzkrieged = ( 1 << 11 ),
 	// Toggled when a player is being crit buffed by the KritzKrieg.
-	TFCond_TmpDamageBonus = (1 << 12),
+	TFCond_TmpDamageBonus = ( 1 << 12 ),
 	// Unknown what this is for. Name taken
 	// from the AlliedModders SDK.
-	TFCond_DeadRingered = (1 << 13),
+	TFCond_DeadRingered = ( 1 << 13 ),
 	// Toggled when a player is taking reduced
 	// damage from the Deadringer.
-	TFCond_Bonked = (1 << 14),
+	TFCond_Bonked = ( 1 << 14 ),
 	// Toggled when a player is under the effects of
 	// The Bonk! Atomic Punch.
-	TFCond_Stunned = (1 << 15),
+	TFCond_Stunned = ( 1 << 15 ),
 	// Toggled when a player's speed is reduced from
 	// airblast or a Sandman ball.
-	TFCond_Buffed = (1 << 16),
+	TFCond_Buffed = ( 1 << 16 ),
 	// Toggled when a player is within range of an
 	// activated Buff Banner.
-	TFCond_Charging = (1 << 17),
+	TFCond_Charging = ( 1 << 17 ),
 	// Toggled when a Demoman charges with the shield.
-	TFCond_DemoBuff = (1 << 18),
+	TFCond_DemoBuff = ( 1 << 18 ),
 	// Toggled when a Demoman has heads from the Eyelander.
-	TFCond_CritCola = (1 << 19),
+	TFCond_CritCola = ( 1 << 19 ),
 	// Toggled when the player is under the effect
 	// of The Crit-a-Cola.
-	TFCond_InHealRadius = (1 << 20),
+	TFCond_InHealRadius = ( 1 << 20 ),
 	// Unused condition, name taken from AlliedModders SDK.
-	TFCond_Healing = (1 << 21),
+	TFCond_Healing = ( 1 << 21 ),
 	// Toggled when someone is being healed by a
 	// medic or a dispenser.
-	TFCond_OnFire = (1 << 22),
+	TFCond_OnFire = ( 1 << 22 ),
 	// Toggled when a player is on fire.
-	TFCond_Overhealed = (1 << 23),
+	TFCond_Overhealed = ( 1 << 23 ),
 	// Toggled when a player has >100% health.
-	TFCond_Jarated = (1 << 24),
+	TFCond_Jarated = ( 1 << 24 ),
 	// Toggled when a player is hit with a Sniper's Jarate.
-	TFCond_Bleeding = (1 << 25),
+	TFCond_Bleeding = ( 1 << 25 ),
 	// Toggled when a player is taking bleeding damage.
-	TFCond_DefenseBuffed = (1 << 26),
+	TFCond_DefenseBuffed = ( 1 << 26 ),
 	// Toggled when a player is within range of
 	// an activated Battalion's Backup.
-	TFCond_Milked = (1 << 27),
+	TFCond_Milked = ( 1 << 27 ),
 	// Player was hit with a jar of Mad Milk.
-	TFCond_MegaHeal = (1 << 28),
+	TFCond_MegaHeal = ( 1 << 28 ),
 	// Player is under the effect of Quick-Fix charge.
-	TFCond_RegenBuffed = (1 << 29),
+	TFCond_RegenBuffed = ( 1 << 29 ),
 	// Toggled when a player is within a Concheror's range.
-	TFCond_MarkedForDeath = (1 << 30),
+	TFCond_MarkedForDeath = ( 1 << 30 ),
 	// Player is marked for death by a Fan O'War hit. Effects are
 	// similar to TFCond_Jarated.
-	TFCond_NoHealingDamageBuff = (1 << 31),
+	TFCond_NoHealingDamageBuff = ( 1 << 31 ),
 	// Unknown what this is used for.
 
-	TFCondEx_SpeedBuffAlly = (1 << 0),
+	TFCondEx_SpeedBuffAlly = ( 1 << 0 ),
 	// Toggled when a player gets hit with the disciplinary action.
-	TFCondEx_HalloweenCritCandy = (1 << 1),
+	TFCondEx_HalloweenCritCandy = ( 1 << 1 ),
 	// Only for Scream Fortress event maps that drop crit candy.
-	TFCondEx_CritCanteen = (1 << 2),
+	TFCondEx_CritCanteen = ( 1 << 2 ),
 	// Player is getting a crit boost from a MVM canteen.
-	TFCondEx_CritDemoCharge = (1 << 3),
+	TFCondEx_CritDemoCharge = ( 1 << 3 ),
 	// From demo's shield
-	TFCondEx_CritHype = (1 << 4),
+	TFCondEx_CritHype = ( 1 << 4 ),
 	// Soda Popper crits.
-	TFCondEx_CritOnFirstBlood = (1 << 5),
+	TFCondEx_CritOnFirstBlood = ( 1 << 5 ),
 	// Arena first blood crit buff.
-	TFCondEx_CritOnWin = (1 << 6),
+	TFCondEx_CritOnWin = ( 1 << 6 ),
 	// End of round crits.
-	TFCondEx_CritOnFlagCapture = (1 << 7),
+	TFCondEx_CritOnFlagCapture = ( 1 << 7 ),
 	// CTF intelligence capture crits.
-	TFCondEx_CritOnKill = (1 << 8),
+	TFCondEx_CritOnKill = ( 1 << 8 ),
 	// Unknown what this is for.
-	TFCondEx_RestrictToMelee = (1 << 9),
+	TFCondEx_RestrictToMelee = ( 1 << 9 ),
 	// Unknown what this is for.
-	TFCondEx_DefenseBuffNoCritBlock = (1 << 10),
+	TFCondEx_DefenseBuffNoCritBlock = ( 1 << 10 ),
 	// MvM Buff.
-	TFCondEx_Reprogrammed = (1 << 11),
+	TFCondEx_Reprogrammed = ( 1 << 11 ),
 	// MvM Bot has been reprogrammed.
-	TFCondEx_PyroCrits = (1 << 12),
+	TFCondEx_PyroCrits = ( 1 << 12 ),
 	// Player is getting crits from the Mmmph charge.
-	TFCondEx_PyroHeal = (1 << 13),
+	TFCondEx_PyroHeal = ( 1 << 13 ),
 	// Player is being healed from the Mmmph charge.
-	TFCondEx_FocusBuff = (1 << 14),
+	TFCondEx_FocusBuff = ( 1 << 14 ),
 	// Player is getting a focus buff.
-	TFCondEx_DisguisedRemoved = (1 << 15),
+	TFCondEx_DisguisedRemoved = ( 1 << 15 ),
 	// Disguised remove from a bot.
-	TFCondEx_MarkedForDeathSilent = (1 << 16),
+	TFCondEx_MarkedForDeathSilent = ( 1 << 16 ),
 	// Player is under the effects of the Escape Plan/Equalizer or
 	// GRU.
-	TFCondEx_DisguisedAsDispenser = (1 << 17),
+	TFCondEx_DisguisedAsDispenser = ( 1 << 17 ),
 	// Bot is disguised as dispenser.
-	TFCondEx_Sapped = (1 << 18),
+	TFCondEx_Sapped = ( 1 << 18 ),
 	// MvM bot is being sapped.
-	TFCondEx_UberchargedHidden = (1 << 19),
+	TFCondEx_UberchargedHidden = ( 1 << 19 ),
 	// MvM Related
-	TFCondEx_UberchargedCanteen = (1 << 20),
+	TFCondEx_UberchargedCanteen = ( 1 << 20 ),
 	// Player is receiving ÜberCharge from a canteen.
-	TFCondEx_HalloweenBombHead = (1 << 21),
+	TFCondEx_HalloweenBombHead = ( 1 << 21 ),
 	// Player has a bomb on their head from Merasmus.
-	TFCondEx_HalloweenThriller = (1 << 22),
+	TFCondEx_HalloweenThriller = ( 1 << 22 ),
 	// Players are forced to dance from Merasmus.
-	TFCondEx_BulletCharge = (1 << 26),
+	TFCondEx_BulletCharge = ( 1 << 26 ),
 	// Player is receiving 75% reduced damage from bullets.
-	TFCondEx_ExplosiveCharge = (1 << 27),
+	TFCondEx_ExplosiveCharge = ( 1 << 27 ),
 	// Player is receiving 75% reduced damage from explosives.
-	TFCondEx_FireCharge = (1 << 28),
+	TFCondEx_FireCharge = ( 1 << 28 ),
 	// Player is receiving 75% reduced damage from fire.
-	TFCondEx_BulletResistance = (1 << 29),
+	TFCondEx_BulletResistance = ( 1 << 29 ),
 	// Player is receiving 10% reduced damage from bullets.
-	TFCondEx_ExplosiveResistance = (1 << 30),
+	TFCondEx_ExplosiveResistance = ( 1 << 30 ),
 	// Player is receiving 10% reduced damage from explosives.
-	TFCondEx_FireResistance = (1 << 31),
+	TFCondEx_FireResistance = ( 1 << 31 ),
 	// Player is receiving 10% reduced damage from fire.
-	TFCondEx2_Stealthed = (1 << 0),
-	TFCondEx2_MedigunDebuff = (1 << 1),
-	TFCondEx2_StealthedUserBuffFade = (1 << 2),
-	TFCondEx2_BulletImmune = (1 << 3),
-	TFCondEx2_BlastImmune = (1 << 4),
-	TFCondEx2_FireImmune = (1 << 5),
-	TFCondEx2_PreventDeath = (1 << 6),
-	TFCondEx2_MVMBotRadiowave = (1 << 7),
-	TFCondEx2_HalloweenSpeedBoost = (1 << 8),
+	TFCondEx2_Stealthed = ( 1 << 0 ),
+	TFCondEx2_MedigunDebuff = ( 1 << 1 ),
+	TFCondEx2_StealthedUserBuffFade = ( 1 << 2 ),
+	TFCondEx2_BulletImmune = ( 1 << 3 ),
+	TFCondEx2_BlastImmune = ( 1 << 4 ),
+	TFCondEx2_FireImmune = ( 1 << 5 ),
+	TFCondEx2_PreventDeath = ( 1 << 6 ),
+	TFCondEx2_MVMBotRadiowave = ( 1 << 7 ),
+	TFCondEx2_HalloweenSpeedBoost = ( 1 << 8 ),
 	// Wheel has granted player speed boost.
-	TFCondEx2_HalloweenQuickHeal = (1 << 9),
+	TFCondEx2_HalloweenQuickHeal = ( 1 << 9 ),
 	// Wheel has granted player quick heal.
-	TFCondEx2_HalloweenGiant = (1 << 10),
+	TFCondEx2_HalloweenGiant = ( 1 << 10 ),
 	// Wheel has granted player giant mode.
-	TFCondEx2_HalloweenTiny = (1 << 11),
+	TFCondEx2_HalloweenTiny = ( 1 << 11 ),
 	// Wheel has granted player tiny mode.
-	TFCondEx2_HalloweenInHell = (1 << 12),
+	TFCondEx2_HalloweenInHell = ( 1 << 12 ),
 	// Wheel has granted player in hell mode.
-	TFCondEx2_HalloweenGhostMode = (1 << 13),
+	TFCondEx2_HalloweenGhostMode = ( 1 << 13 ),
 	// Wheel has granted player ghost mode.
-	TFCondEx2_Parachute = (1 << 16),
+	TFCondEx2_Parachute = ( 1 << 16 ),
 	// Player has deployed the BASE Jumper.
-	TFCondEx2_BlastJumping = (1 << 17),
+	TFCondEx2_BlastJumping = ( 1 << 17 ),
 	// Player has sticky or rocket jumped.
 
-	TFCond_MiniCrits = (TFCond_Buffed | TFCond_CritCola),
-	TFCond_IgnoreStates = (TFCond_Ubercharged | TFCond_Bonked),
-	TFCondEx_IgnoreStates = (TFCondEx_PyroHeal)
+	TFCond_MiniCrits = ( TFCond_Buffed | TFCond_CritCola ),
+	TFCond_IgnoreStates = ( TFCond_Ubercharged | TFCond_Bonked ),
+	TFCondEx_IgnoreStates = ( TFCondEx_PyroHeal )
 };
 
 class IGameEventListener2 {
-	public:
-	virtual ~IGameEventListener2( void ) {};
+public:
+	virtual ~IGameEventListener2( void ) {
+	};
 
 	// FireEvent is called by EventManager if event just occured
 	// KeyValue memory will be freed by manager if not needed anymore
@@ -2494,13 +2538,13 @@ class IGameEventListener2 {
 
 struct IGameEventManager2 {
 	bool AddListener( IGameEventListener2* listener, const char* name, bool bServerSide ) {
-		typedef bool( __thiscall * OriginalFn )(PVOID, IGameEventListener2*, const char*, bool);
-		return getvfunc<OriginalFn>( this, 3 )(this, listener, name, bServerSide);
+		typedef bool( __thiscall * OriginalFn )( PVOID, IGameEventListener2*, const char*, bool );
+		return getvfunc<OriginalFn>( this, 3 )( this, listener, name, bServerSide );
 	}
 
 	void RemoveListener( IGameEventListener2* listener ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, IGameEventListener2*);
-		return getvfunc<OriginalFn>( this, 5 )(this, listener);
+		typedef void( __thiscall * OriginalFn )( PVOID, IGameEventListener2* );
+		return getvfunc<OriginalFn>( this, 5 )( this, listener );
 	}
 };
 
@@ -2513,13 +2557,13 @@ enum source_lifestates {
 };
 
 class ClientModeShared {
-	public:
+public:
 	bool IsChatPanelOutOfFocus( void ) {
-		typedef PVOID( __thiscall * OriginalFn )(PVOID);
-		PVOID CHudChat = getvfunc<OriginalFn>( this, 19 )(this);
+		typedef PVOID( __thiscall * OriginalFn )( PVOID );
+		PVOID CHudChat = getvfunc<OriginalFn>( this, 19 )( this );
 
 		if( CHudChat ) {
-			return *(PFLOAT)((DWORD)CHudChat + 0xFC) == 0;
+			return *(PFLOAT)( (DWORD)CHudChat + 0xFC ) == 0;
 		}
 
 		return false;
@@ -2527,40 +2571,40 @@ class ClientModeShared {
 };
 
 enum MaterialVarFlags_t {
-	MATERIAL_VAR_DEBUG = (1 << 0),
-	MATERIAL_VAR_NO_DEBUG_OVERRIDE = (1 << 1),
-	MATERIAL_VAR_NO_DRAW = (1 << 2),
-	MATERIAL_VAR_USE_IN_FILLRATE_MODE = (1 << 3),
-	MATERIAL_VAR_VERTEXCOLOR = (1 << 4),
-	MATERIAL_VAR_VERTEXALPHA = (1 << 5),
-	MATERIAL_VAR_SELFILLUM = (1 << 6),
-	MATERIAL_VAR_ADDITIVE = (1 << 7),
-	MATERIAL_VAR_ALPHATEST = (1 << 8),
-	MATERIAL_VAR_ZNEARER = (1 << 10),
-	MATERIAL_VAR_MODEL = (1 << 11),
-	MATERIAL_VAR_FLAT = (1 << 12),
-	MATERIAL_VAR_NOCULL = (1 << 13),
-	MATERIAL_VAR_NOFOG = (1 << 14),
-	MATERIAL_VAR_IGNOREZ = (1 << 15),
-	MATERIAL_VAR_DECAL = (1 << 16),
-	MATERIAL_VAR_ENVMAPSPHERE = (1 << 17),
+	MATERIAL_VAR_DEBUG = ( 1 << 0 ),
+	MATERIAL_VAR_NO_DEBUG_OVERRIDE = ( 1 << 1 ),
+	MATERIAL_VAR_NO_DRAW = ( 1 << 2 ),
+	MATERIAL_VAR_USE_IN_FILLRATE_MODE = ( 1 << 3 ),
+	MATERIAL_VAR_VERTEXCOLOR = ( 1 << 4 ),
+	MATERIAL_VAR_VERTEXALPHA = ( 1 << 5 ),
+	MATERIAL_VAR_SELFILLUM = ( 1 << 6 ),
+	MATERIAL_VAR_ADDITIVE = ( 1 << 7 ),
+	MATERIAL_VAR_ALPHATEST = ( 1 << 8 ),
+	MATERIAL_VAR_ZNEARER = ( 1 << 10 ),
+	MATERIAL_VAR_MODEL = ( 1 << 11 ),
+	MATERIAL_VAR_FLAT = ( 1 << 12 ),
+	MATERIAL_VAR_NOCULL = ( 1 << 13 ),
+	MATERIAL_VAR_NOFOG = ( 1 << 14 ),
+	MATERIAL_VAR_IGNOREZ = ( 1 << 15 ),
+	MATERIAL_VAR_DECAL = ( 1 << 16 ),
+	MATERIAL_VAR_ENVMAPSPHERE = ( 1 << 17 ),
 	// OBSOLETE
-	MATERIAL_VAR_ENVMAPCAMERASPACE = (1 << 19),
+	MATERIAL_VAR_ENVMAPCAMERASPACE = ( 1 << 19 ),
 	// OBSOLETE
-	MATERIAL_VAR_BASEALPHAENVMAPMASK = (1 << 20),
-	MATERIAL_VAR_TRANSLUCENT = (1 << 21),
-	MATERIAL_VAR_NORMALMAPALPHAENVMAPMASK = (1 << 22),
-	MATERIAL_VAR_NEEDS_SOFTWARE_SKINNING = (1 << 23),
+	MATERIAL_VAR_BASEALPHAENVMAPMASK = ( 1 << 20 ),
+	MATERIAL_VAR_TRANSLUCENT = ( 1 << 21 ),
+	MATERIAL_VAR_NORMALMAPALPHAENVMAPMASK = ( 1 << 22 ),
+	MATERIAL_VAR_NEEDS_SOFTWARE_SKINNING = ( 1 << 23 ),
 	// OBSOLETE
-	MATERIAL_VAR_OPAQUETEXTURE = (1 << 24),
-	MATERIAL_VAR_ENVMAPMODE = (1 << 25),
+	MATERIAL_VAR_OPAQUETEXTURE = ( 1 << 24 ),
+	MATERIAL_VAR_ENVMAPMODE = ( 1 << 25 ),
 	// OBSOLETE
-	MATERIAL_VAR_SUPPRESS_DECALS = (1 << 26),
-	MATERIAL_VAR_HALFLAMBERT = (1 << 27),
-	MATERIAL_VAR_WIREFRAME = (1 << 28),
-	MATERIAL_VAR_ALLOWALPHATOCOVERAGE = (1 << 29),
-	MATERIAL_VAR_ALPHA_MODIFIED_BY_PROXY = (1 << 30),
-	MATERIAL_VAR_VERTEXFOG = (1 << 31),
+	MATERIAL_VAR_SUPPRESS_DECALS = ( 1 << 26 ),
+	MATERIAL_VAR_HALFLAMBERT = ( 1 << 27 ),
+	MATERIAL_VAR_WIREFRAME = ( 1 << 28 ),
+	MATERIAL_VAR_ALLOWALPHATOCOVERAGE = ( 1 << 29 ),
+	MATERIAL_VAR_ALPHA_MODIFIED_BY_PROXY = ( 1 << 30 ),
+	MATERIAL_VAR_VERTEXFOG = ( 1 << 31 ),
 };
 
 enum MaterialPropertyTypes_t {
@@ -2603,7 +2647,7 @@ struct ModelRenderInfo_t {
 };
 
 class IMaterial {
-	public:
+public:
 	// Get the name of the material.  This is a full path to
 	// the vmt file starting from "hl2/materials" (or equivalent) without
 	// a file extension.
@@ -2769,59 +2813,59 @@ class IMaterial {
 };
 
 class CMaterialSystem {
-	public:
+public:
 	IMaterial* FindMaterial( char const* pMaterialName, const char* pTextureGroupName, bool complain = true, const char* pComplainPrefix = NULL ) {
-		typedef IMaterial* (__thiscall * OriginalFn)(PVOID, const char*, const char*, bool, const char*);
-		return getvfunc<OriginalFn>( this, 73 )(this, pMaterialName, pTextureGroupName, complain, pComplainPrefix);
+		typedef IMaterial* ( __thiscall * OriginalFn )( PVOID, const char*, const char*, bool, const char* );
+		return getvfunc<OriginalFn>( this, 73 )( this, pMaterialName, pTextureGroupName, complain, pComplainPrefix );
 	}
 
 	IMaterial* CreateMaterial( char const* pMaterialName, KeyValues* kv ) {
-		typedef IMaterial* (__thiscall * OriginalFn)(PVOID, const char*, KeyValues*);
-		return getvfunc<OriginalFn>( this, 72 )(this, pMaterialName, kv);
+		typedef IMaterial* ( __thiscall * OriginalFn )( PVOID, const char*, KeyValues* );
+		return getvfunc<OriginalFn>( this, 72 )( this, pMaterialName, kv );
 	}
 
 	IMaterial* GetMaterial( MaterialHandle_t h ) {
-		typedef IMaterial* (__thiscall * OriginalFn)(PVOID, MaterialHandle_t);
-		return getvfunc<OriginalFn>( this, 78 )(this, h);
+		typedef IMaterial* ( __thiscall * OriginalFn )( PVOID, MaterialHandle_t );
+		return getvfunc<OriginalFn>( this, 78 )( this, h );
 	}
 
 	MaterialHandle_t FirstMaterial() {
-		typedef MaterialHandle_t( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 75 )(this);
+		typedef MaterialHandle_t( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 75 )( this );
 	}
 
 	MaterialHandle_t InvalidMaterial() {
-		typedef MaterialHandle_t( __thiscall * OriginalFn )(PVOID);
-		return getvfunc<OriginalFn>( this, 77 )(this);
+		typedef MaterialHandle_t( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 77 )( this );
 	}
 
 	MaterialHandle_t NextMaterial( MaterialHandle_t h ) {
-		typedef MaterialHandle_t( __thiscall * OriginalFn )(PVOID, MaterialHandle_t);
-		return getvfunc<OriginalFn>( this, 76 )(this, h);
+		typedef MaterialHandle_t( __thiscall * OriginalFn )( PVOID, MaterialHandle_t );
+		return getvfunc<OriginalFn>( this, 76 )( this, h );
 	}
 };
 
 class CModelRender {
-	public:
+public:
 	void ForcedMaterialOverride(
 		IMaterial* mat, OverrideType_t type = OVERRIDE_NORMAL ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, IMaterial*, OverrideType_t);
-		return getvfunc<OriginalFn>( this, 1 )(this, mat, type);
+		typedef void( __thiscall * OriginalFn )( PVOID, IMaterial*, OverrideType_t );
+		return getvfunc<OriginalFn>( this, 1 )( this, mat, type );
 	}
 
 	void DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, matrix3x4* pCustomBoneToWorld ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, void*, ModelRenderInfo_t&, matrix3x4*);
-		return getvfunc<OriginalFn>( this, 19 )(this, state, pInfo, pCustomBoneToWorld);
+		typedef void( __thiscall * OriginalFn )( PVOID, void*, ModelRenderInfo_t&, matrix3x4* );
+		return getvfunc<OriginalFn>( this, 19 )( this, state, pInfo, pCustomBoneToWorld );
 	}
 
 	void SuppressEngineLighting( bool t ) {
-		typedef void( __thiscall * OriginalFn )(PVOID, bool);
-		return getvfunc<OriginalFn>( this, 22 )(this, t);
+		typedef void( __thiscall * OriginalFn )( PVOID, bool );
+		return getvfunc<OriginalFn>( this, 22 )( this, t );
 	}
 };
 
 class CRenderView {
-	public:
+public:
 	// Draw normal brush model.
 	// If pMaterialOverride is non-null, then all the faces of the bmodel will
 	// set this material rather than their regular material.
@@ -2940,7 +2984,7 @@ struct CIncomingSequence {
 using CBaseHandle = unsigned int;
 
 class CMoveData {
-	public:
+public:
 	bool m_bFirstRunOfFunctions : 1;
 	bool m_bGameCodeMovedPlayer : 1;
 
@@ -2980,12 +3024,12 @@ class CMoveData {
 	void SetAbsOrigin( const Vector& vec );
 	const Vector& GetAbsOrigin() const;
 
-	private:
+private:
 	Vector m_vecAbsOrigin; // edict::origin
 };
 
 class IGameMovement {
-	public:
+public:
 	virtual ~IGameMovement( void ) {
 	}
 
@@ -3003,14 +3047,14 @@ class IGameMovement {
 };
 
 class IPrediction {
-	public:
+public:
 	void SetupMove( CBaseEntity* pLocal, CUserCmd* cmd, CMoveData* moveData ) {
-		using oSetupMove = void( __thiscall* )(IPrediction*, CBaseEntity*, CUserCmd*, class IMoveHelper*, CMoveData*);
-		getvfunc<oSetupMove>( this, 18 )(this, pLocal, cmd, nullptr, moveData);
+		using oSetupMove = void( __thiscall* )( IPrediction*, CBaseEntity*, CUserCmd*, class IMoveHelper*, CMoveData* );
+		getvfunc<oSetupMove>( this, 18 )( this, pLocal, cmd, nullptr, moveData );
 	}
 	void FinishMove( CBaseEntity* pLocal, CUserCmd* cmd, CMoveData* moveData ) {
-		using oFinishMove = void( __thiscall* )(IPrediction*, CBaseEntity*, CUserCmd*, CMoveData*);
-		getvfunc<oFinishMove>( this, 19 )(this, pLocal, cmd, moveData);
+		using oFinishMove = void( __thiscall* )( IPrediction*, CBaseEntity*, CUserCmd*, CMoveData* );
+		getvfunc<oFinishMove>( this, 19 )( this, pLocal, cmd, moveData );
 	}
 };
 
@@ -3038,7 +3082,7 @@ struct GlowObjectDefinition_t {
 };
 
 class CGlowObjectManager {
-	public:
+public:
 	CUtlVector<GlowObjectDefinition_t> m_GlowObjectDefinitions;
 	int m_nFirstFreeSlot;
 };
@@ -3065,11 +3109,11 @@ struct CInterfaces {
 	CGlowObjectManager* GlowManager;
 };
 
-using CreateMoveFn = bool( __thiscall* )(PVOID, float, CUserCmd*);
-using FrameStageNotifyThinkFn = void( __fastcall* )(PVOID, void*, ClientFrameStage_t);
-using DrawModelExecuteFn = void( __stdcall* )(void* state, ModelRenderInfo_t& pInfo, matrix3x4* pCustomBoneToWorld);
-using PaintTraverseFn = void( __thiscall* )(PVOID, unsigned int, bool, bool);
-using SendDatagramFn = int( __thiscall* )(CNetChan*, bf_write*);
+using CreateMoveFn = bool( __thiscall* )( PVOID, float, CUserCmd* );
+using FrameStageNotifyThinkFn = void( __fastcall* )( PVOID, void*, ClientFrameStage_t );
+using DrawModelExecuteFn = void( __stdcall* )( void* state, ModelRenderInfo_t& pInfo, matrix3x4* pCustomBoneToWorld );
+using PaintTraverseFn = void( __thiscall* )( PVOID, unsigned int, bool, bool );
+using SendDatagramFn = int( __thiscall* )( CNetChan*, bf_write* );
 
 struct CHooks {
 	vmt_single<CreateMoveFn> CreateMove;

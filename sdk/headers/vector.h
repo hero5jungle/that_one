@@ -12,7 +12,7 @@
 #define RADPI 57.295779513082f
 
 class Vector {
-	public:
+public:
 	float x, y, z;
 	Vector( float X = 0.0f, float Y = 0.0f, float Z = 0.0f );
 	void Init( float ix = 0.0f, float iy = 0.0f, float iz = 0.0f );
@@ -32,18 +32,18 @@ class Vector {
 	inline float  Length() const;
 	__forceinline float LengthSqr() const {
 		CHECK_VALID( *this );
-		return (x * x + y * y + z * z);
+		return ( x * x + y * y + z * z );
 	}
 	bool IsZero( float tolerance = 0.01f ) const {
-		return (x > -tolerance && x < tolerance &&
-						 y > -tolerance && y < tolerance &&
-						 z > -tolerance && z < tolerance);
+		return ( x > -tolerance && x < tolerance &&
+			y > -tolerance && y < tolerance &&
+			z > -tolerance && z < tolerance );
 	}
 	float Length2d() const {
 		return sqrtf( x * x + y * y );
 	}
 	float DistTo( const Vector& v ) const {
-		return (*this - v).Length();
+		return ( *this - v ).Length();
 	}
 	void Set( float X = 0.0f, float Y = 0.0f, float Z = 0.0f ) {
 		x = X;
@@ -117,25 +117,25 @@ inline Vector& Vector::operator=( const Vector& vOther ) {
 }
 //===============================================
 inline float& Vector::operator[]( int i ) {
-	Assert( (i >= 0) && (i < 3) );
-	return ((float*)this)[i];
+	Assert( ( i >= 0 ) && ( i < 3 ) );
+	return ( (float*)this )[i];
 }
 //===============================================
 inline float Vector::operator[]( int i ) const {
-	Assert( (i >= 0) && (i < 3) );
-	return ((float*)this)[i];
+	Assert( ( i >= 0 ) && ( i < 3 ) );
+	return ( (float*)this )[i];
 }
 //===============================================
 inline bool Vector::operator==( const Vector& src ) const {
 	CHECK_VALID( src );
 	CHECK_VALID( *this );
-	return (src.x == x) && (src.y == y) && (src.z == z);
+	return ( src.x == x ) && ( src.y == y ) && ( src.z == z );
 }
 //===============================================
 inline bool Vector::operator!=( const Vector& src ) const {
 	CHECK_VALID( src );
 	CHECK_VALID( *this );
-	return (src.x != x) || (src.y != y) || (src.z != z);
+	return ( src.x != x ) || ( src.y != y ) || ( src.z != z );
 }
 //===============================================
 __forceinline void VectorCopy( const Vector& src, Vector& dst ) {
@@ -227,7 +227,7 @@ inline float Vector::Length2D() const {
 }
 //===============================================
 inline float Vector::Length2DSqr() const {
-	return (x * x + y * y);
+	return ( x * x + y * y );
 }
 //===============================================
 inline Vector CrossProduct( const Vector& a, const Vector& b ) {
@@ -244,7 +244,7 @@ float Vector::DistToSqr( const Vector& vOther ) const {
 //===============================================
 inline void Vector::NormalizeInPlace() {
 	Vector& v = *this;
-	float iradius = 1.f / (this->Length() + 1.192092896e-07F); //FLT_EPSILON
+	float iradius = 1.f / ( this->Length() + 1.192092896e-07F ); //FLT_EPSILON
 	v.x *= iradius;
 	v.y *= iradius;
 	v.z *= iradius;
@@ -299,7 +299,7 @@ inline Vector Vector::operator/( const Vector& v ) const {
 }
 inline float Vector::Dot( const Vector& vOther ) const {
 	const Vector& a = *this;
-	return(a.x * vOther.x + a.y * vOther.y + a.z * vOther.z);
+	return( a.x * vOther.x + a.y * vOther.y + a.z * vOther.z );
 }
 inline void SinCos( float radians, float* sine, float* cosine ) {
 	*sine = sin( radians );
@@ -319,14 +319,14 @@ inline void AngleVectors( const Vector& angles, Vector* forward, Vector* right, 
 	}
 
 	if( right ) {
-		right->x = (-1 * sr * sp * cy + -1 * cr * -sy);
-		right->y = (-1 * sr * sp * sy + -1 * cr * cy);
+		right->x = ( -1 * sr * sp * cy + -1 * cr * -sy );
+		right->y = ( -1 * sr * sp * sy + -1 * cr * cy );
 		right->z = -1 * sr * cp;
 	}
 
 	if( up ) {
-		up->x = (cr * sp * cy + -sr * -sy);
-		up->y = (cr * sp * sy + -sr * cy);
+		up->x = ( cr * sp * cy + -sr * -sy );
+		up->y = ( cr * sp * sy + -sr * cy );
 		up->z = cr * cp;
 	}
 }
@@ -406,5 +406,5 @@ inline void AngleNormalize( Vector& v ) {
 inline float Dot( const Vector& a, const Vector& b ) {
 	CHECK_VALID( a );
 	CHECK_VALID( b );
-	return(a.x * b.x + a.y * b.y + a.z * b.z);
+	return( a.x * b.x + a.y * b.y + a.z * b.z );
 }

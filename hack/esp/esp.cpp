@@ -2,7 +2,6 @@
 #include "../../hook/panel/panels.h"
 #include "../../tools/draw/cdrawmanager.h"
 #include "../../tools/util/util.h"
-#include <unordered_map>
 namespace ESP {
 	void Run( CBaseEntity* pLocal ) {
 
@@ -14,7 +13,7 @@ namespace ESP {
 			float cx = (float)gScreen.Width / 2.0f;
 			float cy = (float)gScreen.Height / 2.0f;
 
-			int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( (pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.sniper_nozoom.value) ? 30.0f : 90.0f ) / 2 ) * gScreen.Width;
+			int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.sniper_nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * gScreen.Width;
 
 			if( gCvars.ESP_fov.value == 1 ) {
 				DrawManager::DrawCircle( cx, cy, radius, 16.0f, gCvars.color_fov.get_color() );
@@ -56,10 +55,10 @@ namespace ESP {
 					const float xrot = cos( deg - PI / 2 );
 					const float yrot = sin( deg - PI / 2 );
 					//start and end
-					const float x1 = (radius + 5.0f) * xrot;
-					const float y1 = (radius + 5.0f) * yrot;
-					const float x2 = (radius + 15.0f) * xrot;
-					const float y2 = (radius + 15.0f) * yrot;
+					const float x1 = ( radius + 5.0f ) * xrot;
+					const float y1 = ( radius + 5.0f ) * yrot;
+					const float x2 = ( radius + 15.0f ) * xrot;
+					const float y2 = ( radius + 15.0f ) * yrot;
 					//arrow constants
 					constexpr float arrow_angle = DEG2RAD( 90.0f );
 					constexpr float arrow_lenght = 6.0f;
@@ -67,10 +66,10 @@ namespace ESP {
 					const Vector line{ x2 - x1, y2 - y1, 0.0f };
 					const float length = line.Length();
 					//base of arrow
-					const float fpoint_on_line = arrow_lenght / (atanf( arrow_angle ) * length);
-					const Vector point_on_line = Vector( x2, y2, 0 ) + (line * fpoint_on_line * -1.0f);
+					const float fpoint_on_line = arrow_lenght / ( atanf( arrow_angle ) * length );
+					const Vector point_on_line = Vector( x2, y2, 0 ) + ( line * fpoint_on_line * -1.0f );
 					const Vector normal_vector{ -line.y, line.x, 0.0f };
-					const Vector normal = Vector( arrow_lenght, arrow_lenght, 0.0f ) / (length * 2);
+					const Vector normal = Vector( arrow_lenght, arrow_lenght, 0.0f ) / ( length * 2 );
 					//left and right points
 					const Vector rotation = normal * normal_vector;
 					const Vector left = point_on_line + rotation;
@@ -85,7 +84,7 @@ namespace ESP {
 			}
 		}
 
-		if( (gCvars.ESP_target.value == 1 || gCvars.ESP_target.value == 3) && gCvars.aim_index != -1 ) {
+		if( ( gCvars.ESP_target.value == 1 || gCvars.ESP_target.value == 3 ) && gCvars.aim_index != -1 ) {
 			Vector draw0, draw1;
 
 			if( !gCvars.aim_spot.IsZero() )
@@ -120,7 +119,7 @@ namespace ESP {
 						switch( (classId)pEnt->GetClassId() ) {
 							case classId::CObjectDispenser:
 							{
-								CObjectDispenser* pDispenser = (CObjectDispenser*)(pEnt);
+								CObjectDispenser* pDispenser = (CObjectDispenser*)( pEnt );
 
 								if( pDispenser == nullptr ) {
 									continue;
@@ -147,7 +146,7 @@ namespace ESP {
 
 							case classId::CObjectSentrygun:
 							{
-								CObjectSentryGun* pSentryGun = (CObjectSentryGun*)(pEnt);
+								CObjectSentryGun* pSentryGun = (CObjectSentryGun*)( pEnt );
 
 								if( pSentryGun == nullptr ) {
 									continue;
@@ -179,7 +178,7 @@ namespace ESP {
 
 							case classId::CObjectTeleporter:
 							{
-								CObjectTeleporter* pTeleporter = (CObjectTeleporter*)(pEnt);
+								CObjectTeleporter* pTeleporter = (CObjectTeleporter*)( pEnt );
 
 								if( pTeleporter == nullptr ) {
 									continue;
@@ -287,6 +286,74 @@ namespace ESP {
 						}
 
 						DrawManager::DrawString( 15, SpectatorCount++ * 15, Colors::White, name );
+					}
+				}
+			}
+		}
+		if( gCvars.ESP_head_points.value ) {
+			int my_index = me;
+			int max = gInts.Engine->GetMaxClients();
+
+			for( int i = 1; i <= max; i++ ) {
+
+				CBaseEntity* pEntity = GetBaseEntity( i );
+
+				if( !pEntity || pEntity->GetLifeState() != LIFE_ALIVE ) {
+					continue;
+				}
+
+				DWORD* model = pEntity->GetModel();
+
+				if( !model ) {
+					continue;
+				}
+
+				studiohdr_t* hdr = gInts.ModelInfo->GetStudiomodel( model );
+
+				if( !hdr ) {
+					continue;
+				}
+
+				matrix3x4 matrix[128];
+
+				if( !pEntity->SetupBones( matrix, 128, 0x100, gInts.globals->curtime ) ) {
+					continue;
+				}
+
+				mstudiohitboxset_t* set = hdr->GetHitboxSet( pEntity->GetHitboxSet() );
+
+				if( !set ) {
+					continue;
+				}
+
+				mstudiobbox_t* box = set->pHitbox( 0 );
+
+				if( !box ) {
+					continue;
+				}
+
+				Vector min = box->bbmin * 0.9f;
+				Vector max = box->bbmax * 0.9f;
+
+				Vector Points[]{
+					Vector( min.x, min.y, min.z ),
+					Vector( min.x, max.y, min.z ),
+					Vector( min.x, min.y, max.z ),
+					Vector( min.x, max.y, max.z ),
+					Vector( max.x, min.y, min.z ),
+					Vector( max.x, max.y, min.z ),
+					Vector( max.x, min.y, max.z ),
+					Vector( max.x, max.y, max.z ),
+				};
+
+				Vector Box;
+				Vector temp;
+
+				for( auto point : Points ) {
+					Util::vector_transform( point, matrix[box->bone], Box );
+					if( DrawManager::WorldToScreen( Box, temp ) ) {
+						if( pLocal->CanSee( pEntity, Box ) )
+							DrawManager::DrawRect( temp.x - 2, temp.y - 2, 4, 4, Colors::Orange );
 					}
 				}
 			}

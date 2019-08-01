@@ -11,12 +11,13 @@ struct mstudiobbox_t {
 	const char* pszHitboxName() {
 		if( szhitboxnameindex == 0 ) return "";
 
-		return ((const char*)this) + szhitboxnameindex;
+		return ( (const char*)this ) + szhitboxnameindex;
 	}
 
-	mstudiobbox_t() {}
+	mstudiobbox_t() {
+	}
 
-	private:
+private:
 	// No copy constructors allowed
 	mstudiobbox_t( const mstudiobbox_t& vOther );
 };
@@ -24,19 +25,19 @@ struct mstudiobbox_t {
 struct mstudiohitboxset_t {
 	int sznameindex;
 	inline char* pszName() const {
-		return ((char*)this) + sznameindex;
+		return ( (char*)this ) + sznameindex;
 	}
 	int numhitboxes;
 	int hitboxindex;
 	inline mstudiobbox_t* pHitbox( int i ) const {
-		return (mstudiobbox_t*)(((byte*)this) + hitboxindex) + i;
+		return (mstudiobbox_t*)( ( (byte*)this ) + hitboxindex ) + i;
 	};
 };
 
 struct mstudiobone_t {
 	int sznameindex;
 	inline char* pszName() const {
-		return ((char*)this) + sznameindex;
+		return ( (char*)this ) + sznameindex;
 	}
 	int parent;             // parent bone
 	int bonecontroller[6];  // bone controller index, -1 == none
@@ -59,19 +60,20 @@ struct mstudiobone_t {
 		if( procindex == 0 )
 			return nullptr;
 		else
-			return (void*)(((byte*)this) + procindex);
+			return (void*)( ( (byte*)this ) + procindex );
 	};
 	int surfacepropidx;  // index into string tablefor property name
 	inline char* pszSurfaceProp( void ) const {
-		return ((char*)this) + surfacepropidx;
+		return ( (char*)this ) + surfacepropidx;
 	}
 	int contents;  // See BSPFlags.h for the contents flags
 
 	int unused[8];  // remove as appropriate
 
-	mstudiobone_t() {}
+	mstudiobone_t() {
+	}
 
-	private:
+private:
 	// No copy constructors allowed
 	mstudiobone_t( const mstudiobone_t& vOther );
 };
@@ -101,7 +103,7 @@ struct studiohdr_t {
 	int boneindex;
 
 	inline mstudiobone_t* GetBone( int i ) const {
-		return (mstudiobone_t*)(((byte*)this) + boneindex) + i;
+		return (mstudiobone_t*)( ( (byte*)this ) + boneindex ) + i;
 	};
 	//  inline mstudiobone_t *pBone(int i) const { Assert(i >= 0 && i < numbones);
 	//  return (mstudiobone_t *)(((byte *)this) + boneindex) + i; };
@@ -113,7 +115,7 @@ struct studiohdr_t {
 	int hitboxsetindex;
 
 	mstudiohitboxset_t* GetHitboxSet( int i ) const {
-		return (mstudiohitboxset_t*)(((byte*)this) + hitboxsetindex) + i;
+		return (mstudiohitboxset_t*)( ( (byte*)this ) + hitboxsetindex ) + i;
 	}
 
 	inline mstudiobbox_t* GetHitbox( int i, int set ) const {

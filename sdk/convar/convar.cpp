@@ -7,7 +7,7 @@ static int      s_nDLLIdentifier = -1;
 static bool     s_bRegistered = false;
 
 class CDefaultAccessor : public IConCommandBaseAccessor {
-	public:
+public:
 	virtual bool RegisterConCommandBase( ConCommandBase* pVar ) {
 		gInts.cvar->RegisterConCommand( pVar );
 		return true;
@@ -70,7 +70,7 @@ ConVar::~ConVar( void ) {
 
 
 bool ConVar::IsFlagSet( int flag ) const {
-	return (flag & m_pParent->m_nFlags) ? true : false;
+	return ( flag & m_pParent->m_nFlags ) ? true : false;
 }
 
 const char* ConVar::GetHelpText( void ) const {
@@ -122,9 +122,9 @@ void ConVar::InternalSetValue( const char* value ) {
 
 	// Redetermine value
 	m_Value.m_fValue = fNewValue;
-	m_Value.m_nValue = (int)(fNewValue);
+	m_Value.m_nValue = (int)( fNewValue );
 
-	if( !(m_nFlags & (int)ConvarFlags::FCVAR_NEVER_AS_STRING) ) {
+	if( !( m_nFlags & (int)ConvarFlags::FCVAR_NEVER_AS_STRING ) ) {
 		ChangeStringValue( val, flOldValue );
 	}
 }
@@ -144,12 +144,12 @@ void ConVar::ChangeStringValue( const char* tempVal, float flOldValue ) {
 	memcpy( m_Value.m_pszString, tempVal, len );
 }
 bool ConVar::ClampValue( float& value ) {
-	if( m_bHasMin && (value < m_fMinVal) ) {
+	if( m_bHasMin && ( value < m_fMinVal ) ) {
 		value = m_fMinVal;
 		return true;
 	}
 
-	if( m_bHasMax && (value > m_fMaxVal) ) {
+	if( m_bHasMax && ( value > m_fMaxVal ) ) {
 		value = m_fMaxVal;
 		return true;
 	}
@@ -168,7 +168,7 @@ void ConVar::InternalSetFloatValue( float fNewValue ) {
 	m_Value.m_fValue = fNewValue;
 	m_Value.m_nValue = (int)fNewValue;
 
-	if( !(m_nFlags & (int)ConvarFlags::FCVAR_NEVER_AS_STRING) ) {
+	if( !( m_nFlags & (int)ConvarFlags::FCVAR_NEVER_AS_STRING ) ) {
 		char tempVal[32];
 		ChangeStringValue( tempVal, flOldValue );
 	}
@@ -181,14 +181,14 @@ void ConVar::InternalSetIntValue( int nValue ) {
 	float fValue = (float)nValue;
 
 	if( ClampValue( fValue ) ) {
-		nValue = (int)(fValue);
+		nValue = (int)( fValue );
 	}
 
 	float flOldValue = m_Value.m_fValue;
 	m_Value.m_fValue = fValue;
 	m_Value.m_nValue = nValue;
 
-	if( !(m_nFlags & (int)ConvarFlags::FCVAR_NEVER_AS_STRING) ) {
+	if( !( m_nFlags & (int)ConvarFlags::FCVAR_NEVER_AS_STRING ) ) {
 		char tempVal[32];
 		ChangeStringValue( tempVal, flOldValue );
 	}
@@ -198,8 +198,8 @@ void ConVar::InternalSetColorValue( DWORD cValue ) {
 	InternalSetIntValue( color );
 }
 void ConVar::Create( const char* pName, const char* pDefaultValue,
-										 int flags, const char* pHelpString, bool bMin, float fMin,
-										 bool bMax, float fMax, FnChangeCallback_t callback ) {
+	int flags, const char* pHelpString, bool bMin, float fMin,
+	bool bMax, float fMax, FnChangeCallback_t callback ) {
 	static const char* empty_string = "";
 	m_pParent = this;
 	// Name should be static data
@@ -261,7 +261,7 @@ void ConCommandBase::Create( const char* pName, const char* pHelpString /*= 0*/,
 	m_pszHelpString = pHelpString ? pHelpString : empty_string;
 	m_nFlags = flags;
 
-	if( !(m_nFlags & (int)ConvarFlags::FCVAR_UNREGISTERED) ) {
+	if( !( m_nFlags & (int)ConvarFlags::FCVAR_UNREGISTERED ) ) {
 		m_pNext = s_pConCommandBases;
 		s_pConCommandBases = this;
 	} else {
@@ -290,7 +290,7 @@ void ConVar::InstallChangeCallback( FnChangeCallback_t callback ) {
 }
 
 bool ConCommandBase::IsFlagSet( int flag ) const {
-	return (flag & m_nFlags) ? true : false;
+	return ( flag & m_nFlags ) ? true : false;
 }
 void ConCommandBase::AddFlags( int flags ) {
 	m_nFlags |= flags;

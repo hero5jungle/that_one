@@ -13,7 +13,7 @@ int DefaultStyle::ControlPanel( int x, int y, int w, int h, const char* name ) {
 	DrawManager::DrawRect( x + 1, y + 1, w - 2, textH + txtMargin, Color( 25 ) );
 
 	if( name ) {
-		DrawManager::DrawString( x + ((w / 2) - (textW / 2)), y, Color( 150 ), name, gFonts.calibri_light_small );
+		DrawManager::DrawString( x + ( ( w / 2 ) - ( textW / 2 ) ), y, Color( 150 ), name, gFonts.calibri_light_small );
 	}
 
 	DrawManager::DrawLine( x, y + textH + txtMargin, x + w, y + textH + txtMargin, Color( 50, 50, 55 ) );

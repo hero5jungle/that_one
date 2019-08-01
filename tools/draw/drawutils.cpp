@@ -48,7 +48,7 @@ bool TextureHolder::Draw( int x, int y, Color clr, float scale ) {
 
 	gInts.Surface->DrawSetColor( clr[0], clr[1], clr[2], clr[3] );
 	gInts.Surface->DrawSetTexture( m_iTexture );
-	gInts.Surface->DrawTexturedRect( x, y, x + (m_iW * scale), y + (m_iH * scale) );
+	gInts.Surface->DrawTexturedRect( x, y, x + ( m_iW * scale ), y + ( m_iH * scale ) );
 	return true;
 }
 

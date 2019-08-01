@@ -81,7 +81,7 @@ void Menu::Draw() {
 	// Control region
 	DrawManager::DrawRect( _pos.x + TAB_WIDTH, _pos.y, _scale.x - TAB_WIDTH, _scale.y, Color( 36, 36, 42 ) );
 	// Re-adjusting pos and scale again
-	_pos.x += TAB_WIDTH + 3, _scale.x = scale.x - (_pos.x - pos.x);
+	_pos.x += TAB_WIDTH + 3, _scale.x = scale.x - ( _pos.x - pos.x );
 #pragma endregion
 #pragma region Controls
 
@@ -105,7 +105,7 @@ void Menu::Draw() {
 
 			control->SetPos( cx, cy );
 			bool over = mouseOver( cx, cy, control->GetWidth(), control->GetHeight() );
-			bool getInput = !(control->flags & noinput) && over && !IsDialogOpen();
+			bool getInput = !( control->flags & noinput ) && over && !IsDialogOpen();
 
 			if( getInput ) {
 				control->HandleInput();

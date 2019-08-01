@@ -1,9 +1,7 @@
 #include "controls.h"
 #include "../../tools/draw/cdrawmanager.h"
 #include "../gui/menu.h"
-#include "../style/styles.h"
 #include "icons.h"
-#include "../../sdk/sdk.h"
 static TextureHolder arrow_t, arrowside_t, arrowdown_t;
 static TextureHolder colorpicker, brightness, picker_t;
 
@@ -32,50 +30,50 @@ Color hsv2rgb( float hue, float saturation, float brightness, int alpha = 255 ) 
 	ClampFl( brightness );
 	float h = hue == 1.0f ? 0 : hue * 6.0f;
 	float f = h - (int)h;
-	float p = brightness * (1.0f - saturation);
-	float q = brightness * (1.0f - saturation * f);
-	float t = brightness * (1.0f - (saturation * (1.0f - f)));
+	float p = brightness * ( 1.0f - saturation );
+	float q = brightness * ( 1.0f - saturation * f );
+	float t = brightness * ( 1.0f - ( saturation * ( 1.0f - f ) ) );
 
 	if( h < 1 ) {
 		return Color(
-			(unsigned char)(brightness * 255),
-			(unsigned char)(t * 255),
-			(unsigned char)(p * 255),
+			(unsigned char)( brightness * 255 ),
+			(unsigned char)( t * 255 ),
+			(unsigned char)( p * 255 ),
 			alpha
 		);
 	} else if( h < 2 ) {
 		return Color(
-			(unsigned char)(q * 255),
-			(unsigned char)(brightness * 255),
-			(unsigned char)(p * 255),
+			(unsigned char)( q * 255 ),
+			(unsigned char)( brightness * 255 ),
+			(unsigned char)( p * 255 ),
 			alpha
 		);
 	} else if( h < 3 ) {
 		return Color(
-			(unsigned char)(p * 255),
-			(unsigned char)(brightness * 255),
-			(unsigned char)(t * 255),
+			(unsigned char)( p * 255 ),
+			(unsigned char)( brightness * 255 ),
+			(unsigned char)( t * 255 ),
 			alpha
 		);
 	} else if( h < 4 ) {
 		return Color(
-			(unsigned char)(p * 255),
-			(unsigned char)(q * 255),
-			(unsigned char)(brightness * 255),
+			(unsigned char)( p * 255 ),
+			(unsigned char)( q * 255 ),
+			(unsigned char)( brightness * 255 ),
 			alpha
 		);
 	} else if( h < 5 ) {
 		return Color(
-			(unsigned char)(t * 255),
-			(unsigned char)(p * 255),
-			(unsigned char)(brightness * 255),
+			(unsigned char)( t * 255 ),
+			(unsigned char)( p * 255 ),
+			(unsigned char)( brightness * 255 ),
 			alpha
 		);
 	} else {
 		return Color(
-			(unsigned char)(brightness * 255),
-			(unsigned char)(p * 255),
-			(unsigned char)(q * 255),
+			(unsigned char)( brightness * 255 ),
+			(unsigned char)( p * 255 ),
+			(unsigned char)( q * 255 ),
 			alpha
 		);
 	}
@@ -103,7 +101,7 @@ void InitTextures() {
 
 	for( int h = 0; h < 128; h++ ) {
 		for( int w = 0; w < 32; w++ ) {
-			Color clr( ((128 - h) / 128.f) * 255.f, w > 15 ? 0 : 255 );
+			Color clr( ( ( 128 - h ) / 128.f ) * 255.f, w > 15 ? 0 : 255 );
 			value[i] = clr[0], value[i + 1] = clr[1], value[i + 2] = clr[2], value[i + 3] = clr[3];
 			i += 4;
 		}
@@ -123,11 +121,11 @@ void BaseControl::RunControl( int Index ) {
 
 	bool mouse = gMenu.mouseOver( x, y, GetWidth(), GetHeight() );
 
-	if( gMenu.GetFocus() == Index && !(flags & noinput) && mouse ) {
+	if( gMenu.GetFocus() == Index && !( flags & noinput ) && mouse ) {
 		HandleInput();
 	}
 
-	if( !(flags & nodraw) ) {
+	if( !( flags & nodraw ) ) {
 		Draw( mouse );
 	}
 }
@@ -191,38 +189,38 @@ int Groupbox::Draw( bool mouseOver ) {
 	GetHeight();
 	int strw, strh;
 	gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWstring( name ).c_str(), strw, strh );
-	y += (strh / 2);
+	y += ( strh / 2 );
 	DrawManager::DrawLine( x, y, x, y + h, Color( 80 ) );
 	DrawManager::DrawLine( x + w, y, x + w, y + h, Color( 80 ) );
 	DrawManager::DrawLine( x, y + h, x + w, y + h, Color( 80 ) );
-	DrawManager::DrawString( x + (w / 2) - (strw / 2), y - (strh / 2), Color( 110 ), name, gFonts.verdana_bold );
-	DrawManager::DrawLine( x, y, x + (w / 2) - (strw / 2) - 5, y, Color( 80 ) );
-	DrawManager::DrawLine( x + (w / 2) + (strw / 2) + 5, y, x + w, y, Color( 80 ) );
+	DrawManager::DrawString( x + ( w / 2 ) - ( strw / 2 ), y - ( strh / 2 ), Color( 110 ), name, gFonts.verdana_bold );
+	DrawManager::DrawLine( x, y, x + ( w / 2 ) - ( strw / 2 ) - 5, y, Color( 80 ) );
+	DrawManager::DrawLine( x + ( w / 2 ) + ( strw / 2 ) + 5, y, x + w, y, Color( 80 ) );
 	int cx = x + SPACING, cy = y + SPACING;
 
 	for( auto& i : children ) {
 		i->SetPos( cx, cy );
-		i->SetWidth( w - (SPACING * 2) );
+		i->SetWidth( w - ( SPACING * 2 ) );
 		bool over = gMenu.mouseOver( cx, cy, i->GetWidth(), i->GetHeight() );
-		bool getInput = !(i->flags & noinput) && over && !gMenu.IsDialogOpen();
+		bool getInput = !( i->flags & noinput ) && over && !gMenu.IsDialogOpen();
 		i->Draw( getInput );
 		cy += i->GetHeight() + SPACING;
 	}
 
-	y -= (strh / 2);
+	y -= ( strh / 2 );
 	return h;
 }
 
 void Groupbox::HandleInput() {
 	int strw, strh;
 	gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWstring( name ).c_str(), strw, strh );
-	int cx = x + SPACING, cy = y + SPACING + (strh / 2);
+	int cx = x + SPACING, cy = y + SPACING + ( strh / 2 );
 
 	for( auto& i : children ) {
 		i->SetPos( cx, cy );
-		i->SetWidth( w - (SPACING * 2) );
+		i->SetWidth( w - ( SPACING * 2 ) );
 		bool over = gMenu.mouseOver( cx, cy, i->GetWidth(), i->GetHeight() );
-		bool getInput = !(i->flags & noinput) && over && !gMenu.IsDialogOpen();
+		bool getInput = !( i->flags & noinput ) && over && !gMenu.IsDialogOpen();
 
 		if( getInput ) {
 			i->HandleInput();
@@ -245,7 +243,7 @@ int Groupbox::GetHeight() {
 
 	int strw, strh;
 	gInts.Surface->GetTextSize( gFonts.verdana_bold, ToWstring( name ).c_str(), strw, strh );
-	return h + (strh / 2);
+	return h + ( strh / 2 );
 }
 
 // ===== Checkbox =====
@@ -266,7 +264,7 @@ int Checkbox::Draw( bool mouseOver ) {
 }
 
 void Checkbox::HandleInput() {
-	if( value != -1 && (gMenu.mb == e_mb::lclick || gMenu.mb == e_mb::rclick) ) {
+	if( value != -1 && ( gMenu.mb == e_mb::lclick || gMenu.mb == e_mb::rclick ) ) {
 		value = !value;
 	}
 }
@@ -300,7 +298,7 @@ int Slider::Draw( bool mouseOver ) {
 	Color clr = mouseOver ? HTEXT : CTEXT;
 	DrawManager::DrawString( x, y, clr, name, gFonts.verdana_bold );
 	DrawManager::DrawRect( x, y + 17, nw, 4, BACKGR );
-	int percent = nw * (value - min) / (max - min);
+	int percent = nw * ( value - min ) / ( max - min );
 
 	if( mouseOver ) {
 		DrawManager::DrawRect( x, y + 17, percent, 4, HTEXT );
@@ -480,15 +478,15 @@ void DrawColorBox( void* data, size_t Index ) {
 
 	if( !color->bDef )
 		color->color = hsv2rgb(
-			float( ccursorx ) / colorpicker.GetWidth(),
-			1.f - (float( ccursory ) / colorpicker.GetHeight()),
-			1.f - (float( vcursory ) / brightness.GetHeight()) );
+		float( ccursorx ) / colorpicker.GetWidth(),
+		1.f - ( float( ccursory ) / colorpicker.GetHeight() ),
+		1.f - ( float( vcursory ) / brightness.GetHeight() ) );
 	else {
 		color->color = color->cDef;
 	}
 
 	DrawManager::OutlineRect( X + 4, Y + 29, colorpicker.GetWidth() + 2, colorpicker.GetHeight() + 2, Color( 58, 58, 70 ) );
-	colorpicker.Draw( X + 5, Y + 30, Color( 255 - (float( vcursory ) / brightness.GetHeight()) * 255 ) );
+	colorpicker.Draw( X + 5, Y + 30, Color( 255 - ( float( vcursory ) / brightness.GetHeight() ) * 255 ) );
 	DrawManager::OutlineRect( X + colorpicker.GetWidth() + 9, Y + 29, 16 + 2, brightness.GetHeight() + 2, Color( 58, 58, 70 ) );
 	brightness.Draw( X + colorpicker.GetWidth() + 10, Y + 30 );
 	DrawManager::OutlineRect( X + 4, Y + 4, colorpicker.GetWidth() + 23, 22, Color( 58, 58, 70 ) );

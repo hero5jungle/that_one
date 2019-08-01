@@ -139,18 +139,21 @@ struct CGlobalVariables {
 		&ESP_proj_cham,
 		&ESP_hat,
 		&ESP_hand,
-		} };
+		}
+	};
 
 	Listbox  ESP_fov{ "Fov circle", {"none", "normal", "dotted" }, 2 };
 	Listbox  ESP_target{ "Target highlight", { "Off", "line", "color", "both" }, 1 };
 	Checkbox ESP_around_fov{ "Out of fov esp", true };
 	Checkbox ESP_spectators{ "Spectator list", true };
+	Checkbox ESP_head_points{ "Head point esp", true };
 
 	Groupbox ESP_MISC{ "--Misc--", {
 		&ESP_fov,
 		&ESP_target,
 		&ESP_around_fov,
-		&ESP_spectators
+		&ESP_spectators,
+		&ESP_head_points
 		}
 	};
 
@@ -268,9 +271,20 @@ struct CGlobalVariables {
 		&latency,
 		&latency_amount,
 		&ping_diff,
-		} };
+		}
+	};
+
 	Checkbox explanation1{ "200 ping for 400ms backtrack", comment };
 	Checkbox explanation2{ "or 800 ping for the 1 sec backtrack", comment };
+
+	Checkbox fake{ "Fake Angle" };
+	Slider fake_amount{ "fake lag",0,0,14,1 };
+
+	Groupbox FAKE{ "--Fakes--", {
+		&fake,
+		&fake_amount,
+		}
+	};
 
 	Tab Misc{ "Misc", {
 		&MOVEMENT,
@@ -278,7 +292,8 @@ struct CGlobalVariables {
 		&ENGINE,
 		&LATENCY,
 		&explanation1,
-		&explanation2
+		&explanation2,
+		&FAKE
 		}
 	};
 
@@ -304,7 +319,6 @@ struct CGlobalVariables {
 	Functionbox Dump_classId{ "Dump classId", Dumps::dumpClassIds };
 	Functionbox Dump_netvar{ "Dump netvar", Dumps::dumpNetvars };
 	Functionbox Detach{ "Detach", detach_start };
-
 
 	Tab Testing{ "Testing", {
 		&Sv_cheat,

@@ -1,5 +1,4 @@
 #include "airblast.h"
-#include "../../sdk/sdk.h"
 #include "../../tools/util/util.h"
 namespace Airblast {
 
@@ -55,7 +54,7 @@ namespace Airblast {
 			INetChannelInfo* net = gInts.Engine->GetNetChannelInfo();
 			float latency = net->GetLatency( FLOW_OUTGOING ) + net->GetLatency( FLOW_INCOMING );
 			Vector velocity = Util::EstimateAbsVelocity( ent );
-			Vector predicted_proj = ent->GetAbsOrigin() + (velocity * latency);
+			Vector predicted_proj = ent->GetAbsOrigin() + ( velocity * latency );
 			float dist = predicted_proj.DistToSqr( pLocal->GetAbsOrigin() );
 
 			if( dist < closest_dist || closest_dist == 0.0f ) {
@@ -74,7 +73,7 @@ namespace Airblast {
 		Vector tr;
 
 		if( pLocal->CanSee( nullptr, closest_vec ) ) {
-			tr = (closest_vec - pLocal->GetEyePosition());
+			tr = ( closest_vec - pLocal->GetEyePosition() );
 		} else {
 			return;
 		}

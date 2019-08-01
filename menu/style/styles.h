@@ -1,7 +1,7 @@
 #pragma once
 
 class WindowStyle {
-	public:
+public:
 	// Draws a framed control area for dialogs
 	virtual void Dialog( int x, int y, int w, int h ) = 0;
 	// Draws a framed control area for small panels within another control area
@@ -18,7 +18,7 @@ class WindowStyle {
 };
 
 class DefaultStyle : public WindowStyle {
-	public:
+public:
 	void Dialog( int x, int y, int w, int h );
 	int ControlPanel( int x, int y, int w, int h, const char* name = nullptr );
 	int DialogButton( int x, int y, int w, const char* text, bool mouseOver = false );

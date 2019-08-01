@@ -11,17 +11,18 @@ class CNetVars {
 	using map_type = std::unordered_map<std::string, std::shared_ptr<node>>;
 
 	struct node {
-		node( DWORD offset ) : offset( offset ) {}
+		node( DWORD offset ) : offset( offset ) {
+		}
 		map_type nodes;
 		DWORD offset;
 	};
 
 	map_type nodes;
 
-	public:
+public:
 	void Initialize();
 
-	private:
+private:
 	void populate_nodes( class RecvTable* recv_table, map_type* map );
 
 	/**
@@ -52,7 +53,7 @@ class CNetVars {
 		return get_offset_recursive( node->nodes, acc + node->offset, args... );
 	}
 
-	public:
+public:
 	/**
 	* get_offset - Get the offset of a netvar given a list of branch names
 	* @name:  Top level datatable name
@@ -73,7 +74,7 @@ template<typename T>
 class CDynamicNetvar {
 	DWORD off;
 
-	public:
+public:
 	template<typename... args_t>
 	CDynamicNetvar( args_t... a ) {
 		// just assume these wont be accessed until after netvars has been inited
@@ -85,10 +86,10 @@ class CDynamicNetvar {
 	}
 
 	T GetValue( PVOID base ) {
-		return *reinterpret_cast<T*>((DWORD)base + (DWORD)off);
+		return *reinterpret_cast<T*>( (DWORD)base + (DWORD)off );
 	}
 	void SetValue( PVOID base, T val ) {
-		*reinterpret_cast<T*>((DWORD)(base)+((DWORD)(off))) = val;
+		*reinterpret_cast<T*>( (DWORD)(base)+( (DWORD)( off ) ) ) = val;
 	}
 };
 

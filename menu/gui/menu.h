@@ -24,7 +24,7 @@ enum class e_focus {
 
 
 class Menu {
-	public:
+public:
 	bool enabled = false;
 
 	bool mouseOver( int x, int y, int w, int h );
@@ -66,7 +66,7 @@ class Menu {
 	inline const TabGroup* GetTabs() {
 		return &Tabs;
 	}
-	private:
+private:
 	int focus = 0;
 	vector<Dialog*> dialogs;
 

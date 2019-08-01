@@ -80,8 +80,8 @@ namespace DrawManager {
 
 		if( w > 0.001 ) { //If the object is within view.
 			float fl1DBw = 1 / w; //Divide 1 by the angle.
-			vScreen.x = (gScreen.Width / 2) + (0.5 * ((worldToScreen[0][0] * vOrigin[0] + worldToScreen[0][1] * vOrigin[1] + worldToScreen[0][2] * vOrigin[2] + worldToScreen[0][3]) * fl1DBw) * gScreen.Width + 0.5); //Get the X dimension and push it in to the Vector.
-			vScreen.y = (gScreen.Height / 2) - (0.5 * ((worldToScreen[1][0] * vOrigin[0] + worldToScreen[1][1] * vOrigin[1] + worldToScreen[1][2] * vOrigin[2] + worldToScreen[1][3]) * fl1DBw) * gScreen.Height + 0.5); //Get the Y dimension and push it in to the Vector.
+			vScreen.x = ( gScreen.Width / 2 ) + ( 0.5 * ( ( worldToScreen[0][0] * vOrigin[0] + worldToScreen[0][1] * vOrigin[1] + worldToScreen[0][2] * vOrigin[2] + worldToScreen[0][3] ) * fl1DBw ) * gScreen.Width + 0.5 ); //Get the X dimension and push it in to the Vector.
+			vScreen.y = ( gScreen.Height / 2 ) - ( 0.5 * ( ( worldToScreen[1][0] * vOrigin[0] + worldToScreen[1][1] * vOrigin[1] + worldToScreen[1][2] * vOrigin[2] + worldToScreen[1][3] ) * fl1DBw ) * gScreen.Height + 0.5 ); //Get the Y dimension and push it in to the Vector.
 			return true;
 		}
 
@@ -91,7 +91,7 @@ namespace DrawManager {
 	void DrawCircle( float x, float y, float r, float s, Color color ) {
 		float Step = 3.141 * 2.0 / s;
 
-		for( float a = 0; a < (3.141 * 2.0); a += Step ) {
+		for( float a = 0; a < ( 3.141 * 2.0 ); a += Step ) {
 			float x1 = r * cos( a ) + x;
 			float y1 = r * sin( a ) + y;
 			float x2 = r * cos( a + Step ) + x;
@@ -117,7 +117,7 @@ namespace DrawManager {
 		float Step = 3.141 / s;
 		float timer = gInts.globals->curtime;
 
-		for( float a = timer; a < timer + (3.141 * 2); a += Step ) {
+		for( float a = timer; a < timer + ( 3.141 * 2 ); a += Step ) {
 			float xt = r * cos( a ) + x;
 			float yt = r * sin( a ) + y;
 			DrawRect( xt - 1, yt - 1, 3, 3, color );

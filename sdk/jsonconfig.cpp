@@ -1,5 +1,4 @@
 #include "sdk.h"
-#include "cglobalvars.h"
 #include "../menu/gui/menu.h"
 #include "headers/json.h"
 #include <fstream>
@@ -19,7 +18,7 @@ void Save( json& main, string player_class, TAB tab, SETTING setting ) {
 	switch( setting->type ) {
 		case e_control::checkbox:
 		{
-			auto checkbox = (Checkbox*)(setting);
+			auto checkbox = (Checkbox*)( setting );
 
 			if( checkbox->value != -1 ) {
 				main[player_class][tab->name][checkbox->name] = checkbox->value;
@@ -30,21 +29,21 @@ void Save( json& main, string player_class, TAB tab, SETTING setting ) {
 
 		case e_control::slider:
 		{
-			auto slider = (Slider*)(setting);
+			auto slider = (Slider*)( setting );
 			main[player_class][tab->name][slider->name] = slider->value;
 			break;
 		}
 
 		case e_control::listbox:
 		{
-			auto list = (Listbox*)(setting);
+			auto list = (Listbox*)( setting );
 			main[player_class][tab->name][list->name] = list->value;
 			break;
 		}
 
 		case e_control::colorpicker:
 		{
-			auto colorpicker = (ColorPicker*)(setting);
+			auto colorpicker = (ColorPicker*)( setting );
 			main[player_class][tab->name][colorpicker->name]["color"] = colorpicker->color.to_int();
 			main[player_class][tab->name][colorpicker->name]["def"] = colorpicker->bDef;
 			main[player_class][tab->name][colorpicker->name]["rainbow"] = colorpicker->rainbow;
@@ -53,7 +52,7 @@ void Save( json& main, string player_class, TAB tab, SETTING setting ) {
 
 		case e_control::keybind:
 		{
-			auto keybind = (KeyBind*)(setting);
+			auto keybind = (KeyBind*)( setting );
 			main[player_class][tab->name][keybind->name]["key"] = keybind->key;
 			main[player_class][tab->name][keybind->name]["mode"] = keybind->mode;
 			break;
@@ -72,7 +71,7 @@ void Load( json& main, string player_class, TAB tab, SETTING setting ) {
 	switch( setting->type ) {
 		case e_control::checkbox:
 		{
-			auto checkbox = (Checkbox*)(setting);
+			auto checkbox = (Checkbox*)( setting );
 
 			if( checkbox->value != -1 ) {
 				checkbox->value = main[player_class][tab->name][checkbox->name];
@@ -83,21 +82,21 @@ void Load( json& main, string player_class, TAB tab, SETTING setting ) {
 
 		case e_control::slider:
 		{
-			auto slider = (Slider*)(setting);
+			auto slider = (Slider*)( setting );
 			slider->value = main[player_class][tab->name][slider->name];
 			break;
 		}
 
 		case e_control::listbox:
 		{
-			auto list = (Listbox*)(setting);
+			auto list = (Listbox*)( setting );
 			list->value = main[player_class][tab->name][list->name];
 			break;
 		}
 
 		case e_control::colorpicker:
 		{
-			auto colorpicker = (ColorPicker*)(setting);
+			auto colorpicker = (ColorPicker*)( setting );
 			colorpicker->color.from_int( main[player_class][tab->name][colorpicker->name]["color"] );
 			colorpicker->bDef = main[player_class][tab->name][colorpicker->name]["def"];
 			colorpicker->rainbow = main[player_class][tab->name][colorpicker->name]["rainbow"];
@@ -106,7 +105,7 @@ void Load( json& main, string player_class, TAB tab, SETTING setting ) {
 
 		case e_control::keybind:
 		{
-			auto keybind = (KeyBind*)(setting);
+			auto keybind = (KeyBind*)( setting );
 			keybind->key = main[player_class][tab->name][keybind->name]["key"];
 			keybind->mode = main[player_class][tab->name][keybind->name]["mode"];
 			break;

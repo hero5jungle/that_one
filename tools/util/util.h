@@ -24,6 +24,7 @@ namespace Util {
 	bool canAmbassadorHeadshot( CBaseCombatWeapon* wpn );
 	bool canBackstab( const Vector& from_angle, const Vector& to_angle, Vector wsc_spy_to_victim );
 	bool canHeadshot( CBaseEntity* pLocal );
+	bool CanShoot( CBaseEntity* pLocal, CBaseCombatWeapon* wpn );
 
 	void minDist( weaponid id, float& dist );
 	bool weaponSetup( float& speed, float& chargetime, float& gravity, bool& quick_release, weaponid id, CBaseCombatWeapon* wpn );

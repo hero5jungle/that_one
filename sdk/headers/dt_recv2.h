@@ -24,7 +24,7 @@ class RecvProp;
 
 // This is passed into RecvProxy functions.
 class CRecvProxyData {
-	public:
+public:
 	const RecvProp* m_pRecvProp;   // The property it's receiving.
 
 	DVariant    m_Value;      // The value given to you to store.
@@ -41,13 +41,13 @@ class CRecvProxyData {
 //
 // Convert the network-standard-type value in m_Value into your own format in pStruct/pOut.
 //-----------------------------------------------------------------------------
-typedef void(*RecvVarProxyFn)(const CRecvProxyData* pData, void* pStruct, void* pOut);
+typedef void( *RecvVarProxyFn )( const CRecvProxyData* pData, void* pStruct, void* pOut );
 
 // ------------------------------------------------------------------------ //
 // ArrayLengthRecvProxies are optionally used to get the length of the
 // incoming array when it changes.
 // ------------------------------------------------------------------------ //
-typedef void(*ArrayLengthRecvProxyFn)(void* pStruct, int objectID, int currentArrayLength);
+typedef void( *ArrayLengthRecvProxyFn )( void* pStruct, int objectID, int currentArrayLength );
 
 
 // NOTE: DataTable receive proxies work differently than the other proxies.
@@ -56,13 +56,13 @@ typedef void(*ArrayLengthRecvProxyFn)(void* pStruct, int objectID, int currentAr
 // If the parent object just contains the child object, the default proxy just does *pOut = pData.
 // If the parent object points at the child object, you need to dereference the pointer here.
 // NOTE: don't ever return null from a DataTable receive proxy function. Bad things will happen.
-typedef void(*DataTableRecvVarProxyFn)(const RecvProp* pProp, void** pOut, void* pData, int objectID);
+typedef void( *DataTableRecvVarProxyFn )( const RecvProp* pProp, void** pOut, void* pData, int objectID );
 
 
 // This is used to fork over the standard proxy functions to the engine so it can
 // make some optimizations.
 class CStandardRecvProxies {
-	public:
+public:
 	CStandardRecvProxies();
 
 	RecvVarProxyFn m_Int32ToInt8;
@@ -79,7 +79,7 @@ class CRecvDecoder;
 
 class RecvProp {
 	// This info comes from the receive data table.
-	public:
+public:
 	RecvProp();
 
 	void          InitArray( int nElements, int elementStride );
@@ -127,7 +127,7 @@ class RecvProp {
 	const char* GetParentArrayPropName();
 	void        SetParentArrayPropName( const char* pArrayPropName );
 
-	public:
+public:
 
 	const char* m_pVarName;
 	SendPropType      m_RecvType;
@@ -135,7 +135,7 @@ class RecvProp {
 	int           m_StringBufferSize;
 
 
-	private:
+private:
 
 	bool          m_bInsideArray;   // Set to true by the engine if this property sits inside an array.
 
@@ -162,7 +162,7 @@ class RecvProp {
 
 
 class RecvTable {
-	public:
+public:
 
 	typedef RecvProp  PropType;
 
@@ -186,7 +186,7 @@ class RecvTable {
 	bool    IsInMainList() const;
 
 
-	public:
+public:
 
 	// Properties described in a table.
 	RecvProp* m_pProps;
@@ -199,7 +199,7 @@ class RecvTable {
 	const char* m_pNetTableName; // The name matched between client and server.
 
 
-	private:
+private:
 
 	bool      m_bInitialized;
 	bool      m_bInMainList;

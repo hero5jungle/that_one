@@ -28,7 +28,7 @@ namespace Materials {
 		const string name = "#mat_"s + to_string( created ) + ".vmt"s;
 		created++;
 		KeyValues* keyValues = new KeyValues;
-		keyValues->Initialize( keyValues, const_cast<char*>(type.c_str()) );
+		keyValues->Initialize( keyValues, const_cast<char*>( type.c_str() ) );
 		keyValues->LoadFromBuffer( keyValues, name.c_str(), data.c_str() );
 		IMaterial* createdMaterial = gInts.MatSystem->CreateMaterial( name.c_str(), keyValues );
 

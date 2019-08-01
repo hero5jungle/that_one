@@ -9,7 +9,7 @@ namespace Keyvalues {
 }
 class IBaseFileSystem;
 class KeyValues {
-	public:
+public:
 	static KeyValues* Initialize( KeyValues* kv, char* name );
 	static bool LoadFromBuffer( KeyValues* kv, char const* resourceName, const char* pBuffer, IBaseFileSystem* pFileSystem = NULL, const char* pPathID = NULL );
 

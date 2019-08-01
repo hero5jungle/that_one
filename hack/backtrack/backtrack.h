@@ -19,7 +19,7 @@ namespace Backtrack {
 
 
 	template<typename T> constexpr T clamp( T val, T  min, T max ) {
-		return (((val) > (max)) ? (max) : (((val) < (min)) ? (min) : (val)));
+		return ( ( ( val ) > ( max ) ) ? ( max ) : ( ( ( val ) < ( min ) ) ? ( min ) : ( val ) ) );
 	}
 
 	void collect_tick( CBaseEntity* pLocal );

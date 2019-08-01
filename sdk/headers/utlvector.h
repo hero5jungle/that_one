@@ -4,12 +4,12 @@
 #pragma warning (disable:4514)
 template <class T>
 inline void Construct( T* pMemory ) {
-	::new(pMemory) T;
+	::new( pMemory ) T;
 }
 
 template <class T>
 inline void CopyConstruct( T* pMemory, T const& src ) {
-	::new(pMemory) T( src );
+	::new( pMemory ) T( src );
 }
 
 template <class T>
@@ -23,7 +23,7 @@ inline void Destruct( T* pMemory ) {
 //-----------------------------------------------------------------------------
 template< class T >
 class CUtlMemory {
-	public:
+public:
 	// constructor, destructor
 	CUtlMemory( int nGrowSize = 0, int nInitSize = 0 );
 	CUtlMemory( T* pMemory, int numElements );
@@ -64,7 +64,7 @@ class CUtlMemory {
 	// Set the size by which the memory grows
 	void SetGrowSize( int size );
 
-	private:
+private:
 	enum {
 		EXTERNAL_BUFFER_MARKER = -1,
 	};
@@ -81,7 +81,7 @@ class CUtlMemory {
 template< class T >
 CUtlMemory<T>::CUtlMemory( int nGrowSize, int nInitAllocationCount ) : m_pMemory( 0 ),
 m_nAllocationCount( nInitAllocationCount ), m_nGrowSize( nGrowSize ) {
-	Assert( (nGrowSize >= 0) && (nGrowSize != EXTERNAL_BUFFER_MARKER) );
+	Assert( ( nGrowSize >= 0 ) && ( nGrowSize != EXTERNAL_BUFFER_MARKER ) );
 	if( m_nAllocationCount ) {
 		m_pMemory = (T*)malloc( m_nAllocationCount * sizeof( T ) );
 	}
@@ -155,7 +155,7 @@ bool CUtlMemory<T>::IsExternallyAllocated() const {
 
 template< class T >
 void CUtlMemory<T>::SetGrowSize( int nSize ) {
-	Assert( (nSize >= 0) && (nSize != EXTERNAL_BUFFER_MARKER) );
+	Assert( ( nSize >= 0 ) && ( nSize != EXTERNAL_BUFFER_MARKER ) );
 	m_nGrowSize = nSize;
 }
 
@@ -193,7 +193,7 @@ inline int CUtlMemory<T>::Count() const {
 //-----------------------------------------------------------------------------
 template< class T >
 inline bool CUtlMemory<T>::IsIdxValid( int i ) const {
-	return (i >= 0) && (i < m_nAllocationCount);
+	return ( i >= 0 ) && ( i < m_nAllocationCount );
 }
 
 
@@ -222,7 +222,7 @@ void CUtlMemory<T>::Grow( int num ) {
 			}
 		} else {
 			// Compute an allocation which is at least as big as a cache line...
-			m_nAllocationCount = (31 + sizeof( T )) / sizeof( T );
+			m_nAllocationCount = ( 31 + sizeof( T ) ) / sizeof( T );
 			Assert( m_nAllocationCount != 0 );
 		}
 	}
@@ -274,7 +274,7 @@ void CUtlMemory<T>::Purge() {
 
 template<class T>
 class CUtlVector {
-	public:
+public:
 	typedef T ElemType_t;
 
 	// constructor, destructor
@@ -359,9 +359,11 @@ class CUtlVector {
 	// Set the size by which it grows when it needs to allocate more memory.
 	void SetGrowSize( int size );
 
-	protected:
+protected:
 	// Can't copy this unless we explicitly do it!
-	CUtlVector( CUtlVector const& vec ) { assert( 0 ); }
+	CUtlVector( CUtlVector const& vec ) {
+		assert( 0 );
+	}
 
 	// Grows the vector
 	void GrowVector( int num = 1 );
@@ -479,7 +481,7 @@ inline int CUtlVector<T>::Count() const {
 
 template< class T >
 inline bool CUtlVector<T>::IsValidIndex( int i ) const {
-	return (i >= 0) && (i < m_Size);
+	return ( i >= 0 ) && ( i < m_Size );
 }
 
 //-----------------------------------------------------------------------------
@@ -526,17 +528,17 @@ void CUtlVector<T>::EnsureCount( int num ) {
 //-----------------------------------------------------------------------------
 template< class T >
 void CUtlVector<T>::ShiftElementsRight( int elem, int num ) {
-	assert( IsValidIndex( elem ) || (m_Size == 0) || (num == 0) );
+	assert( IsValidIndex( elem ) || ( m_Size == 0 ) || ( num == 0 ) );
 	int numToMove = m_Size - elem - num;
-	if( (numToMove > 0) && (num > 0) )
+	if( ( numToMove > 0 ) && ( num > 0 ) )
 		memmove( &Element( elem + num ), &Element( elem ), numToMove * sizeof( T ) );
 }
 
 template< class T >
 void CUtlVector<T>::ShiftElementsLeft( int elem, int num ) {
-	assert( IsValidIndex( elem ) || (m_Size == 0) || (num == 0) );
+	assert( IsValidIndex( elem ) || ( m_Size == 0 ) || ( num == 0 ) );
 	int numToMove = m_Size - elem - num;
-	if( (numToMove > 0) && (num > 0) ) {
+	if( ( numToMove > 0 ) && ( num > 0 ) ) {
 		memmove( &Element( elem ), &Element( elem + num ), numToMove * sizeof( T ) );
 
 	#ifdef _DEBUG
@@ -567,7 +569,7 @@ inline int CUtlVector<T>::InsertAfter( int elem ) {
 template< class T >
 int CUtlVector<T>::InsertBefore( int elem ) {
 	// Can insert at the end
-	assert( (elem == Count()) || IsValidIndex( elem ) );
+	assert( ( elem == Count() ) || IsValidIndex( elem ) );
 
 	GrowVector();
 	ShiftElementsRight( elem );
@@ -597,7 +599,7 @@ inline int CUtlVector<T>::InsertAfter( int elem, T const& src ) {
 template< class T >
 int CUtlVector<T>::InsertBefore( int elem, T const& src ) {
 	// Can insert at the end
-	assert( (elem == Count()) || IsValidIndex( elem ) );
+	assert( ( elem == Count() ) || IsValidIndex( elem ) );
 
 	GrowVector();
 	ShiftElementsRight( elem );
@@ -641,7 +643,7 @@ template< class T >
 void CUtlVector<T>::CopyArray( T const* pArray, int size ) {
 	SetSize( size );
 	for( int i = 0; i < size; i++ )
-		(*this)[i] = pArray[i];
+		( *this )[i] = pArray[i];
 }
 
 template< class T >
@@ -653,7 +655,7 @@ int CUtlVector<T>::AddVectorToTail( CUtlVector const& src ) {
 
 	// Copy the elements.
 	for( int i = 0; i < src.Count(); i++ )
-		(*this)[base + i] = src[i];
+		( *this )[base + i] = src[i];
 
 	return base;
 }
@@ -664,7 +666,7 @@ inline int CUtlVector<T>::InsertMultipleBefore( int elem, int num, const T* pToI
 		return elem;
 
 	// Can insert at the end
-	assert( (elem == Count()) || IsValidIndex( elem ) );
+	assert( ( elem == Count() ) || IsValidIndex( elem ) );
 
 	GrowVector( num );
 	ShiftElementsRight( elem, num );
@@ -697,7 +699,7 @@ int CUtlVector<T>::Find( T const& src ) const {
 
 template< class T >
 bool CUtlVector<T>::HasElement( T const& src ) {
-	return (Find( src ) >= 0);
+	return ( Find( src ) >= 0 );
 }
 
 //-----------------------------------------------------------------------------

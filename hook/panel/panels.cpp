@@ -3,7 +3,6 @@
 #include "../../hack/esp/esp.h"
 #include "../../menu/gui/menu.h"
 #include "../../sdk/cmat/cmat.h"
-#include "../../tools/signature/csignature.h"
 
 CScreenSize gScreen;
 unsigned int FocusOverlayPanel = 0;
@@ -16,7 +15,7 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
 			return;
 		}
 
-		gHooks.PaintTraverse.get_original()(pPanels, vguiPanel, forceRepaint, allowForce);
+		gHooks.PaintTraverse.get_original()( pPanels, vguiPanel, forceRepaint, allowForce );
 
 		if( !FocusOverlayPanel ) {
 			if( strstr( panel_name, "FocusOverlayPanel" ) ) {
@@ -65,6 +64,7 @@ void __fastcall Hooked_PaintTraverse( PVOID pPanels, int edx, unsigned int vguiP
 void Intro() {
 	DrawManager::Initialize();
 	gMenu.CreateGUI();
+	gCvars.Sv_cheat.value = false;
 	gNetVars.Initialize();
 	Materials::Initialize();
 	InitTextures();

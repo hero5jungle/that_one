@@ -10,13 +10,13 @@ namespace Keyvalues {
 	}
 }
 bool KeyValues::LoadFromBuffer( KeyValues* kv, char const* resourceName, const char* pBuffer, IBaseFileSystem* pFileSystem, const char* pPathID ) {
-	typedef int( __thiscall * LoadFromBufferFn )(KeyValues * kv, char const*, const char*, IBaseFileSystem*, const char*);
+	typedef int( __thiscall * LoadFromBufferFn )( KeyValues * kv, char const*, const char*, IBaseFileSystem*, const char* );
 	static LoadFromBufferFn Load = (LoadFromBufferFn)Keyvalues::pLoadFromBuffer;
 	return Load( kv, resourceName, pBuffer, pFileSystem, pPathID );
 }
 
 KeyValues* KeyValues::Initialize( KeyValues* kv, char* name ) {
-	typedef KeyValues* (__thiscall * InitializeFn)(KeyValues*, char*);
+	typedef KeyValues* ( __thiscall * InitializeFn )( KeyValues*, char* );
 	static InitializeFn Init = (InitializeFn)Keyvalues::pKeyValues;
 	return Init( kv, name );
 }

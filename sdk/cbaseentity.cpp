@@ -5,20 +5,20 @@
 bool CBaseEntity::CanSee( CBaseEntity* pEntity, const Vector& pos ) {
 	trace_t tr;
 	Ray_t ray;
-	CTraceFilter filter;
+	CTraceFilterNothing filter;
 	ray.Init( this->GetEyePosition(), pos );
 	gInts.EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
 
 	if( tr.m_pEnt == nullptr || pEntity == nullptr ) {
 		return tr.fraction == 1.0f;
 	}
-	return (tr.m_pEnt->GetIndex() == pEntity->GetIndex()) || (tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum());
+	return ( tr.m_pEnt->GetIndex() == pEntity->GetIndex() ) || ( tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum() );
 }
 
 Vector CBaseEntity::CanSeeSpot( CBaseEntity* pEntity, const Vector& pos ) {
 	trace_t tr;
 	Ray_t ray;
-	CTraceFilter filter;
+	CTraceFilterNothing filter;
 	ray.Init( this->GetEyePosition(), pos );
 	gInts.EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
 
@@ -27,7 +27,7 @@ Vector CBaseEntity::CanSeeSpot( CBaseEntity* pEntity, const Vector& pos ) {
 			return tr.endpos;
 	}
 
-	if( (tr.m_pEnt->GetIndex() == pEntity->GetIndex()) || (tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum()) ) {
+	if( ( tr.m_pEnt->GetIndex() == pEntity->GetIndex() ) || ( tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum() ) ) {
 		return tr.endpos;
 	}
 
@@ -35,15 +35,15 @@ Vector CBaseEntity::CanSeeSpot( CBaseEntity* pEntity, const Vector& pos ) {
 }
 
 void CBaseEntity::RemoveNoDraw() {
-	*(byte*)(this + 0x7C) &= ~32;//m_fEffects
-	static auto add_to_leaf_system = (int( __thiscall* )(void*, int))(Signatures::GetClientSignature( "55 8B EC 56 FF 75 08 8B F1 B8" ));
+	*(byte*)( this + 0x7C ) &= ~32;//m_fEffects
+	static auto add_to_leaf_system = ( int( __thiscall* )( void*, int ) )( Signatures::GetClientSignature( "55 8B EC 56 FF 75 08 8B F1 B8" ) );
 	if( add_to_leaf_system )
 		add_to_leaf_system( this, 7 );
 }
 
 int CBaseEntity::registerGlowObject( Color color, bool bRenderWhenOccluded, bool bRenderWhenUnoccluded ) {
 
-	using registerFn = int( __thiscall* )(CGlowObjectManager*, CBaseEntity*, Vector&, float, bool, bool, int);
+	using registerFn = int( __thiscall* )( CGlowObjectManager*, CBaseEntity*, Vector&, float, bool, bool, int );
 	static DWORD dwFn = Signatures::GetClientSignature( "55 8B EC 51 53 56 8B F1 57 8B 5E 14" );
 	static registerFn Register = (registerFn)dwFn;
 
@@ -91,7 +91,7 @@ Vector CBaseEntity::GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind ) {
 		return Vector();
 	}
 
-	Vector center = (box->bbmin + box->bbmax) * 0.5f;
+	Vector center = ( box->bbmin + box->bbmax ) * 0.5f;
 	Vector vHitbox;
 	Util::vector_transform( center, matrix[box->bone], vHitbox );
 	vHitbox = pLocal->CanSeeSpot( this, vHitbox );
@@ -134,10 +134,10 @@ Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind )
 		return Vector();
 	}
 
-	Vector min = box->bbmin * 0.7f;
-	Vector max = box->bbmax * 0.7f;
+	Vector min = box->bbmin * 0.9f;
+	Vector max = box->bbmax * 0.9f;
 
-	Vector center = (min + max) * 0.5f;
+	Vector center = ( min + max ) * 0.5f;
 	Vector vHitbox;
 
 	Util::vector_transform( center, matrix[box->bone], vHitbox );
@@ -145,19 +145,19 @@ Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind )
 	if( pLocal->CanSee( this, vHitbox ) )
 		return vHitbox;
 
-	Vector Points[8]{
-		Vector( max.x, min.y, max.z ),
+	Vector Points[]{
+		Vector( min.x, min.y, min.z ),
+		Vector( min.x, max.y, min.z ),
 		Vector( min.x, min.y, max.z ),
 		Vector( min.x, max.y, max.z ),
-		Vector( max.x, max.y, max.z ),
 		Vector( max.x, min.y, min.z ),
 		Vector( max.x, max.y, min.z ),
-		Vector( min.x, max.y, min.z ),
-		Vector( min.x, min.y, min.z )
+		Vector( max.x, min.y, max.z ),
+		Vector( max.x, max.y, max.z ),
 	};
 
-	for( int i = 0; i < 8; i++ ) {
-		Util::vector_transform( Points[i], matrix[box->bone], vHitbox );
+	for( auto point : Points ) {
+		Util::vector_transform( point, matrix[box->bone], vHitbox );
 		vHitbox = pLocal->CanSeeSpot( this, vHitbox );
 		if( !vHitbox.IsZero() )
 			return vHitbox;

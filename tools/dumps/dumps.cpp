@@ -1,10 +1,6 @@
 #include "dumps.h"
 #include "../../sdk/headers/json.h"
 #include <fstream>
-#include <iomanip>
-#include <vector>
-#include <utility>
-#include <algorithm>
 void Dumps::dumpClassIds() {
 
 	vector< pair<string, int> > id;

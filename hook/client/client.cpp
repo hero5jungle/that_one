@@ -3,13 +3,13 @@
 #include "../../tools/util/util.h"
 #include "../../hack/aimbot/aimbot.h"
 #include "../../hack/misc/misc.h"
+#include "../../hack/fake/fake.h"
 #include "../../hack/sticky/sticky.h"
 #include "../../hack/airblast/airblast.h"
 #include "../../hack/backtrack/backtrack.h"
 #include "../../hack/backtrack/latency.h"
 #include "../../hack/engine/engine.h"
 #include "../../sdk/cmat/cmat.h"
-#include <unordered_map>
 
 int __fastcall hkSendDatagram( CNetChan* netchan, PVOID, bf_write* datagram ) {
 	auto sendDatagram = gHooks.SendDatagram.get_original();
@@ -28,11 +28,12 @@ int __fastcall hkSendDatagram( CNetChan* netchan, PVOID, bf_write* datagram ) {
 }
 
 Vector qLASTTICK;
+
 bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample_frametime, CUserCmd* cmd ) {
-	bool bReturn = gHooks.CreateMove.get_original()(ClientMode, input_sample_frametime, cmd);
-	//uintptr_t _bp;
-	//__asm mov _bp, ebp;
-	//bool *send_packet = ( bool * )( * **( uintptr_t ** * )_bp - 1 );
+	bool bReturn = gHooks.CreateMove.get_original()( ClientMode, input_sample_frametime, cmd );
+	uintptr_t _bp;
+	__asm mov _bp, ebp;
+	bool* send_packet = (bool*)( ***(uintptr_t * **)_bp - 1 );
 	Latency::UpdateIncomingSequences();
 
 	if( !cmd->command_number ) {
@@ -41,7 +42,7 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
 		gCvars.last_cmd_number = cmd->command_number;
 	}
 
-	INetChannel* ch = gInts.Engine->GetNetChannelInfo();
+	CNetChan* ch = gInts.Engine->GetNetChannelInfo();
 
 	if( ch ) {
 		if( ch != old_ch ) {
@@ -60,7 +61,8 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
 		Misc::Run( pLocal, cmd );
 		EnginePred::Start( pLocal, cmd );
 		Backtrack::Run( pLocal, ch );
-		Aimbot::Run( pLocal, cmd );
+		Aimbot::Run( pLocal, cmd, send_packet );
+		Fake::Run( pLocal, cmd, send_packet );
 		Airblast::Run( pLocal, cmd );
 		DemoSticky::Run( pLocal, cmd );
 		EnginePred::End( pLocal, cmd );
@@ -90,14 +92,15 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 
 					bool valid = !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE;
 					bool team = !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum();
+					bool model = pEntity->GetModel();
 
 					switch( (classId)pEntity->GetClassId() ) {
 						case classId::CTFPlayer:
 						{
 							if( gCvars.ESP_player.value == 2 ) {
-								if( !pEntity->HasGlowEffect() ) {
-									pEntity->registerGlowObject( Util::team_color( pLocal, pEntity ), true, true );
-								}
+								//if( !pEntity->HasGlowEffect() ) {
+								//	pEntity->registerGlowObject( Util::team_color( pLocal, pEntity ), true, true );
+								//}
 								pEntity->SetGlowEnabled( valid && team );
 							}
 
@@ -128,12 +131,12 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 								pEntity->SetGlowEnabled( valid && team );
 							}
 						}
-
 						default:
 							break;
 					}
 				}
 			}
+
 
 			if( Stage == FRAME_RENDER_START ) {
 				for( int i = 0; i < gInts.GlowManager->m_GlowObjectDefinitions.Count(); i++ ) {
@@ -186,7 +189,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 							default:
 								break;
 						}
-					} 
+					}
 				}
 			}
 		} else {
@@ -228,7 +231,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 
 	static unordered_map<MaterialHandle_t, Color> worldmats_new, worldmats_old;
 
-	if( (!gInts.Engine->IsInGame() || !gCvars.world_enabled.value) && worldmats_old.size() ) {
+	if( ( !gInts.Engine->IsInGame() || !gCvars.world_enabled.value ) && worldmats_old.size() ) {
 		if( gInts.Engine->IsInGame() ) {
 			for( auto& hMat : worldmats_old ) { // Reset the material colors
 				IMaterial* mat = gInts.MatSystem->GetMaterial( hMat.first );
@@ -293,7 +296,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 		Latency::ClearIncomingSequences();
 	}
 
-	return gHooks.FrameStageNotifyThink.get_original()(CHLClient, _this, Stage);
+	return gHooks.FrameStageNotifyThink.get_original()( CHLClient, _this, Stage );
 }
 
 void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, matrix3x4* pCustomBoneToWorld ) {
@@ -336,7 +339,7 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 
 		case classId::CTFPlayer:
 		{
-			if( !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE && (!gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum()) ) {
+			if( !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE && ( !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum() ) ) {
 				//backtrack
 				if( gCvars.ESP_backtrack.value && gCvars.Backtrack.value ) {
 					if( gCvars.aim_index == pInfo.entity_index ) {

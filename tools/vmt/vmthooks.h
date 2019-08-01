@@ -1,16 +1,16 @@
 #pragma once
 //written by a pleb
 class vmt_hook {
-	private:
+private:
 	uintptr_t** baseclass = nullptr;
 	std::unique_ptr<uintptr_t[]> current;
 	uintptr_t* original = nullptr;
 	int size = 0;
-	public:
+public:
 	void setup( void* base ) {
-		baseclass = static_cast<uintptr_t * *>(base);
+		baseclass = static_cast<uintptr_t * *>( base );
 
-		while( static_cast<uintptr_t*>(*baseclass)[size] ) {
+		while( static_cast<uintptr_t*>( *baseclass )[size] ) {
 			size++;
 		}
 
@@ -26,11 +26,11 @@ class vmt_hook {
 
 	template <typename Fn>
 	const inline Fn get_original( const int index ) {
-		return reinterpret_cast<Fn>(original[index]);
+		return reinterpret_cast<Fn>( original[index] );
 	}
 
 	const inline void hook( const int index, void* function ) {
-		current[index] = reinterpret_cast<uintptr_t>(function);
+		current[index] = reinterpret_cast<uintptr_t>( function );
 	}
 
 	const inline void unhook( const int index ) {
@@ -44,10 +44,10 @@ class vmt_hook {
 // a quick and dirty wrapper for tables with only one function to hook.
 template<typename Fn>
 class vmt_single : vmt_hook {
-	private:
+private:
 	int Index = 0;
 	void* Function = nullptr;
-	public:
+public:
 	void setup( void* base, const int index, void* function ) {
 		Index = index;
 		Function = function;

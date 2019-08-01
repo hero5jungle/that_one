@@ -77,11 +77,11 @@ namespace Backtrack {
 		correct += INetChannel_cache.lerptime;
 
 		if( gCvars.latency.value ) {
-			correct += (gCvars.latency_amount.value + gCvars.ping_diff.value) / 1000.0f;
+			correct += ( gCvars.latency_amount.value + gCvars.ping_diff.value ) / 1000.0f;
 		}
 
 		correct = clamp( correct, 0.0f, 1.0f );
-		float deltaTime = correct - (gInts.globals->curtime - simtime);
+		float deltaTime = correct - ( gInts.globals->curtime - simtime );
 		return fabs( deltaTime ) <= 0.2f;
 	}
 }

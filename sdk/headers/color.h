@@ -25,24 +25,24 @@ struct Color {
 		return rgba[i];
 	}
 	bool operator==( Color clr ) {
-		return (rgba[0] == clr[0]) &&
-			(rgba[1] == clr[1]) &&
-			(rgba[2] == clr[2]) &&
-			(rgba[3] == clr[3]);
+		return ( rgba[0] == clr[0] ) &&
+			( rgba[1] == clr[1] ) &&
+			( rgba[2] == clr[2] ) &&
+			( rgba[3] == clr[3] );
 	}
 	bool operator!=( Color clr ) {
-		return !(operator==( clr ));
+		return !( operator==( clr ) );
 	}
 	int to_int() {
-		return int( (rgba[0]) << 24 |
-			(rgba[1]) << 16 |
-								(rgba[2]) << 8 |
-								(rgba[3]) );
+		return int( ( rgba[0] ) << 24 |
+			( rgba[1] ) << 16 |
+			( rgba[2] ) << 8 |
+			( rgba[3] ) );
 	}
 	void from_int( int input ) {
-		rgba[0] = (input >> 24) & 0xFF;
-		rgba[1] = (input >> 16) & 0xFF;
-		rgba[2] = (input >> 8) & 0xFF;
+		rgba[0] = ( input >> 24 ) & 0xFF;
+		rgba[1] = ( input >> 16 ) & 0xFF;
+		rgba[2] = ( input >> 8 ) & 0xFF;
 		rgba[3] = input & 0xFF;
 	}
 	Vector rgb() {

@@ -3,7 +3,7 @@ namespace Misc {
 
 
 	void Run( CBaseEntity* pLocal, CUserCmd* pCommand ) {
-		bool ground = (pLocal->GetFlags() & FL_ONGROUND);
+		bool ground = ( pLocal->GetFlags() & FL_ONGROUND );
 		bool jump = pCommand->buttons & IN_JUMP;
 
 		if( pLocal->GetClass() != TF2_Scout ) {

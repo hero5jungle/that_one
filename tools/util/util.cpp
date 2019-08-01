@@ -3,7 +3,7 @@
 
 namespace Util {
 	float Distance( const Vector& vOrigin, const Vector& vLocalOrigin ) {
-		return fmax( 1.0f, sqrt( (vOrigin - vLocalOrigin).Length() ) );
+		return fmax( 1.0f, sqrt( ( vOrigin - vLocalOrigin ).Length() ) );
 	}
 
 	void vector_transform( const Vector& vSome, const matrix3x4& vMatrix, Vector& vOut ) {
@@ -100,7 +100,7 @@ namespace Util {
 
 	Vector CalcAngle( const Vector& src, const Vector& dst ) {
 		Vector vAngle;
-		Vector delta( (src.x - dst.x), (src.y - dst.y), (src.z - dst.z) );
+		Vector delta( ( src.x - dst.x ), ( src.y - dst.y ), ( src.z - dst.z ) );
 		double hyp = sqrt( delta.x * delta.x + delta.y * delta.y );
 		vAngle.x = float( atanf( float( delta.z / hyp ) ) * RADPI );
 		vAngle.y = float( atanf( float( delta.y / delta.x ) ) * RADPI );
@@ -123,9 +123,9 @@ namespace Util {
 	}
 
 	Vector EstimateAbsVelocity( CBaseEntity* ent ) {
-		typedef void( __thiscall * EstimateAbsVelocityFn )(CBaseEntity*, Vector&);
+		typedef void( __thiscall * EstimateAbsVelocityFn )( CBaseEntity*, Vector& );
 		static DWORD dwFn = Signatures::GetClientSignature( "E8 ? ? ? ? F3 0F 10 4D ? 8D 85 ? ? ? ? F3 0F 10 45 ? F3 0F 59 C9 56 F3 0F 59 C0 F3 0F 58 C8 0F 2F 0D ? ? ? ? 76 07" ) + 0x1;
-		static DWORD dwEstimate = ((*(PDWORD)(dwFn)) + dwFn + 4);
+		static DWORD dwEstimate = ( ( *(PDWORD)( dwFn ) ) + dwFn + 4 );
 		EstimateAbsVelocityFn vel = (EstimateAbsVelocityFn)dwEstimate;
 		Vector v;
 		vel( ent, v );
@@ -134,15 +134,16 @@ namespace Util {
 
 	bool isHeadshotWeapon( int Class, CBaseCombatWeapon* pWep ) {
 		if( pWep->GetSlot() == 0 ) {
-			auto wep = pWep->GetItemDefinitionIndex();
+			weaponid index = pWep->GetItemDefinitionIndex();
+			classId id = (classId)pWep->GetClassId();
 
 			if( Class == TF2_Sniper )
-				if( wep != weaponid::Sniper_m_TheHuntsman && wep != weaponid::Sniper_m_FestiveHuntsman && wep != weaponid::Sniper_m_TheFortifiedCompound ) {
+				if( id == classId::CTFSniperRifle || id == classId::CTFSniperRifleClassic ) {
 					return true;
 				}
 
 			if( Class == TF2_Spy )
-				if( wep == weaponid::Spy_m_TheAmbassador || wep == weaponid::Spy_m_FestiveAmbassador ) {
+				if( index == weaponid::Spy_m_TheAmbassador || index == weaponid::Spy_m_FestiveAmbassador ) {
 					return true;
 				}
 		}
@@ -150,7 +151,7 @@ namespace Util {
 		return false;
 	}
 	bool canAmbassadorHeadshot( CBaseCombatWeapon* wpn ) {
-		return gInts.globals->curtime - wpn->m_flLastFireTime() >= 1.0f;
+		return gInts.globals->curtime - wpn->GetLastFireTime() >= 1.0f;
 	}
 
 	//from_angle = pCommand->viewangles
@@ -184,7 +185,7 @@ namespace Util {
 		static float timer = 0;
 		static bool started = false;
 
-		if( !(pLocal->GetCond() & tf_cond::TFCond_Zoomed) ) {
+		if( !( pLocal->GetCond() & tf_cond::TFCond_Zoomed ) ) {
 			started = false;
 			timer = 0;
 		}
@@ -201,6 +202,24 @@ namespace Util {
 		}
 
 		return false;
+	}
+
+	bool CanShoot( CBaseEntity* pLocal, CBaseCombatWeapon* wpn ) {
+
+		static float lastFire = 0, nextAttack = 0;
+		static CBaseCombatWeapon* old_weapon;
+
+		if( lastFire != wpn->GetLastFireTime() || wpn != old_weapon ) {
+			lastFire = wpn->GetLastFireTime();
+			nextAttack = wpn->GetNextFireTime();
+		}
+
+		if( wpn->GetClip1() == 0 )
+			return false;
+
+		old_weapon = wpn;
+
+		return ( nextAttack <= (float)( pLocal->GetTickBase() ) * gInts.globals->interval_per_tick );
 	}
 
 	void minDist( weaponid id, float& dist ) {
@@ -470,8 +489,8 @@ namespace Util {
 			case weaponid::Demoman_s_TheScottishResistance:
 			{
 				chargetime = gInts.globals->curtime - wpn->GetChargeTime();
-				speed = (fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * 1500.0f) + 900.0f;
-				gravity = (fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * -0.7f) + 0.5f;
+				speed = ( fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * 1500.0f ) + 900.0f;
+				gravity = ( fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * -0.7f ) + 0.5f;
 				quick_release = true;
 				break;
 			}
@@ -481,8 +500,8 @@ namespace Util {
 			case weaponid::Sniper_m_TheFortifiedCompound:
 			{
 				chargetime = gInts.globals->curtime - wpn->GetChargeTime();
-				speed = (fminf( fmaxf( chargetime, 0.0f ), 1.0f ) * 800.0f) + 1800.0f;
-				gravity = (fminf( fmaxf( chargetime, 0.0f ), 1.0f ) * -0.4f) + 0.5f;
+				speed = ( fminf( fmaxf( chargetime, 0.0f ), 1.0f ) * 800.0f ) + 1800.0f;
+				gravity = ( fminf( fmaxf( chargetime, 0.0f ), 1.0f ) * -0.4f ) + 0.5f;
 				quick_release = true;
 				break;
 			}
@@ -647,15 +666,15 @@ namespace Util {
 		}
 
 		if( gCvars.color_type.value == 0 ) { //red/blue
-			if( pEntity->GetTeamNum() == 2 || (gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised) ) {
+			if( pEntity->GetTeamNum() == 2 || ( gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
 				return gCvars.color_red.get_color();
-			} else if( pEntity->GetTeamNum() == 3 || (gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised) ) {
+			} else if( pEntity->GetTeamNum() == 3 || ( gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
 				return gCvars.color_blue.get_color();
 			}
 
 			return Colors::White;
 		} else { //ally/enemy
-			if( pEntity->GetTeamNum() == pLocal->GetTeamNum() || (gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised) ) {
+			if( pEntity->GetTeamNum() == pLocal->GetTeamNum() || ( gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
 				return gCvars.color_ally.get_color();
 			} else {
 				return gCvars.color_enemy.get_color();

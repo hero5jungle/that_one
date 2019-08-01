@@ -2,7 +2,6 @@
 
 #include "../../tools/util/util.h"
 #include "../backtrack/backtrack.h"
-#include "../event/event.h"
 
 namespace Aimbot {
 
@@ -13,14 +12,15 @@ namespace Aimbot {
 		BACKTRACK
 	};
 
-	void Run( CBaseEntity* pLocal, CUserCmd* pCommand ) {
+	void Run( CBaseEntity* pLocal, CUserCmd* pCommand, bool packet ) {
 		if( !gCvars.Aimbot_enable.value || !gCvars.Aimbot_auto_aim.KeyDown() ) {
 			return;
 		}
 
-		Vector m_vOldViewAngle = pCommand->viewangles;
-		float m_fOldSideMove = pCommand->sidemove;
-		float m_fOldForwardMove = pCommand->forwardmove;
+		Vector OldAngles = pCommand->viewangles;
+		float  OldForward = pCommand->forwardmove;
+		float  OldSidemove = pCommand->sidemove;
+
 
 		CBaseCombatWeapon* wpn = pLocal->GetActiveWeapon();
 		bool sniper_headshot = Util::canHeadshot( pLocal );
@@ -38,8 +38,15 @@ namespace Aimbot {
 
 		gCvars.aim_spot = GetBestHitbox( pLocal, pCommand, wpn );
 
-		if( gCvars.aim_spot == Vector() ) {
+		if( gCvars.aim_spot.IsZero() ) {
 			gCvars.aim_spot = GetBaseEntity( gCvars.aim_index )->GetWorldSpaceCenter();
+			return;
+		}
+
+		CBaseEntity* pEntity = GetBaseEntity( gCvars.aim_index );
+
+		if( !pLocal->CanSee( pEntity, gCvars.aim_spot ) ) {
+			return;
 		}
 
 		weaponid id = wpn->GetItemDefinitionIndex();
@@ -52,16 +59,9 @@ namespace Aimbot {
 			return;
 		}
 
-		CBaseEntity* pEntity = GetBaseEntity( gCvars.aim_index );
-
-		if( gCvars.aim_spot.IsZero() || !pLocal->CanSee( pEntity, gCvars.aim_spot ) ) {
-			return;
-		}
-
 		Vector vLocal = pLocal->GetEyePosition();
 
 		float minimalDistance = 9999.0f;
-		float distance = Util::Distance( vLocal, gCvars.aim_spot );
 		int wpn_slot = wpn->GetSlot();
 		bool is_melee = wpn_slot == 2;
 
@@ -71,22 +71,21 @@ namespace Aimbot {
 			Util::minDist( id, minimalDistance );
 		}
 
-		if( distance > minimalDistance ) {
+		if( Util::Distance( vLocal, gCvars.aim_spot ) > minimalDistance ) {
 			return;
 		}
 
 		Vector vAngs;
-		VectorAngles( (gCvars.aim_spot - vLocal), vAngs );
+		VectorAngles( ( gCvars.aim_spot - vLocal ), vAngs );
 		ClampAngle( vAngs );
 
 		int Class = pLocal->GetClass();
 
 		bool fov = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( vLocal, gCvars.aim_spot ) ) < gCvars.Aimbot_fov.value;
-		bool pyro = (gCvars.pyro_lazy.value && Class == TF2_Pyro && wpn_slot == 0 && !(wpn->GetItemDefinitionIndex() == weaponid::Pyro_m_DragonsFury));
+		bool pyro = ( gCvars.pyro_lazy.value && Class == TF2_Pyro && wpn_slot == 0 && !( wpn->GetItemDefinitionIndex() == weaponid::Pyro_m_DragonsFury ) );
 		bool lazy_melee = is_melee && gCvars.Aimbot_melee.value;
 
-		if( fov || lazy_melee || pyro ) {
-			Util::lookAt( gCvars.Aimbot_silent.value, vAngs, pCommand );
+		if( ( fov || lazy_melee || pyro ) && Util::CanShoot( pLocal, wpn ) ) {
 
 			if( gCvars.backtrack_tick != -1 && gCvars.backtrack_arr != -1 ) {
 				pCommand->tick_count = gCvars.backtrack_tick;
@@ -134,23 +133,36 @@ namespace Aimbot {
 				} else {
 					pCommand->buttons |= IN_ATTACK;
 				}
+
+				if( pCommand->buttons & IN_ATTACK ) {
+					if( !gCvars.fake.value || packet ) {
+						Util::lookAt( gCvars.Aimbot_silent.value, vAngs, pCommand );
+					} else {
+						pCommand->buttons &= ~IN_ATTACK;
+					}
+				}
 			}
 		}
 
-		Util::FixMove( pCommand, m_vOldViewAngle, m_fOldForwardMove, m_fOldSideMove );
+		Util::FixMove( pCommand, OldAngles, OldForward, OldSidemove );
+
 	}
 
 	void GetBestTarget( CBaseEntity* pLocal, CUserCmd* pCommand, CBaseCombatWeapon* wpn, int& index, int& mode ) {
+
 		int best_target = -1;
 		float best_score = FLT_MAX;
+
 		Vector local_pos = pLocal->GetEyePosition();
+		bool melee = wpn->GetSlot() == 2;
+
 		gCvars.backtrack_arr = -1;
 		gCvars.backtrack_tick = -1;
-		bool melee = wpn->GetSlot() == 2;
 		mode = MODE::NONE;
+		index = -1;
 
 		if( !gCvars.Aimbot_melee.value && melee ) {
-			index = -1;
+
 			return;
 		}
 
@@ -169,7 +181,7 @@ namespace Aimbot {
 
 			int cond = pEntity->GetCond();
 
-			if( cond & (TFCond_Ubercharged | TFCond_UberchargeFading | TFCond_Bonked) )
+			if( cond & ( TFCond_Ubercharged | TFCond_UberchargeFading | TFCond_Bonked ) )
 				continue;
 
 			if( cond & TFCond_Cloaked && gCvars.Ignore_A_cloak.value )
@@ -186,7 +198,7 @@ namespace Aimbot {
 			if( mp_friendlyfire->GetInt() == 0 && pEntity->GetTeamNum() == pLocal->GetTeamNum() )
 				continue;
 
-			if( !gCvars.latency.value || (gCvars.latency_amount.value + gCvars.ping_diff.value) < 200 ) {
+			if( !gCvars.latency.value || ( gCvars.latency_amount.value + gCvars.ping_diff.value ) < 200 ) {
 				int iBestHitbox = -1;
 
 				if( melee ) {
@@ -213,7 +225,7 @@ namespace Aimbot {
 				float fov = Util::GetFOV( pCommand->viewangles, angle );
 				float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
 
-				if( melee ? (distance < best_score) : (fov < best_score) ) {
+				if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
 					best_target = i;
 					best_score = melee ? distance : fov;
 					mode = MODE::PLAYER;
@@ -234,11 +246,11 @@ namespace Aimbot {
 						float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
 
 						if( BacktrackData[i][t].simtime > ( pLocal->flSimulationTime() - 1.0f ) ) {
-							if( melee ? (distance < best_score) : (fov < best_score) ) {
+							if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
 								best_score = melee ? distance : fov;
 								best_target = i;
 								gCvars.backtrack_arr = t;
-								gCvars.backtrack_tick = (int)(0.5f + (float)(BacktrackData[i][t].simtime) / gInts.globals->interval_per_tick);
+								gCvars.backtrack_tick = (int)( 0.5f + (float)( BacktrackData[i][t].simtime ) / gInts.globals->interval_per_tick );
 								mode = MODE::BACKTRACK;
 							}
 						}
@@ -278,7 +290,7 @@ namespace Aimbot {
 			float fov = Util::GetFOV( pCommand->viewangles, angle );
 			float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
 
-			if( melee ? (distance < best_score) : (fov < best_score) ) {
+			if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
 				best_score = melee ? distance : fov;
 				best_target = i;
 				mode = MODE::BUILDING;
@@ -307,24 +319,26 @@ namespace Aimbot {
 					{
 						float score = FLT_MAX;
 						int hitbox_ind = -1;
-						Vector hitbox_pos;
+						Vector hitbox;
 
 						for( int box = Util::isHeadshotWeapon( pLocal->GetClass(), wpn ) ? 0 : 4; box < 17; box++ ) {
-							hitbox_pos = gCvars.Aimbot_multipoint.value ? pEntity->GetMultipoint( pLocal, box ) : pEntity->GetHitbox( pLocal, box );
-							Vector angle = Util::CalcAngle( pLocal->GetEyePosition(), hitbox_pos );
-							float fov = Util::GetFOV( pCommand->viewangles, angle );
+							Vector pos = gCvars.Aimbot_multipoint.value ? pEntity->GetMultipoint( pLocal, box ) : pEntity->GetHitbox( pLocal, box );
+							float fov = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( pLocal->GetEyePosition(), pos ) );
 
-							if( pLocal->CanSee( pEntity, hitbox_pos ) ) {
+							if( !pos.IsZero() && fov < score ) {
 								hitbox_ind = box;
 								score = fov;
-								if( gCvars.Aimbot_hitbox.value )
-									break;
+								if( gCvars.Aimbot_hitbox.value ) {
+									return pos;
+								} else {
+									hitbox = pos;
+								}
 							}
 						}
 
 						if( hitbox_ind != -1 ) {
 							gCvars.hitbox = hitbox_ind;
-							return hitbox_pos;
+							return hitbox;
 						} else {
 							return Vector();
 						}
@@ -343,7 +357,7 @@ namespace Aimbot {
 						if( gCvars.Aimbot_multipoint.value )
 							return pEntity->GetMultipoint( pLocal, 4 );
 						else
-							return pEntity->GetHitbox(pLocal, 4 );
+							return pEntity->GetHitbox( pLocal, 4 );
 					};
 
 					default:
@@ -376,5 +390,4 @@ namespace Aimbot {
 		}
 		return Vector();
 	}
-
 }

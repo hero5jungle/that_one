@@ -4,9 +4,9 @@
 using namespace std;
 
 class CKey {
-	public:
+public:
 	inline bool AlphaChar( char c ) {
-		return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+		return ( c >= 'A' && c <= 'Z' ) || ( c >= 'a' && c <= 'z' ) || ( c >= '0' && c <= '9' );
 	}
 
 	inline bool AcceptedKey( byte c ) {
