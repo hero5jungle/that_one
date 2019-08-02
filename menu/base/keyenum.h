@@ -1,7 +1,6 @@
 #pragma once
 #include <Windows.h>
 #include <string>
-using namespace std;
 
 class CKey {
 public:
@@ -29,11 +28,11 @@ public:
 		return false;
 	}
 
-	wstring KeyToString( byte c ) {
+	std::wstring KeyToString( byte c ) {
 		if( !AcceptedKey( c ) ) {
-			return to_wstring( c );
+			return std::to_wstring( c );
 		} else if( AlphaChar( c ) ) {
-			return wstring( 1, c );
+			return std::wstring( 1, c );
 		}
 
 		switch( c ) {

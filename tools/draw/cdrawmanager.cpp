@@ -24,11 +24,11 @@ namespace DrawManager {
 		gTex.Reload();
 	}
 
-	void DrawString( int x, int y, Color color, wstring text, HFont font, bool center ) {
+	void DrawString( int x, int y, Color color, std::wstring text, HFont font, bool center ) {
 		DrawString( x, y, color, text.c_str(), font, center );
 	}
 
-	void DrawString( int x, int y, Color color, string text, HFont font, bool center ) {
+	void DrawString( int x, int y, Color color, std::string text, HFont font, bool center ) {
 		DrawString( x, y, color, text.c_str(), font, center );
 	}
 

@@ -11,8 +11,8 @@ namespace Materials {
 
 	IMaterial* CreateMaterial( bool flat ) {
 		static int created = 0;
-		string type = flat ? "UnlitGeneric" : "VertexLitGeneric";
-		const string data = "\""s + type + R"#(" {
+		std::string type = flat ? "UnlitGeneric" : "VertexLitGeneric";
+		const std::string data = std::string( "\"" ) + type + std::string( R"#(" {
       "$basetexture" "vgui/white_additive"
       "$envmap" ""
       "$model" "1"
@@ -24,8 +24,8 @@ namespace Materials {
       "$znearer" "0"
       "$wireframe" "0"
       "$ignorez" "0"
-    })#"s;
-		const string name = "#mat_"s + to_string( created ) + ".vmt"s;
+    })#" );
+		const std::string name = std::string( "#mat_" ) + std::to_string( created ) + std::string( ".vmt" );
 		created++;
 		KeyValues* keyValues = new KeyValues;
 		keyValues->Initialize( keyValues, const_cast<char*>( type.c_str() ) );

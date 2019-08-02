@@ -1,5 +1,6 @@
 #include "util.h"
 #include "../signature/csignature.h"
+#include <vector>
 
 namespace Util {
 	float Distance( const Vector& vOrigin, const Vector& vLocalOrigin ) {
@@ -17,29 +18,6 @@ namespace Util {
 		vOut.x = vSome.Dot( xm ) + vMatrix[0][3];
 		vOut.y = vSome.Dot( ym ) + vMatrix[1][3];
 		vOut.z = vSome.Dot( zm ) + vMatrix[2][3];
-	}
-
-	float DistanceToGround( CBaseEntity* ent ) {
-		return DistanceToGround( ent->GetVecOrigin(), ent->GetCollideableMins() );
-	}
-
-	float DistanceToGround( Vector origin, Vector mins ) {
-		trace_t ground_trace;
-		Ray_t ray;
-		Vector endpos = origin;
-		endpos.z -= 8192;
-		ray.Init( origin, endpos, mins, mins );
-		gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, nullptr, &ground_trace );
-		return std::fabs( origin.z - ground_trace.endpos.z );
-	}
-	float DistanceToGround( Vector origin ) {
-		trace_t ground_trace;
-		Ray_t ray;
-		Vector endpos = origin;
-		endpos.z -= 8192;
-		ray.Init( origin, endpos );
-		gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, nullptr, &ground_trace );
-		return std::fabs( origin.z - ground_trace.endpos.z );
 	}
 
 	void FixMove( CUserCmd* pCmd, Vector m_vOldAngles, float m_fOldForward, float m_fOldSidemove ) {
@@ -69,6 +47,7 @@ namespace Util {
 		pCmd->forwardmove = cos( DEG2RAD( deltaView ) ) * m_fOldForward + cos( DEG2RAD( deltaView + 90.f ) ) * m_fOldSidemove;
 		pCmd->sidemove = sin( DEG2RAD( deltaView ) ) * m_fOldForward + sin( DEG2RAD( deltaView + 90.f ) ) * m_fOldSidemove;
 	}
+
 	void lookAt( const bool silent, Vector vAngs, CUserCmd* pCommand ) {
 		if( silent ) {
 			pCommand->viewangles = vAngs;
@@ -153,7 +132,6 @@ namespace Util {
 	bool canAmbassadorHeadshot( CBaseCombatWeapon* wpn ) {
 		return gInts.globals->curtime - wpn->GetLastFireTime() >= 1.0f;
 	}
-
 	//from_angle = pCommand->viewangles
 	//to_angle = enemy->GetEyeAngles()
 	//wsc_spy_to_victim = enemy->GetWorldSpaceCenter() - local->GetWorldSpaceCenter()
@@ -203,7 +181,6 @@ namespace Util {
 
 		return false;
 	}
-
 	bool CanShoot( CBaseEntity* pLocal, CBaseCombatWeapon* wpn ) {
 
 		static float lastFire = 0, nextAttack = 0;
@@ -658,6 +635,108 @@ namespace Util {
 		}
 
 		return true;
+	}
+
+	float PlayerGravityMod( CBaseEntity* ent ) {
+		if( ent->GetCond() & TFCondEx2_Parachute )
+			return 0.448f;
+		return 1.0f;
+	}
+
+	Vector PredictStep( Vector pos, Vector& vel, Vector acceleration, std::pair<Vector, Vector>& minmax, float time, float steplength = gInts.globals->interval_per_tick, bool vischeck = true ) {
+		Vector result = pos;
+		// Quadratic + linear function to go one step into the future
+		float grounddistance = -1;
+		vel += acceleration * steplength;
+		result += vel * steplength;
+		if( vischeck ) {
+			Vector modify = result;
+			// Standing Player height is 83
+			modify.z = pos.z + 83.0f;
+			Vector low = modify;
+			low.z -= 8912.0f;
+
+			{
+				Ray_t ray;
+				trace_t trace;
+				CTraceFilterPlayers filter;
+				ray.Init( modify, low, minmax.first, minmax.second );
+				gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, &filter, &trace );
+
+				float dist = pos.z - trace.endpos.z;
+				if( trace.m_pEnt && std::fabs( dist ) < 63.0f )
+					grounddistance = dist;
+			}
+		}
+		if( grounddistance != -1 )
+			if( result.z < pos.z - grounddistance )
+				result.z = pos.z - grounddistance;
+		return result;
+	}
+
+	Vector Predict( Vector& pos, Vector& vel, Vector acceleration, float& time ) {
+		Vector result = pos;
+		vel += acceleration * time;
+		result += vel * time;
+		return result;
+	}
+
+	Vector ProjectilePrediction( CBaseEntity* local, CBaseEntity* ent, Vector hitbox, float speed, float gravitymod ) {
+		Vector origin = ent->GetAbsOrigin();
+		Vector hitbox_offset = hitbox - origin;
+
+		if( speed == 0.0f )
+			return Vector();
+		Vector velocity = EstimateAbsVelocity( ent );
+		float medianTime = local->GetShootPosition().DistTo( hitbox ) / speed;
+		float range = 1.5f;
+		float currenttime = medianTime - range;
+		if( currenttime <= 0.0f )
+			currenttime = 0.01f;
+		float besttime = currenttime;
+		float mindelta = 65536.0f;
+		Vector bestpos = origin;
+		Vector current = origin;
+		int maxsteps = 40;
+		bool onground = ent->GetFlags() & FL_ONGROUND;
+		static ConVar* sv_gravity = gInts.cvar->FindVar( "sv_gravity" );
+
+		float steplength = ( (float)( 2 * range ) / (float)maxsteps );
+		auto minmax = std::make_pair( ent->GetCollideableMins(), ent->GetCollideableMaxs() );
+
+		Vector acceleration = { 0, 0, -( sv_gravity->GetFloat() * PlayerGravityMod( ent ) ) };
+
+		Vector last = origin;
+
+		for( int steps = 0; steps < maxsteps; steps++, currenttime += steplength ) {
+			if( steps == 0 )
+				last = Predict( last, velocity, acceleration, currenttime );
+			else
+				last = PredictStep( last, velocity, acceleration, minmax, currenttime, steplength );
+
+			current = last;
+
+			float rockettime = local->GetShootPosition().DistTo( current ) / speed;
+			if( fabs( rockettime - currenttime ) < mindelta ) {
+				besttime = currenttime;
+				bestpos = current;
+				mindelta = fabs( rockettime - currenttime );
+			}
+		}
+		bestpos.z += ( sv_gravity->GetFloat() / 2.0f * besttime * besttime * gravitymod );
+		Vector result = bestpos + hitbox_offset;
+		return result;
+	}
+
+	float DistanceToGround( Vector origin, Vector min, Vector max ) {
+		trace_t ground_trace;
+		Ray_t ray;
+		CTraceFilterPlayers filter;
+		Vector endpos = origin;
+		endpos.z -= 8192;
+		ray.Init( origin, endpos, min, max );
+		gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, &filter, &ground_trace );
+		return std::fabs( origin.z - ground_trace.endpos.z );
 	}
 
 	Color team_color( CBaseEntity* pLocal, CBaseEntity* pEntity ) {

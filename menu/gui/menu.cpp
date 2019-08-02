@@ -88,7 +88,7 @@ void Menu::Draw() {
 	if( Tabs.active ) {
 		int cx = _pos.x + 13, cy = _pos.y + 12;
 		int maxWidth = 0;
-		vector<BaseControl*> controls = Tabs.active->GetChildren();
+		std::vector<BaseControl*> controls = Tabs.active->GetChildren();
 
 		for( auto& control : controls ) {
 			if( control->flags & nodraw ) {

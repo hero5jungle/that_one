@@ -78,8 +78,9 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 	if( Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START ) {
 		Latency::UpdateIncomingSequences();
 	}
-	if( gInts.Engine->IsInGame() ) {
-		CBaseEntity* pLocal = GetBaseEntity( me );
+	CBaseEntity* pLocal = GetBaseEntity( me );
+
+	if( gInts.Engine->IsInGame() && pLocal ) {
 
 		if( gCvars.ESP_building.value == 2 || gCvars.ESP_player.value == 2 || gCvars.ESP_object.value == 2 ) {
 			if( Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START ) {
@@ -136,7 +137,6 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 					}
 				}
 			}
-
 
 			if( Stage == FRAME_RENDER_START ) {
 				for( int i = 0; i < gInts.GlowManager->m_GlowObjectDefinitions.Count(); i++ ) {
@@ -197,7 +197,6 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 				gInts.GlowManager->m_GlowObjectDefinitions.RemoveAll();
 			}
 		}
-
 		if( gCvars.sniper_nozoom.value ) {
 			pLocal->SetFov( pLocal->GetDefaultFov() );
 			pLocal->set( 0xE5C, 0.0f );//m_flFOVRate
@@ -229,7 +228,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 
 	}
 
-	static unordered_map<MaterialHandle_t, Color> worldmats_new, worldmats_old;
+	static std::unordered_map<MaterialHandle_t, Color> worldmats_new, worldmats_old;
 
 	if( ( !gInts.Engine->IsInGame() || !gCvars.world_enabled.value ) && worldmats_old.size() ) {
 		if( gInts.Engine->IsInGame() ) {

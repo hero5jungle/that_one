@@ -73,7 +73,7 @@ namespace Airblast {
 		Vector tr;
 
 		if( pLocal->CanSee( nullptr, closest_vec ) ) {
-			tr = ( closest_vec - pLocal->GetEyePosition() );
+			tr = ( closest_vec - pLocal->GetShootPosition() );
 		} else {
 			return;
 		}

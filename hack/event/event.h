@@ -13,11 +13,6 @@ public:
 
 	void InitEvents();
 	void UndoEvents();
-
-	~CEvents() {
-		UndoEvents();
-	}
-
 	void FireGameEvent( IGameEvent* event );
 };
 

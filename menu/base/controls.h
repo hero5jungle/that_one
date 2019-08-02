@@ -3,7 +3,6 @@
 #include "keyenum.h"
 #include <Windows.h>
 #include <vector>
-using namespace std;
 #define CONTROL_WIDTH 100
 #define SPACING 10
 
@@ -50,7 +49,7 @@ protected:
 	int w = 0, h = 0;
 
 public:
-	vector<BaseControl*> children;
+	std::vector<BaseControl*> children;
 
 	const char* name = nullptr;
 	e_control type = e_control::null;
@@ -101,10 +100,10 @@ public:
 		}
 	}
 
-	inline void SetChildren( const vector<BaseControl*>& Children ) {
+	inline void SetChildren( const std::vector<BaseControl*>& Children ) {
 		children = Children;
 	}
-	inline vector<BaseControl*> GetChildren() {
+	inline std::vector<BaseControl*> GetChildren() {
 		return children;
 	}
 
@@ -138,7 +137,7 @@ public:
 	void HandleInput() {
 	}
 
-	Tab( const char* Name, const vector<BaseControl*>& Children, int W = NULL ) {
+	Tab( const char* Name, const std::vector<BaseControl*>& Children, int W = NULL ) {
 		type = e_control::tab;
 		name = Name, children = Children, w = W, h = GetTabHeight;
 		flags = scale_width;
@@ -147,7 +146,7 @@ public:
 
 class TabGroup : public BaseControl {
 public:
-	vector<Tab*> tabs;
+	std::vector<Tab*> tabs;
 
 	int spacing = 5;
 	Tab* active = nullptr;
@@ -174,7 +173,7 @@ public:
 
 	int Draw( bool mouseOver );
 	void HandleInput();
-	TabGroup( const vector<Tab*>& Tabs, int W = 200, int Spacing = 5 ) {
+	TabGroup( const std::vector<Tab*>& Tabs, int W = 200, int Spacing = 5 ) {
 		type = e_control::tabgroup;
 		tabs = Tabs, w = W, h = tabs.size() * GetTabHeight + Spacing * ( tabs.size() - 1 ), spacing = Spacing;
 		active = tabs[0];
@@ -194,7 +193,7 @@ public:
 	int GetHeight();
 
 	// Leaving the default height parameter will auto-fit all children controls
-	Groupbox( const char* Name, const vector<BaseControl*>& Children, int W = 180, int H = NULL ) {
+	Groupbox( const char* Name, const std::vector<BaseControl*>& Children, int W = 180, int H = NULL ) {
 		type = e_control::groupbox;
 		name = Name, children = Children, w = W, h = H;
 		flags = scale_width;
@@ -251,11 +250,11 @@ public:
 class Listbox : public BaseControl {
 public:
 	size_t value = 0;
-	vector<string> list = {};
+	std::vector<std::string> list = {};
 	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	Listbox( const char* Name, vector<string> List, int Value = 0, int W = 100, int X = 0, int Y = 0 ) {
+	Listbox( const char* Name, std::vector<std::string> List, int Value = 0, int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::listbox, flags = scale_width;
 		name = Name, value = Value, list = List, x = X, y = Y;
 		h = 15 + 15, w = W;

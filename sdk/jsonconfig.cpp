@@ -6,15 +6,15 @@
 
 using json = nlohmann::json;
 
-bool checkExists( string file ) {
-	ifstream file_to_check( file );
+bool checkExists( std::string file ) {
+	std::ifstream file_to_check( file );
 	bool open = file_to_check.is_open();
 	file_to_check.close();
 	return open;
 }
 
 template<typename SETTING, typename TAB>
-void Save( json& main, string player_class, TAB tab, SETTING setting ) {
+void Save( json& main, std::string player_class, TAB tab, SETTING setting ) {
 	switch( setting->type ) {
 		case e_control::checkbox:
 		{
@@ -67,7 +67,7 @@ void Save( json& main, string player_class, TAB tab, SETTING setting ) {
 }
 
 template<typename SETTING, typename TAB>
-void Load( json& main, string player_class, TAB tab, SETTING setting ) {
+void Load( json& main, std::string player_class, TAB tab, SETTING setting ) {
 	switch( setting->type ) {
 		case e_control::checkbox:
 		{
@@ -122,12 +122,12 @@ void SaveToJson() {
 	json main;
 
 	if( checkExists( "that_one.json" ) ) {
-		ifstream read( "that_one.json" );
+		std::ifstream read( "that_one.json" );
 		read >> main;
 		read.close();
 	}
 
-	string player_class;
+	std::string player_class;
 
 	if( !gInts.Engine->IsInGame() ) {
 		player_class = "general";
@@ -135,7 +135,7 @@ void SaveToJson() {
 		CBaseEntity* pLocal = GetBaseEntity( me );
 
 		if( pLocal ) {
-			player_class = string( pLocal->szGetClass() );
+			player_class = std::string( pLocal->szGetClass() );
 		} else {
 			player_class = "general";
 		}
@@ -155,14 +155,14 @@ void SaveToJson() {
 		}
 	}
 
-	ofstream write( "that_one.json" );
-	write << setw( 4 ) << main;
+	std::ofstream write( "that_one.json" );
+	write << std::setw( 4 ) << main;
 	write.close();
 }
 void LoadFromJson() {
 	if( checkExists( "that_one.json" ) ) {
 		json main;
-		string player_class;
+		std::string player_class;
 
 		if( !gInts.Engine->IsInGame() ) {
 			player_class = "general";
@@ -170,7 +170,7 @@ void LoadFromJson() {
 			CBaseEntity* pLocal = GetBaseEntity( me );
 
 			if( pLocal ) {
-				player_class = string( pLocal->szGetClass() );
+				player_class = std::string( pLocal->szGetClass() );
 			} else {
 				player_class = "general";
 			}
@@ -178,7 +178,7 @@ void LoadFromJson() {
 			player_class = "general";
 		}
 
-		ifstream read( "that_one.json" );
+		std::ifstream read( "that_one.json" );
 		read >> main;
 		read.close();
 

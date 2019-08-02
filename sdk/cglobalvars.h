@@ -3,7 +3,7 @@
 #include "headers/vector.h"
 #include "../tools/dumps/dumps.h"
 #include <utility>
-bool checkExists( string file );
+bool checkExists( std::string file );
 void SaveToJson();
 void LoadFromJson();
 

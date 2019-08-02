@@ -30,16 +30,27 @@ namespace Aimbot {
 			return;
 		}
 
-		GetBestTarget( pLocal, pCommand, wpn, gCvars.aim_index, gCvars.aim_mode );
+		weaponid id = wpn->GetItemDefinitionIndex();
+		float speed = -1;
+		float chargetime = 0;
+		float gravity = 0;
+		bool quick_release = false;
+		bool valid = Util::weaponSetup( speed, chargetime, gravity, quick_release, id, wpn );
+
+		GetBestTarget( pLocal, pCommand, wpn, gCvars.aim_index, gCvars.aim_mode, speed );
 
 		if( gCvars.aim_mode == MODE::NONE ) {
 			return;
 		}
 
-		gCvars.aim_spot = GetBestHitbox( pLocal, pCommand, wpn );
+		gCvars.aim_spot = GetBestHitbox( pLocal, pCommand, wpn, speed, gravity );
 
 		if( gCvars.aim_spot.IsZero() ) {
 			gCvars.aim_spot = GetBaseEntity( gCvars.aim_index )->GetWorldSpaceCenter();
+			return;
+		}
+
+		if( !valid ) {
 			return;
 		}
 
@@ -49,17 +60,7 @@ namespace Aimbot {
 			return;
 		}
 
-		weaponid id = wpn->GetItemDefinitionIndex();
-		float speed = -1;
-		float chargetime = 0;
-		float gravity = 0;
-		bool quick_release = false;
-
-		if( !Util::weaponSetup( speed, chargetime, gravity, quick_release, id, wpn ) ) {
-			return;
-		}
-
-		Vector vLocal = pLocal->GetEyePosition();
+		Vector vLocal = pLocal->GetShootPosition();
 
 		float minimalDistance = 9999.0f;
 		int wpn_slot = wpn->GetSlot();
@@ -133,13 +134,12 @@ namespace Aimbot {
 				} else {
 					pCommand->buttons |= IN_ATTACK;
 				}
-
-				if( pCommand->buttons & IN_ATTACK ) {
-					if( !gCvars.fake.value || packet ) {
-						Util::lookAt( gCvars.Aimbot_silent.value, vAngs, pCommand );
-					} else {
-						pCommand->buttons &= ~IN_ATTACK;
-					}
+			}
+			if( pCommand->buttons & IN_ATTACK ) {
+				if( packet ) {
+					Util::lookAt( gCvars.Aimbot_silent.value, vAngs, pCommand );
+				} else {
+					pCommand->buttons &= ~IN_ATTACK;
 				}
 			}
 		}
@@ -148,12 +148,12 @@ namespace Aimbot {
 
 	}
 
-	void GetBestTarget( CBaseEntity* pLocal, CUserCmd* pCommand, CBaseCombatWeapon* wpn, int& index, int& mode ) {
+	void GetBestTarget( CBaseEntity* pLocal, CUserCmd* pCommand, CBaseCombatWeapon* wpn, int& index, int& mode, float& speed ) {
 
 		int best_target = -1;
 		float best_score = FLT_MAX;
 
-		Vector local_pos = pLocal->GetEyePosition();
+		Vector local_pos = pLocal->GetShootPosition();
 		bool melee = wpn->GetSlot() == 2;
 
 		gCvars.backtrack_arr = -1;
@@ -223,7 +223,7 @@ namespace Aimbot {
 
 				Vector angle = Util::CalcAngle( local_pos, vEntity );
 				float fov = Util::GetFOV( pCommand->viewangles, angle );
-				float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
+				float distance = Util::Distance( vEntity, pLocal->GetShootPosition() );
 
 				if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
 					best_target = i;
@@ -232,7 +232,7 @@ namespace Aimbot {
 				}
 			}
 
-			if( gCvars.Backtrack.value ) {
+			if( gCvars.Backtrack.value && speed == -1 ) {
 				int ticks = 0;
 
 				for( int t = 0; t < (int)BacktrackData[i].size() && ticks < 12; t++ ) {
@@ -243,7 +243,7 @@ namespace Aimbot {
 						Vector vEntity = BacktrackData[i][t].hitbox;
 						Vector angle = Util::CalcAngle( local_pos, vEntity );
 						float fov = Util::GetFOV( pCommand->viewangles, angle );
-						float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
+						float distance = Util::Distance( vEntity, pLocal->GetShootPosition() );
 
 						if( BacktrackData[i][t].simtime > ( pLocal->flSimulationTime() - 1.0f ) ) {
 							if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
@@ -288,7 +288,7 @@ namespace Aimbot {
 			Vector vEntity = pEntity->GetWorldSpaceCenter();
 			Vector angle = Util::CalcAngle( local_pos, vEntity );
 			float fov = Util::GetFOV( pCommand->viewangles, angle );
-			float distance = Util::Distance( vEntity, pLocal->GetEyePosition() );
+			float distance = Util::Distance( vEntity, pLocal->GetShootPosition() );
 
 			if( melee ? ( distance < best_score ) : ( fov < best_score ) ) {
 				best_score = melee ? distance : fov;
@@ -300,9 +300,10 @@ namespace Aimbot {
 		index = best_target;
 	}
 
-	Vector GetBestHitbox( CBaseEntity* pLocal, CUserCmd* pCommand, CBaseCombatWeapon* wpn ) {
+	Vector GetBestHitbox( CBaseEntity* pLocal, CUserCmd* pCommand, CBaseCombatWeapon* wpn, float& speed, float& gravity ) {
 
 		CBaseEntity* pEntity = GetBaseEntity( gCvars.aim_index );
+		int Class = pLocal->GetClass();
 
 		if( !pEntity || pEntity->IsDormant() || pEntity->GetLifeState() != LIFE_ALIVE ) {
 			return Vector();
@@ -313,6 +314,24 @@ namespace Aimbot {
 			{
 				if( wpn->GetSlot() == 2 ) return pEntity->GetHitbox( pLocal, 4 );
 
+				if( speed != -1 ) {
+					Vector Hitbox;
+					weaponid id = wpn->GetItemDefinitionIndex();
+
+					if( id == weaponid::Soldier_s_TheRighteousBison || id == weaponid::Demoman_m_TheLooseCannon ) {
+						Hitbox = pEntity->GetHitbox( pLocal, 4, true );
+					} else if( Class == TF2_Demoman || Class == TF2_Soldier ) {
+						Hitbox = pEntity->GetAbsOrigin();
+						Hitbox[2] += 15.0f;
+					} else if( id == weaponid::Sniper_m_TheHuntsman || id == weaponid::Sniper_m_FestiveHuntsman || id == weaponid::Sniper_m_TheFortifiedCompound ) {
+						Hitbox = pEntity->GetHitbox( pLocal, 0, true );
+					} else {
+						Hitbox = pEntity->GetHitbox( pLocal, 4, true );
+					}
+
+					return Util::ProjectilePrediction( pLocal, pEntity, Hitbox, speed, gravity );
+
+				}
 				switch( gCvars.Aimbot_hitbox.value ) {
 					case 0:
 					case 1:
@@ -321,9 +340,9 @@ namespace Aimbot {
 						int hitbox_ind = -1;
 						Vector hitbox;
 
-						for( int box = Util::isHeadshotWeapon( pLocal->GetClass(), wpn ) ? 0 : 4; box < 17; box++ ) {
+						for( int box = Util::isHeadshotWeapon( Class, wpn ) ? 0 : 4; box < 17; box++ ) {
 							Vector pos = gCvars.Aimbot_multipoint.value ? pEntity->GetMultipoint( pLocal, box ) : pEntity->GetHitbox( pLocal, box );
-							float fov = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( pLocal->GetEyePosition(), pos ) );
+							float fov = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( pLocal->GetShootPosition(), pos ) );
 
 							if( !pos.IsZero() && fov < score ) {
 								hitbox_ind = box;
@@ -342,6 +361,7 @@ namespace Aimbot {
 						} else {
 							return Vector();
 						}
+						break;
 					};
 
 					case 2:

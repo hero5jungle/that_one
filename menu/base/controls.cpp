@@ -307,7 +307,7 @@ int Slider::Draw( bool mouseOver ) {
 		DrawManager::DrawRect( x, y + 17, percent, 4, Color( 85, 85, 95 ) );
 	}
 
-	DrawManager::DrawString( x + nw + 3, y + 9, Color( 125, 125, 130 ), to_wstring( value ), gFonts.verdana_bold );
+	DrawManager::DrawString( x + nw + 3, y + 9, Color( 125, 125, 130 ), std::to_wstring( value ), gFonts.verdana_bold );
 	return h;
 }
 

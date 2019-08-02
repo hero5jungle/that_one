@@ -5,8 +5,8 @@
 namespace DrawManager {
 	void Initialize();
 	void Reload();
-	void DrawString( int x, int y, Color color, wstring text, HFont font = gFonts.anon, bool center = false );
-	void DrawString( int x, int y, Color color, string text, HFont font = gFonts.anon, bool center = false );
+	void DrawString( int x, int y, Color color, std::wstring text, HFont font = gFonts.anon, bool center = false );
+	void DrawString( int x, int y, Color color, std::string text, HFont font = gFonts.anon, bool center = false );
 	void DrawString( int x, int y, Color color, const char* text, HFont font = gFonts.anon, bool center = false );
 	void DrawString( int x, int y, Color color, const wchar_t* text, HFont font = gFonts.anon, bool center = false );
 

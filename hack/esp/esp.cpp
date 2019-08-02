@@ -112,9 +112,9 @@ namespace ESP {
 
 				Vector center = pEnt->GetWorldSpaceCenter();
 				Vector pos;
-				string name = pEnt->GetClientClass()->name;
+				std::string name = pEnt->GetClientClass()->name;
 
-				if( DrawManager::WorldToScreen( center, pos ) && Util::Distance( pLocal->GetEyePosition(), center ) < 100 ) {
+				if( DrawManager::WorldToScreen( center, pos ) && Util::Distance( pLocal->GetShootPosition(), center ) < 100 ) {
 					if( gCvars.ESP_building_text.value ) {
 						switch( (classId)pEnt->GetClassId() ) {
 							case classId::CObjectDispenser:
@@ -129,7 +129,7 @@ namespace ESP {
 									continue;
 								}
 
-								DrawManager::DrawString( pos.x, pos.y, Util::team_color( pLocal, pEnt ), L"Dispenser: " + to_wstring( pDispenser->GetLevel() ) );
+								DrawManager::DrawString( pos.x, pos.y, Util::team_color( pLocal, pEnt ), L"Dispenser: " + std::to_wstring( pDispenser->GetLevel() ) );
 								pos.y += DrawManager::GetESPHeight();
 
 								if( pDispenser->IsSapped() ) {
@@ -137,9 +137,9 @@ namespace ESP {
 									pos.y += DrawManager::GetESPHeight();
 								}
 
-								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"HP: " + to_wstring( pDispenser->GetHealth() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"HP: " + std::to_wstring( pDispenser->GetHealth() ), gFonts.anon );
 								pos.y += DrawManager::GetESPHeight();
-								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"Ammo: " + to_wstring( pDispenser->GetMetalReserve() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"Ammo: " + std::to_wstring( pDispenser->GetMetalReserve() ), gFonts.anon );
 								pos.y += DrawManager::GetESPHeight();
 								continue;
 							}
@@ -156,7 +156,7 @@ namespace ESP {
 									continue;
 								}
 
-								DrawManager::DrawString( pos.x, pos.y, Util::team_color( pLocal, pEnt ), L"Sentry: " + to_wstring( pSentryGun->GetLevel() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Util::team_color( pLocal, pEnt ), L"Sentry: " + std::to_wstring( pSentryGun->GetLevel() ), gFonts.anon );
 								pos.y += DrawManager::GetESPHeight();
 
 								if( pSentryGun->IsSapped() ) {
@@ -164,11 +164,11 @@ namespace ESP {
 									pos.y += DrawManager::GetESPHeight();
 								}
 
-								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"HP: " + to_wstring( pSentryGun->GetHealth() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"HP: " + std::to_wstring( pSentryGun->GetHealth() ), gFonts.anon );
 								pos.y += DrawManager::GetESPHeight();
-								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"ammo: " + to_wstring( pSentryGun->GetAmmo() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"ammo: " + std::to_wstring( pSentryGun->GetAmmo() ), gFonts.anon );
 								pos.y += DrawManager::GetESPHeight();
-								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"rockets: " + to_wstring( pSentryGun->GetRocket() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"rockets: " + std::to_wstring( pSentryGun->GetRocket() ), gFonts.anon );
 								pos.y += DrawManager::GetESPHeight();
 								DrawManager::DrawString( pos.x, pos.y, Colors::White, pSentryGun->GetStateString(), gFonts.anon );
 								pos.y += DrawManager::GetESPHeight();
@@ -188,7 +188,7 @@ namespace ESP {
 									continue;
 								}
 
-								DrawManager::DrawString( pos.x, pos.y, Util::team_color( pLocal, pEnt ), L"Teleporter: " + to_wstring( pTeleporter->GetLevel() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Util::team_color( pLocal, pEnt ), L"Teleporter: " + std::to_wstring( pTeleporter->GetLevel() ), gFonts.anon );
 								pos.y += 11;
 
 								if( pTeleporter->IsSapped() ) {
@@ -196,7 +196,7 @@ namespace ESP {
 									pos.y += 11;
 								}
 
-								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"HP: " + to_wstring( pTeleporter->GetHealth() ), gFonts.anon );
+								DrawManager::DrawString( pos.x, pos.y, Colors::White, L"HP: " + std::to_wstring( pTeleporter->GetHealth() ), gFonts.anon );
 								pos.y += 11;
 								continue;
 							}
@@ -213,9 +213,9 @@ namespace ESP {
 							case classId::CTFAmmoPack:
 							{
 								if( gCvars.ESP_item_text.value ) {
-									static unordered_map<string, wstring> cached_convert;
+									static std::unordered_map<std::string, std::wstring> cached_convert;
 
-									string model = gInts.ModelInfo->GetModelName( pEnt->GetModel() );
+									std::string model = gInts.ModelInfo->GetModelName( pEnt->GetModel() );
 									int size = model.size();
 
 									auto cache = [&]( int start ) {
@@ -277,12 +277,12 @@ namespace ESP {
 					int nObserverMode = pEntity->ObserverMode();
 
 					if( nObserverMode == OBS_MODE_FIRSTPERSON || nObserverMode == OBS_MODE_THIRDPERSON ) {
-						string name = PlayerInfo.name;
+						std::string name = PlayerInfo.name;
 
 						if( nObserverMode == OBS_MODE_FIRSTPERSON ) {
-							name += " - firstperson"s;
+							name += std::string( " - firstperson" );
 						} else if( nObserverMode == OBS_MODE_THIRDPERSON ) {
-							name += " - thirdperson"s;
+							name += std::string( " - thirdperson" );
 						}
 
 						DrawManager::DrawString( 15, SpectatorCount++ * 15, Colors::White, name );

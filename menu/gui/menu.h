@@ -68,7 +68,7 @@ public:
 	}
 private:
 	int focus = 0;
-	vector<Dialog*> dialogs;
+	std::vector<Dialog*> dialogs;
 
 	// - Set the starting position and menu scale
 	POINT pos = { 100, 100 }, scale = { 575, 500 };

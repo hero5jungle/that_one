@@ -13,7 +13,6 @@
 #include "headers/weaponlist.h"
 #include "headers/bspflags.h"
 #include "headers/utlvector.h"
-using namespace std;
 
 #define WIN32_LEAN_AND_MEAN
 #pragma warning(disable:4996)
@@ -86,9 +85,9 @@ using MaterialHandle_t = unsigned short;
 #define FLOW_INCOMING 1
 
 
-inline wstring ToWstring( const char* text ) {
+inline std::wstring ToWstring( const char* text ) {
 	size_t length = strlen( text ) + 1;
-	wstring wc( length, L'#' );
+	std::wstring wc( length, L'#' );
 	mbstowcs( &wc[0], text, length );
 	return wc;
 }
@@ -462,6 +461,7 @@ struct CBaseEntity {
 		DYNVAR_RETURN( Vector, this, "DT_BasePlayer", "localdata", "m_vecViewOffset[0]" ) + this->GetAbsOrigin();
 	}
 
+
 	Vector GetEyeAngles() {
 		DYNVAR_RETURN( Vector, this, "DT_TFPlayer", "tfnonlocaldata", "m_angEyeAngles[0]" );
 	}
@@ -498,6 +498,7 @@ struct CBaseEntity {
 	}
 
 	//CBaseEntity.cpp
+	Vector GetShootPosition();
 	Vector GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind = false );
 	Vector GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind = false );
 	CBaseCombatWeapon* GetActiveWeapon();
@@ -2207,6 +2208,8 @@ public:
 		CBaseEntity* pEntity = (CBaseEntity*)pEntityHandle;
 
 		switch( (classId)pEntity->GetClassId() ) {
+			case classId::CTFPlayerResource:
+			case classId::CTFPlayer:
 			case classId::CFuncAreaPortalWindow:
 			case classId::CFuncRespawnRoomVisualizer:
 			case classId::CSniperDot:

@@ -18,8 +18,8 @@ float edgeDistance( CBaseEntity* pLocal, float edgeRayYaw ) {
 	forward.x = cp * cy;
 	forward.y = cp * sy;
 	forward.z = -sp;
-	forward = forward * 300.0f + pLocal->GetEyePosition();
-	ray.Init( pLocal->GetEyePosition(), forward );
+	forward = forward * 300.0f + pLocal->GetShootPosition();
+	ray.Init( pLocal->GetShootPosition(), forward );
 	gInts.EngineTrace->TraceRay( ray, 0x4200400B, &filter, &trace );
 	float edgeDistance = ( sqrt( pow( trace.startpos.x - trace.endpos.x, 2 ) + pow( trace.startpos.y - trace.endpos.y, 2 ) ) );
 	return edgeDistance;
@@ -32,9 +32,9 @@ bool findEdge( CBaseEntity* pLocal, float edgeOrigYaw ) {
 	edgeRightDist = edgeRightDist + edgeDistance( pLocal, edgeOrigYaw + 27 );
 
 	if( edgeLeftDist >= 260 )
-		edgeLeftDist = 999999999;
+		edgeLeftDist = 999999999.0f;
 	if( edgeRightDist >= 260 )
-		edgeRightDist = 999999999;
+		edgeRightDist = 999999999.0f;
 
 	if( edgeLeftDist == edgeRightDist )
 		return false;
@@ -111,7 +111,7 @@ void Fake::Run( CBaseEntity* pLocal, CUserCmd* pCommand, bool* packet ) {
 		}
 	} else {
 		Vector vAngs;
-		VectorAngles( ( gCvars.aim_spot - pLocal->GetEyePosition() ), vAngs );
+		VectorAngles( ( gCvars.aim_spot - pLocal->GetShootPosition() ), vAngs );
 		ClampAngle( vAngs );
 		if( *packet ) {//fake
 			pCommand->viewangles.y = vAngs.y + flip ? 90.0f : -90.0f;
