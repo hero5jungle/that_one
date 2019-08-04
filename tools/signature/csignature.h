@@ -7,4 +7,5 @@ namespace Signatures {
 	HMODULE GetModuleHandleSafe( const wchar_t* pszModuleName );
 	DWORD GetClientSignature( char* chPattern );
 	DWORD GetEngineSignature( char* chPattern );
+	DWORD GetDirectSignature( char* chPattern );
 }

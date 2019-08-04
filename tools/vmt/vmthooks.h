@@ -10,10 +10,11 @@ public:
 	void setup( void* base ) {
 		baseclass = static_cast<uintptr_t * *>( base );
 
-		while( static_cast<uintptr_t*>( *baseclass )[size] ) {
-			size++;
+		if( size == 0 ) {
+			while( static_cast<uintptr_t*>( *baseclass )[size] ) {
+				size++;
+			}
 		}
-
 		original = *baseclass;
 		current = std::make_unique<uintptr_t[]>( size );
 		std::memcpy( current.get(), original, size * sizeof( uintptr_t ) );
@@ -72,5 +73,42 @@ public:
 	}
 	const inline void restore() {
 		vmt_hook::restore();
+	}
+};
+// a quick and dirty wrapper for tables with more than one function to hook.
+template<typename Fn>
+class vmt_func {
+private:
+	int Index = 0;
+	void* Function = nullptr;
+	vmt_hook* Hook;
+public:
+	void setup(  const int index, void* function ) {
+		Index = index;
+		Function = function;
+		Hook->hook( index, function );
+	};
+
+	vmt_func( vmt_hook* hook) {
+		Hook = hook;
+	}
+
+	~vmt_func() {
+		Hook->unhook( Index );
+	}
+
+	const inline Fn get_original() {
+		return Hook->get_original<Fn>( Index );
+	}
+
+	const inline void rehook() {
+		Hook->hook( Index, Function );
+	}
+
+	const inline void unhook() {
+		Hook->unhook( Index );
+	}
+	const inline void restore() {
+		Hook->restore();
 	}
 };

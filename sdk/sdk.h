@@ -13,6 +13,7 @@
 #include "headers/weaponlist.h"
 #include "headers/bspflags.h"
 #include "headers/utlvector.h"
+#include "d3dx9.h"
 
 #define WIN32_LEAN_AND_MEAN
 #pragma warning(disable:4996)
@@ -3110,6 +3111,7 @@ struct CInterfaces {
 	IGameMovement* GameMovement;
 	IPrediction* Prediction;
 	CGlowObjectManager* GlowManager;
+	DWORD DirectXDevice;
 };
 
 using CreateMoveFn = bool( __thiscall* )( PVOID, float, CUserCmd* );
@@ -3117,6 +3119,8 @@ using FrameStageNotifyThinkFn = void( __fastcall* )( PVOID, void*, ClientFrameSt
 using DrawModelExecuteFn = void( __stdcall* )( void* state, ModelRenderInfo_t& pInfo, matrix3x4* pCustomBoneToWorld );
 using PaintTraverseFn = void( __thiscall* )( PVOID, unsigned int, bool, bool );
 using SendDatagramFn = int( __thiscall* )( CNetChan*, bf_write* );
+using EndSceneFn = long( __stdcall* ) ( struct IDirect3DDevice9* pDevice );
+using ResetFn = long( __stdcall* ) ( IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentParams );
 
 struct CHooks {
 	vmt_single<CreateMoveFn> CreateMove;
@@ -3124,6 +3128,9 @@ struct CHooks {
 	vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
 	vmt_single<PaintTraverseFn> PaintTraverse;
 	vmt_single<SendDatagramFn> SendDatagram;
+	vmt_hook dx9;
+	vmt_func<EndSceneFn> EndScene{ &dx9 };
+	vmt_func<ResetFn> Reset{ &dx9 };
 };
 
 enum gOffsets {
@@ -3132,6 +3139,8 @@ enum gOffsets {
 	FrameStageNotifyThink = 35,
 	PaintTraverse = 41,
 	SendDatagram = 46,
+	EndSceneOffset = 42,
+	ResetOffset = 16
 };
 
 extern CInterfaces gInts;

@@ -57,4 +57,10 @@ namespace Signatures {
 		static PIMAGE_NT_HEADERS pNTHeaders = (PIMAGE_NT_HEADERS)( ( (DWORD)hmModule ) + pDOSHeader->e_lfanew );
 		return dwFindPattern( ( (DWORD)hmModule ) + pNTHeaders->OptionalHeader.BaseOfCode, ( (DWORD)hmModule ) + pNTHeaders->OptionalHeader.SizeOfCode, chPattern );
 	}
+	DWORD GetDirectSignature( char* chPattern ) {
+		static HMODULE hmModule = GetModuleHandleSafe( L"shaderapidx9.dll" );
+		static PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)hmModule;
+		static PIMAGE_NT_HEADERS pNTHeaders = (PIMAGE_NT_HEADERS)( ( (DWORD)hmModule ) + pDOSHeader->e_lfanew );
+		return dwFindPattern( ( (DWORD)hmModule ) + pNTHeaders->OptionalHeader.BaseOfCode, ( (DWORD)hmModule ) + pNTHeaders->OptionalHeader.SizeOfCode, chPattern );
+	}
 }

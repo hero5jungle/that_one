@@ -39,6 +39,12 @@ struct Color {
 			( rgba[2] ) << 8 |
 			( rgba[3] ) );
 	}
+	int to_dx9() {
+		return int( ( rgba[3] ) << 24 |
+			( rgba[0] ) << 16 |
+			( rgba[1] ) << 8 |
+			( rgba[2] ) );
+	}
 	void from_int( int input ) {
 		rgba[0] = ( input >> 24 ) & 0xFF;
 		rgba[1] = ( input >> 16 ) & 0xFF;

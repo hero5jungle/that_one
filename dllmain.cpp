@@ -1,6 +1,7 @@
 #include "sdk/sdk.h"
 #include "hook/client/client.h"
 #include "hook/panel/panels.h"
+#include "hook/dx9/dx9.h"
 #include "menu/gui/menu.h"
 #include "hack/event/event.h"
 #include "sdk/cmat/keyvalues.h"
@@ -64,6 +65,9 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
 	//glow
 	gInts.GlowManager = *(CGlowObjectManager * *)( Signatures::GetClientSignature( "8B 0D ? ? ? ? A1 ? ? ? ? 56 8B 37" ) + 0x2 );
 	XASSERT( gInts.GlowManager );
+	//dx9
+	gInts.DirectXDevice = **(DWORD **)( Signatures::GetDirectSignature( "A1 ?? ?? ?? ?? 50 8B 08 FF 51 0C" ) + 0x1 );
+	XASSERT( gInts.DirectXDevice );
 	// material stuff
 	Keyvalues::GetOffsets();
 	//
@@ -74,6 +78,10 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
 	gHooks.CreateMove.setup( gInts.ClientMode, gOffsets::CreateMove, &Hooked_CreateMove );
 	//
 	gHooks.DrawModelExecute.setup( gInts.MdlRender, gOffsets::DrawModelExecute, &Hooked_DrawModelExecute );
+	//
+	gHooks.dx9.setup((DWORD * *)gInts.DirectXDevice);
+	gHooks.EndScene.setup(gOffsets::EndSceneOffset,&Hooked_EndScene);
+	gHooks.Reset.setup( gOffsets::ResetOffset, &Hooked_Reset );
 	//
 	gEvents.InitEvents();
 
