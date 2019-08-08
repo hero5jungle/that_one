@@ -1,26 +1,19 @@
 #include "../../sdk/sdk.h"
 #include "client.h"
+#include "../../hack/hack.h"
 #include "../../tools/util/util.h"
-#include "../../hack/aimbot/aimbot.h"
-#include "../../hack/misc/misc.h"
-#include "../../hack/fake/fake.h"
-#include "../../hack/sticky/sticky.h"
-#include "../../hack/airblast/airblast.h"
-#include "../../hack/backtrack/backtrack.h"
-#include "../../hack/backtrack/latency.h"
-#include "../../hack/engine/engine.h"
 #include "../../sdk/cmat/cmat.h"
 
 int __fastcall hkSendDatagram( CNetChan* netchan, PVOID, bf_write* datagram ) {
-	auto sendDatagram = gHooks.SendDatagram.get_original();
+	auto sendDatagram = Hook::SendDatagram.get_original();
 
-	if( !gCvars.latency.value || datagram ) {
+	if( !Global.latency.value || datagram ) {
 		return sendDatagram( netchan, datagram );
 	}
 
 	int instate = netchan->m_nInReliableState;
 	int insequencenr = netchan->m_nInSequenceNr;
-	Latency::AddLatencyToNetchan( netchan, gCvars.latency_amount.value / 1000.0f );
+	Latency::AddLatencyToNetchan( netchan, Global.latency_amount.value / 1000.0f );
 	int Return = sendDatagram( netchan, datagram );
 	netchan->m_nInReliableState = instate;
 	netchan->m_nInSequenceNr = insequencenr;
@@ -30,7 +23,7 @@ int __fastcall hkSendDatagram( CNetChan* netchan, PVOID, bf_write* datagram ) {
 Vector qLASTTICK;
 
 bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample_frametime, CUserCmd* cmd ) {
-	bool bReturn = gHooks.CreateMove.get_original()( ClientMode, input_sample_frametime, cmd );
+	bool bReturn = Hook::CreateMove.get_original()( ClientMode, input_sample_frametime, cmd );
 	uintptr_t _bp;
 	__asm mov _bp, ebp;
 	bool* send_packet = (bool*)( ***(uintptr_t * **)_bp - 1 );
@@ -39,14 +32,14 @@ bool __fastcall Hooked_CreateMove( PVOID ClientMode, int edx, float input_sample
 	if( !cmd->command_number ) {
 		return false;
 	} else {
-		gCvars.last_cmd_number = cmd->command_number;
+		Global.last_cmd_number = cmd->command_number;
 	}
 
-	CNetChan* ch = gInts.Engine->GetNetChannelInfo();
+	CNetChan* ch = Int::Engine->GetNetChannelInfo();
 
 	if( ch ) {
 		if( ch != old_ch ) {
-			gHooks.SendDatagram.setup( ch, gOffsets::SendDatagram, &hkSendDatagram );
+			Hook::SendDatagram.setup( ch, gOffsets::SendDatagram, &hkSendDatagram );
 			old_ch = ch;
 		}
 	}
@@ -80,11 +73,11 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 	}
 	CBaseEntity* pLocal = GetBaseEntity( me );
 
-	if( gInts.Engine->IsInGame() && pLocal ) {
+	if( Int::Engine->IsInGame() && pLocal ) {
 
-		if( gCvars.ESP_building.value == 2 || gCvars.ESP_player.value == 2 || gCvars.ESP_object.value == 2 ) {
+		if( Global.ESP_building.value == 2 || Global.ESP_player.value == 2 || Global.ESP_object.value == 2 ) {
 			if( Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START ) {
-				int max = gInts.EntList->GetHighestEntityIndex();
+				int max = Int::EntityList->GetHighestEntityIndex();
 				for( int n = 1; n <= max; n++ ) {
 					CBaseEntity* pEntity = GetBaseEntity( n );
 
@@ -92,13 +85,13 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 						continue;
 
 					bool valid = !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE;
-					bool team = !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum();
+					bool team = !Global.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum();
 					bool model = pEntity->GetModel();
 
 					switch( (classId)pEntity->GetClassId() ) {
 						case classId::CTFPlayer:
 						{
-							if( gCvars.ESP_player.value == 2 ) {
+							if( Global.ESP_player.value == 2 ) {
 								//if( !pEntity->HasGlowEffect() ) {
 								//	pEntity->registerGlowObject( Util::team_color( pLocal, pEntity ), true, true );
 								//}
@@ -112,7 +105,7 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 						case classId::CObjectDispenser:
 						case classId::CObjectTeleporter:
 						{
-							if( gCvars.ESP_building.value == 2 ) {
+							if( Global.ESP_building.value == 2 ) {
 								if( !pEntity->HasGlowEffect() ) {
 									pEntity->registerGlowObject( Util::team_color( pLocal, pEntity ), true, true );
 								}
@@ -125,9 +118,9 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 						case classId::CBaseAnimating:
 						case classId::CTFAmmoPack:
 						{
-							if( gCvars.ESP_object.value == 2 ) {
+							if( Global.ESP_object.value == 2 ) {
 								if( !pEntity->HasGlowEffect() ) {
-									pEntity->registerGlowObject( gCvars.color_objects.color, true, true );
+									pEntity->registerGlowObject( Global.color_objects.color, true, true );
 								}
 								pEntity->SetGlowEnabled( valid && team );
 							}
@@ -139,24 +132,24 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 			}
 
 			if( Stage == FRAME_RENDER_START ) {
-				for( int i = 0; i < gInts.GlowManager->m_GlowObjectDefinitions.Count(); i++ ) {
-					GlowObjectDefinition_t& GlowObject = gInts.GlowManager->m_GlowObjectDefinitions[i];
+				for( int i = 0; i < Int::GlowManager->m_GlowObjectDefinitions.Count(); i++ ) {
+					GlowObjectDefinition_t& GlowObject = Int::GlowManager->m_GlowObjectDefinitions[i];
 
 					if( GlowObject.m_nNextFreeSlot != ENTRY_IN_USE )
 						continue;
 
-					CBaseEntity* pEntity = gInts.EntList->GetClientEntityFromHandle( GlowObject.m_hEntity );
+					CBaseEntity* pEntity = Int::EntityList->GetClientEntityFromHandle( GlowObject.m_hEntity );
 					if( pEntity ) {
 						Color color;
 						switch( (classId)pEntity->GetClassId() ) {
 							case classId::CTFPlayer:
 							{
-								if( gCvars.ESP_player.value == 2 ) {
+								if( Global.ESP_player.value == 2 ) {
 									color = Util::team_color( pLocal, pEntity );
 									GlowObject.m_vGlowColor = color.rgb();
 									GlowObject.m_flGlowAlpha = color[3] / 255.0f;
 								} else {
-									gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
+									Int::GlowManager->m_GlowObjectDefinitions.Remove( i );
 								}
 								break;
 							}
@@ -165,24 +158,24 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 							case classId::CObjectDispenser:
 							case classId::CObjectTeleporter:
 							{
-								if( gCvars.ESP_building.value == 2 ) {
+								if( Global.ESP_building.value == 2 ) {
 									color = Util::team_color( pLocal, pEntity );
 									GlowObject.m_vGlowColor = color.rgb();
 									GlowObject.m_flGlowAlpha = color[3] / 255.0f;
 								} else {
-									gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
+									Int::GlowManager->m_GlowObjectDefinitions.Remove( i );
 								}
 								break;
 							}
 							case classId::CBaseAnimating:
 							case classId::CTFAmmoPack:
 							{
-								if( gCvars.ESP_object.value == 2 ) {
-									color = gCvars.color_objects.color;
+								if( Global.ESP_object.value == 2 ) {
+									color = Global.color_objects.color;
 									GlowObject.m_vGlowColor = color.rgb();
 									GlowObject.m_flGlowAlpha = color[3] / 255.0f;
 								} else {
-									gInts.GlowManager->m_GlowObjectDefinitions.Remove( i );
+									Int::GlowManager->m_GlowObjectDefinitions.Remove( i );
 								}
 								break;
 							}
@@ -193,35 +186,35 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 				}
 			}
 		} else {
-			if( gInts.GlowManager->m_GlowObjectDefinitions.Count() ) {
-				gInts.GlowManager->m_GlowObjectDefinitions.RemoveAll();
+			if( Int::GlowManager->m_GlowObjectDefinitions.Count() ) {
+				Int::GlowManager->m_GlowObjectDefinitions.RemoveAll();
 			}
 		}
-		if( gCvars.sniper_nozoom.value ) {
+		if( Global.sniper_nozoom.value ) {
 			pLocal->SetFov( pLocal->GetDefaultFov() );
 			pLocal->set( 0xE5C, 0.0f );//m_flFOVRate
 		}
 
-		if( gCvars.NoRecoil.value ) {
+		if( Global.NoRecoil.value ) {
 			pLocal->set( 0xE8C, Vector() );
 		}
 
 		static bool Thirdperson_enabled = false;
 
-		if( gCvars.Thirdperson.KeyDown() ) {
+		if( Global.Thirdperson.KeyDown() ) {
 			pLocal->SetThirdpersonView( qLASTTICK );
 
 			if( pLocal->GetLifeState() == LIFE_ALIVE ) {
 				pLocal->SetThirdperson( true );
 				Thirdperson_enabled = true;
-				if( gCvars.Thirdperson_scoped.value && pLocal->GetCond() & TFCond_Zoomed ) {
+				if( Global.Thirdperson_scoped.value && pLocal->GetCond() & TFCond_Zoomed ) {
 					pLocal->RemoveNoDraw();
 					if( auto wpn = pLocal->GetActiveWeapon() ) {
 						wpn->RemoveNoDraw();
 					}
 				}
 			}
-		} else if( !Thirdperson_enabled || !gCvars.Thirdperson.KeyDown() ) {
+		} else if( !Thirdperson_enabled || !Global.Thirdperson.KeyDown() ) {
 			pLocal->SetThirdperson( false );
 			Thirdperson_enabled = false;
 		}
@@ -230,10 +223,10 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 
 	static std::unordered_map<MaterialHandle_t, Color> worldmats_new, worldmats_old;
 
-	if( ( !gInts.Engine->IsInGame() || !gCvars.world_enabled.value ) && worldmats_old.size() ) {
-		if( gInts.Engine->IsInGame() ) {
+	if( ( !Int::Engine->IsInGame() || !Global.world_enabled.value ) && worldmats_old.size() ) {
+		if( Int::Engine->IsInGame() ) {
 			for( auto& hMat : worldmats_old ) { // Reset the material colors
-				IMaterial* mat = gInts.MatSystem->GetMaterial( hMat.first );
+				IMaterial* mat = Int::MatSystem->GetMaterial( hMat.first );
 
 				if( !mat ) {
 					continue;
@@ -250,11 +243,11 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 		worldmats_old.clear();  //
 	}
 
-	if( gCvars.world_enabled.value && Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_END ) {
+	if( Global.world_enabled.value && Stage == FRAME_NET_UPDATE_POSTDATAUPDATE_END ) {
 		Latency::UpdateIncomingSequences();
 
-		for( MaterialHandle_t i = gInts.MatSystem->FirstMaterial(); i != gInts.MatSystem->InvalidMaterial(); i = gInts.MatSystem->NextMaterial( i ) ) {
-			IMaterial* mat = gInts.MatSystem->GetMaterial( i );
+		for( MaterialHandle_t i = Int::MatSystem->FirstMaterial(); i != Int::MatSystem->InvalidMaterial(); i = Int::MatSystem->NextMaterial( i ) ) {
+			IMaterial* mat = Int::MatSystem->GetMaterial( i );
 
 			if( !mat ) {
 				continue;
@@ -277,9 +270,9 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 			Color color = worldmats_old.at( i );
 
 			if( bIsSkybox ) {
-				color = gCvars.sky_clr.bDef ? Color( 255 ) : gCvars.sky_clr.get_color();
+				color = Global.sky_clr.bDef ? Color( 255 ) : Global.sky_clr.get_color();
 			} else {
-				color = gCvars.world_clr.bDef ? Color( 255 ) : gCvars.world_clr.get_color();
+				color = Global.world_clr.bDef ? Color( 255 ) : Global.world_clr.get_color();
 			}
 
 			if( worldmats_new.at( i ) != color ) {
@@ -291,36 +284,36 @@ void __fastcall Hooked_FrameStageNotifyThink( PVOID CHLClient, void* _this, Clie
 		}
 	}
 
-	if( !gInts.Engine->IsInGame() ) {
+	if( !Int::Engine->IsInGame() ) {
 		Latency::ClearIncomingSequences();
 	}
 
-	return gHooks.FrameStageNotifyThink.get_original()( CHLClient, _this, Stage );
+	return Hook::FrameStageNotifyThink.get_original()( CHLClient, _this, Stage );
 }
 
 void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, matrix3x4* pCustomBoneToWorld ) {
-	gHooks.DrawModelExecute.unhook();
+	Hook::DrawModelExecute.unhook();
 
 	CBaseEntity* pEntity = GetBaseEntity( pInfo.entity_index );
 	CBaseEntity* pLocal = GetBaseEntity( me );
 
 	if( !pEntity || !pLocal ) {
-		gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
-		gHooks.DrawModelExecute.rehook();
+		Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+		Hook::DrawModelExecute.rehook();
 		return;
 	}
 
-	const char* model_name = gInts.ModelInfo->GetModelName( pInfo.pModel );
+	const char* model_name = Int::ModelInfo->GetModelName( pInfo.pModel );
 	Color team_color = Util::team_color( pLocal, pEntity );
-	IMaterial* wanted_material = gCvars.ESP_cham_mat.value ? Materials::glow : Materials::shaded;
+	IMaterial* wanted_material = Global.ESP_cham_mat.value ? Materials::glow : Materials::shaded;
 
-	if( gCvars.ESP_hand.value ) {
+	if( Global.ESP_hand.value ) {
 		if( strstr( model_name, "arms" ) ) {
-			if( gCvars.ESP_hand.value == 1 ) {
-				gInts.RenderView->SetBlend( 0 );
-			} else if( gCvars.ESP_hand.value == 2 ) {
-				gInts.RenderView->SetBlend( 0.5 );
-			} else if( gCvars.ESP_hand.value == 3 ) {
+			if( Global.ESP_hand.value == 1 ) {
+				Int::RenderView->SetBlend( 0 );
+			} else if( Global.ESP_hand.value == 2 ) {
+				Int::RenderView->SetBlend( 0.5 );
+			} else if( Global.ESP_hand.value == 3 ) {
 				Materials::ForceMaterial( wanted_material, team_color );
 			}
 		}
@@ -329,8 +322,8 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 	switch( (classId)pEntity->GetClassId() ) {
 		case classId::CTFWearable:
 		{
-			if( gCvars.ESP_hat.value ) {
-				gHooks.DrawModelExecute.rehook();
+			if( Global.ESP_hat.value ) {
+				Hook::DrawModelExecute.rehook();
 				return;
 			}
 			break;
@@ -338,47 +331,47 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 
 		case classId::CTFPlayer:
 		{
-			if( !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE && ( !gCvars.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum() ) ) {
+			if( !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE && ( !Global.ESP_enemy.value || pEntity->GetTeamNum() != pLocal->GetTeamNum() ) ) {
 				//backtrack
-				if( gCvars.ESP_backtrack.value && gCvars.Backtrack.value ) {
-					if( gCvars.aim_index == pInfo.entity_index ) {
+				if( Global.ESP_backtrack.value && Global.Backtrack.value ) {
+					if( Global.aim_index == pInfo.entity_index ) {
 						int ticks = 0;
-						for( int tick = 0; tick < (int)BacktrackData[gCvars.aim_index].size() && ticks < 12; tick++ ) {
-							if( Backtrack::is_tick_valid( BacktrackData[gCvars.aim_index][tick].simtime ) ) {
+						for( int tick = 0; tick < (int)BacktrackData[Global.aim_index].size() && ticks < 12; tick++ ) {
+							if( Backtrack::is_tick_valid( BacktrackData[Global.aim_index][tick].simtime ) ) {
 								ticks++;
-								if( BacktrackData[gCvars.aim_index][tick].valid && BacktrackData[gCvars.aim_index][tick].velocity.Length() > 45.0f ) {
-									if( gCvars.ESP_player.value == 1 ) {
-										Color tick_color = tick == gCvars.backtrack_arr ? gCvars.color_cham_tick.get_color() : gCvars.color_cham_history.get_color();
+								if( BacktrackData[Global.aim_index][tick].valid && BacktrackData[Global.aim_index][tick].velocity.Length() > 45.0f ) {
+									if( Global.ESP_player.value == 1 ) {
+										Color tick_color = tick == Global.backtrack_arr ? Global.color_cham_tick.get_color() : Global.color_cham_history.get_color();
 										//Hidden
 										wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
 										Materials::ForceMaterial( wanted_material, tick_color );
-										gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+										Int::MdlRender->DrawModelExecute( state, pInfo, BacktrackData[Global.aim_index][tick].boneMatrix );
 										//Visible
 										wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 										Materials::ForceMaterial( wanted_material, tick_color );
-										gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+										Int::MdlRender->DrawModelExecute( state, pInfo, BacktrackData[Global.aim_index][tick].boneMatrix );
 										Materials::ResetMaterial();
 									} else {
-										gInts.MdlRender->DrawModelExecute( state, pInfo, BacktrackData[gCvars.aim_index][tick].boneMatrix );
+										Int::MdlRender->DrawModelExecute( state, pInfo, BacktrackData[Global.aim_index][tick].boneMatrix );
 									}
 								}
 							}
 						}
 					}
 				}
-				if( gCvars.ESP_player.value == 1 ) {
+				if( Global.ESP_player.value == 1 ) {
 					//player
 					//Hidden
 					wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
 					Materials::ForceMaterial( wanted_material, team_color );
-					gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+					Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 					//Visible
 					wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 					Materials::ForceMaterial( wanted_material, team_color );
-					gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+					Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 					Materials::ResetMaterial();
 				} else {
-					gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+					Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 				}
 			}
 			break;
@@ -390,22 +383,22 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 		case classId::CObjectTeleporter:
 		case classId::CCaptureFlag:
 		{
-			if( gCvars.ESP_building.value == 1 ) {
+			if( Global.ESP_building.value == 1 ) {
 				if( !strstr( model_name, "blueprint" ) ) {
 					if( !pEntity->IsDormant() && pEntity->GetLifeState() == LIFE_ALIVE ) {
 						//Hidden
 						wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
 						Materials::ForceMaterial( wanted_material, team_color );
-						gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+						Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 						//Visible
 						wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 						Materials::ForceMaterial( wanted_material, team_color );
-						gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+						Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 						Materials::ResetMaterial();
 					}
 				}
 			} else {
-				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			}
 			break;
 		}
@@ -415,19 +408,19 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 		case classId::CTFGrenadePipebombProjectile:
 		case classId::CTFProjectile_Rocket:
 		{
-			if( gCvars.ESP_proj_cham.value ) {
-				Color RGBA = gCvars.color_objects.get_color();
+			if( Global.ESP_proj_cham.value ) {
+				Color RGBA = Global.color_objects.get_color();
 				//Hidden
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
 				Materials::ForceMaterial( wanted_material, RGBA );
-				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 				//Visible
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 				Materials::ForceMaterial( wanted_material, RGBA );
-				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 				Materials::ResetMaterial();
 			} else {
-				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			}
 			break;
 		}
@@ -435,29 +428,29 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 		case classId::CBaseAnimating:
 		case classId::CTFAmmoPack:
 		{
-			if( gCvars.ESP_object.value == 1 ) {
-				Color RGBA = gCvars.color_objects.get_color();
+			if( Global.ESP_object.value == 1 ) {
+				Color RGBA = Global.color_objects.get_color();
 				//Hidden
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
 				Materials::ForceMaterial( wanted_material, RGBA );
-				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 				//Visible
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, false );
 				Materials::ForceMaterial( wanted_material, RGBA );
-				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 				Materials::ResetMaterial();
 			} else {
-				gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+				Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			}
 			break;
 		}
 
 		default:
 		{
-			gInts.MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
+			Int::MdlRender->DrawModelExecute( state, pInfo, pCustomBoneToWorld );
 			break;
 		}
 	}
 
-	gHooks.DrawModelExecute.rehook();
+	Hook::DrawModelExecute.rehook();
 }

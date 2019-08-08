@@ -3,7 +3,7 @@
 namespace Airblast {
 
 	void Run( CBaseEntity* pLocal, CUserCmd* cmd ) {
-		if( !gCvars.Airblast_enable.value ) {
+		if( !Global.Airblast_enable.value ) {
 			return;
 		}
 
@@ -32,8 +32,8 @@ namespace Airblast {
 		float closest_dist = 0.0f;
 		Vector closest_vec;
 
-		for( int i = 1; i < gInts.EntList->GetHighestEntityIndex(); i++ ) {
-			CBaseEntity* ent = gInts.EntList->GetClientEntity( i );
+		for( int i = 1; i < Int::EntityList->GetHighestEntityIndex(); i++ ) {
+			CBaseEntity* ent = Int::EntityList->GetClientEntity( i );
 
 			if( !ent ) {
 				continue;
@@ -51,7 +51,7 @@ namespace Airblast {
 				continue;
 			}
 
-			INetChannelInfo* net = gInts.Engine->GetNetChannelInfo();
+			INetChannelInfo* net = Int::Engine->GetNetChannelInfo();
 			float latency = net->GetLatency( FLOW_OUTGOING ) + net->GetLatency( FLOW_INCOMING );
 			Vector velocity = Util::EstimateAbsVelocity( ent );
 			Vector predicted_proj = ent->GetAbsOrigin() + ( velocity * latency );
@@ -68,22 +68,22 @@ namespace Airblast {
 		}
 
 		Vector previousAngles = cmd->viewangles;
-		CBaseEntity* enem = gInts.EntList->GetClientEntity( gCvars.aim_index );
+		CBaseEntity* enem = Int::EntityList->GetClientEntity( Global.aim_index );
 		Vector angles;
 		Vector tr;
 
 		if( pLocal->CanSee( nullptr, closest_vec ) ) {
-			tr = ( closest_vec - pLocal->GetShootPosition() );
+			tr = ( closest_vec - pLocal->GetEyePosition() );
 		} else {
 			return;
 		}
 
 		VectorAngles( tr, angles );
 		ClampAngle( angles );
-		Util::lookAt( gCvars.Airblast_silent.value, angles, cmd );
+		Util::lookAt( Global.Airblast_silent.value, angles, cmd );
 		cmd->buttons |= IN_ATTACK2;
 
-		if( !gCvars.Airblast_silent.value ) {
+		if( !Global.Airblast_silent.value ) {
 			cmd->viewangles = previousAngles;
 		}
 

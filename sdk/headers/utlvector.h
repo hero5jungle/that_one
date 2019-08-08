@@ -52,9 +52,6 @@ public:
 	// Grows the memory, so that at least allocated + num elements are allocated
 	void Grow( int num = 1 );
 
-	// Makes sure we've got at least this much memory
-	void EnsureCapacity( int num );
-
 	// Memory deallocation
 	void Purge();
 
@@ -234,30 +231,6 @@ void CUtlMemory<T>::Grow( int num ) {
 	}
 }
 
-
-//-----------------------------------------------------------------------------
-// Makes sure we've got at least this much memory
-//-----------------------------------------------------------------------------
-template< class T >
-inline void CUtlMemory<T>::EnsureCapacity( int num ) {
-	if( m_nAllocationCount >= num )
-		return;
-
-	if( IsExternallyAllocated() ) {
-		// Can't grow a buffer whose memory was externally allocated 
-		Assert( 0 );
-		return;
-	}
-
-	m_nAllocationCount = num;
-	if( m_pMemory ) {
-		m_pMemory = (T*)realloc( m_pMemory, m_nAllocationCount * sizeof( T ) );
-	} else {
-		m_pMemory = (T*)malloc( m_nAllocationCount * sizeof( T ) );
-	}
-}
-
-
 //-----------------------------------------------------------------------------
 // Memory deallocation
 //-----------------------------------------------------------------------------
@@ -336,9 +309,6 @@ public:
 	int Find( T const& src ) const;
 
 	bool HasElement( T const& src );
-
-	// Makes sure we have enough memory allocated to store a requested # of elements
-	void EnsureCapacity( int num );
 
 	// Makes sure we have at least this many elements
 	void EnsureCount( int num );
@@ -502,15 +472,6 @@ void CUtlVector<T>::GrowVector( int num ) {
 	}
 
 	m_Size += num;
-	ResetDbgInfo();
-}
-
-//-----------------------------------------------------------------------------
-// Makes sure we have enough memory allocated to store a requested # of elements
-//-----------------------------------------------------------------------------
-template< class T >
-void CUtlVector<T>::EnsureCapacity( int num ) {
-	m_Memory.EnsureCapacity( num );
 	ResetDbgInfo();
 }
 

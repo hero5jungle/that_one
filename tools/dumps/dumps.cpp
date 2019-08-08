@@ -1,15 +1,15 @@
-#include "dumps.h"
-#include "../../sdk/headers/json.h"
+#include "../../sdk/sdk.h"
+#include <algorithm>
 #include <fstream>
 void Dumps::dumpClassIds() {
 
 	std::vector< std::pair<std::string, int> > id;
 
-	for( ClientClass* list = gInts.Client->GetAllClasses(); list != nullptr; list = list->next ) {
+	for( ClientClass* list = Int::Client->GetAllClasses(); list != nullptr; list = list->next ) {
 		id.push_back( { list->name, list->classId } );
 	}
 
-	sort( begin( id ), end( id ) );
+	std::sort( begin( id ), end( id ) );
 	std::ofstream dump( "classId.txt" );
 	dump << "enum class classId : int {\n";
 
@@ -39,10 +39,10 @@ void DumpTable( RecvTable* table, std::ofstream& dump, int level ) {
 			}
 		}
 
-		auto table = prop->GetDataTable();
+		auto Table = prop->GetDataTable();
 
-		if( table != NULL ) {
-			dump << std::string( level, ' ' ) << table->m_pNetTableName << "{\n";
+		if( Table != NULL ) {
+			dump << std::string( level, ' ' ) << Table->m_pNetTableName << " {\n";
 			DumpTable( prop->GetDataTable(), dump, level + 2 );
 			dump << std::string( level, ' ' ) << "}\n";
 		}
@@ -51,7 +51,7 @@ void DumpTable( RecvTable* table, std::ofstream& dump, int level ) {
 void Dumps::dumpNetvars() {
 	std::ofstream dump( "netvar.txt" );
 
-	for( ClientClass* list = gInts.Client->GetAllClasses(); list != nullptr; list = list->next ) {
+	for( ClientClass* list = Int::Client->GetAllClasses(); list != nullptr; list = list->next ) {
 		dump << list->name << " : id = " << list->classId << "{\n";
 		DumpTable( list->table, dump, 0 );
 		dump << "}\n";

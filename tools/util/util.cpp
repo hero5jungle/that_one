@@ -20,7 +20,7 @@ namespace Util {
 		vOut.z = vSome.Dot( zm ) + vMatrix[2][3];
 	}
 
-	void FixMove( CUserCmd* pCmd, Vector m_vOldAngles, float m_fOldForward, float m_fOldSidemove ) {
+	void FixMove( CUserCmd* pCmd, Vector& m_vOldAngles, float m_fOldForward, float m_fOldSidemove ) {
 		float deltaView;
 		float f1;
 		float f2;
@@ -48,12 +48,12 @@ namespace Util {
 		pCmd->sidemove = sin( DEG2RAD( deltaView ) ) * m_fOldForward + sin( DEG2RAD( deltaView + 90.f ) ) * m_fOldSidemove;
 	}
 
-	void lookAt( const bool silent, Vector vAngs, CUserCmd* pCommand ) {
+	void lookAt( const bool silent, Vector& vAngs, CUserCmd* pCommand ) {
 		if( silent ) {
 			pCommand->viewangles = vAngs;
 		} else {
 			pCommand->viewangles = vAngs;
-			gInts.Engine->SetViewAngles( pCommand->viewangles );
+			Int::Engine->SetViewAngles( pCommand->viewangles );
 		}
 	}
 
@@ -130,7 +130,7 @@ namespace Util {
 		return false;
 	}
 	bool canAmbassadorHeadshot( CBaseCombatWeapon* wpn ) {
-		return gInts.globals->curtime - wpn->GetLastFireTime() >= 1.0f;
+		return Int::globals->curtime - wpn->GetLastFireTime() >= 1.0f;
 	}
 	//from_angle = pCommand->viewangles
 	//to_angle = enemy->GetEyeAngles()
@@ -163,18 +163,18 @@ namespace Util {
 		static float timer = 0;
 		static bool started = false;
 
+		if( !started ) {
+			started = true;
+			timer = Int::globals->curtime;
+		}
+
 		if( !( pLocal->GetCond() & tf_cond::TFCond_Zoomed ) ) {
 			started = false;
 			timer = 0;
 		}
 
-		if( !started ) {
-			started = true;
-			timer = gInts.globals->curtime;
-		}
-
 		if( started ) {
-			if( gInts.globals->curtime - timer > 0.2f ) {
+			if( Int::globals->curtime - timer > 0.2f ) {
 				return true;
 			}
 		}
@@ -196,7 +196,7 @@ namespace Util {
 
 		old_weapon = wpn;
 
-		return ( nextAttack <= (float)( pLocal->GetTickBase() ) * gInts.globals->interval_per_tick );
+		return ( nextAttack <= (float)( pLocal->GetTickBase() ) * Int::globals->interval_per_tick );
 	}
 
 	void minDist( weaponid id, float& dist ) {
@@ -260,11 +260,6 @@ namespace Util {
 			case weaponid::Sniper_s_Jarate:
 			case weaponid::Sniper_s_FestiveJarate:
 			case weaponid::Pyro_s_GasPasser:
-			{
-				dist = 23.0f;
-				break;
-			}
-
 			case weaponid::Pyro_m_DragonsFury:
 			{
 				dist = 23.0f;
@@ -354,7 +349,7 @@ namespace Util {
 			case weaponid::Heavy_s_HeavysShotgun:
 			case weaponid::Pyro_s_PyrosShotgun:
 			{
-				dist = gCvars.Aimbot_range.value ? gCvars.Aimbot_ranges.value : 9999.0f;
+				dist = Global.Aimbot_range.value ? Global.Aimbot_ranges.value : 9999.0f;
 				break;
 			}
 
@@ -465,7 +460,7 @@ namespace Util {
 			case weaponid::Demoman_s_TheQuickiebombLauncher:
 			case weaponid::Demoman_s_TheScottishResistance:
 			{
-				chargetime = gInts.globals->curtime - wpn->GetChargeTime();
+				chargetime = Int::globals->curtime - wpn->GetChargeTime();
 				speed = ( fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * 1500.0f ) + 900.0f;
 				gravity = ( fminf( fmaxf( chargetime / 4.0f, 0.0f ), 1.0f ) * -0.7f ) + 0.5f;
 				quick_release = true;
@@ -476,7 +471,7 @@ namespace Util {
 			case weaponid::Sniper_m_FestiveHuntsman:
 			case weaponid::Sniper_m_TheFortifiedCompound:
 			{
-				chargetime = gInts.globals->curtime - wpn->GetChargeTime();
+				chargetime = Int::globals->curtime - wpn->GetChargeTime();
 				speed = ( fminf( fmaxf( chargetime, 0.0f ), 1.0f ) * 800.0f ) + 1800.0f;
 				gravity = ( fminf( fmaxf( chargetime, 0.0f ), 1.0f ) * -0.4f ) + 0.5f;
 				quick_release = true;
@@ -643,7 +638,7 @@ namespace Util {
 		return 1.0f;
 	}
 
-	Vector PredictStep( Vector pos, Vector& vel, Vector acceleration, std::pair<Vector, Vector>& minmax, float time, float steplength = gInts.globals->interval_per_tick, bool vischeck = true ) {
+	Vector PredictStep( Vector& pos, Vector& vel, Vector& acceleration, std::pair<Vector, Vector>& minmax, float time, float steplength = Int::globals->interval_per_tick, bool vischeck = true ) {
 		Vector result = pos;
 		// Quadratic + linear function to go one step into the future
 		float grounddistance = -1;
@@ -661,7 +656,7 @@ namespace Util {
 				trace_t trace;
 				CTraceFilterPlayers filter;
 				ray.Init( modify, low, minmax.first, minmax.second );
-				gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, &filter, &trace );
+				Int::EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, &filter, &trace );
 
 				float dist = pos.z - trace.endpos.z;
 				if( trace.m_pEnt && std::fabs( dist ) < 63.0f )
@@ -674,21 +669,21 @@ namespace Util {
 		return result;
 	}
 
-	Vector Predict( Vector& pos, Vector& vel, Vector acceleration, float& time ) {
+	Vector Predict( Vector& pos, Vector& vel, Vector& acceleration, float time ) {
 		Vector result = pos;
 		vel += acceleration * time;
 		result += vel * time;
 		return result;
 	}
 
-	Vector ProjectilePrediction( CBaseEntity* local, CBaseEntity* ent, Vector hitbox, float speed, float gravitymod ) {
+	Vector ProjectilePrediction( CBaseEntity* local, CBaseEntity* ent, Vector& hitbox, float speed, float gravitymod ) {
 		Vector origin = ent->GetAbsOrigin();
 		Vector hitbox_offset = hitbox - origin;
 
 		if( speed == 0.0f )
 			return Vector();
 		Vector velocity = EstimateAbsVelocity( ent );
-		float medianTime = local->GetShootPosition().DistTo( hitbox ) / speed;
+		float medianTime = local->GetEyePosition().DistTo( hitbox ) / speed;
 		float range = 1.5f;
 		float currenttime = medianTime - range;
 		if( currenttime <= 0.0f )
@@ -699,7 +694,7 @@ namespace Util {
 		Vector current = origin;
 		int maxsteps = 40;
 		bool onground = ent->GetFlags() & FL_ONGROUND;
-		static ConVar* sv_gravity = gInts.cvar->FindVar( "sv_gravity" );
+		static ConVar* sv_gravity = Int::cvar->FindVar( "sv_gravity" );
 
 		float steplength = ( (float)( 2 * range ) / (float)maxsteps );
 		auto minmax = std::make_pair( ent->GetCollideableMins(), ent->GetCollideableMaxs() );
@@ -716,7 +711,7 @@ namespace Util {
 
 			current = last;
 
-			float rockettime = local->GetShootPosition().DistTo( current ) / speed;
+			float rockettime = local->GetEyePosition().DistTo( current ) / speed;
 			if( fabs( rockettime - currenttime ) < mindelta ) {
 				besttime = currenttime;
 				bestpos = current;
@@ -735,28 +730,28 @@ namespace Util {
 		Vector endpos = origin;
 		endpos.z -= 8192;
 		ray.Init( origin, endpos, min, max );
-		gInts.EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, &filter, &ground_trace );
+		Int::EngineTrace->TraceRay( ray, MASK_PLAYERSOLID, &filter, &ground_trace );
 		return std::fabs( origin.z - ground_trace.endpos.z );
 	}
 
 	Color team_color( CBaseEntity* pLocal, CBaseEntity* pEntity ) {
-		if( gCvars.aim_index == pEntity->GetIndex() && gCvars.ESP_target.value > 1 ) {
-			return gCvars.color_aim.get_color();
+		if( Global.aim_index == pEntity->GetIndex() && Global.ESP_target.value > 1 ) {
+			return Global.color_aim.get_color();
 		}
 
-		if( gCvars.color_type.value == 0 ) { //red/blue
-			if( pEntity->GetTeamNum() == 2 || ( gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
-				return gCvars.color_red.get_color();
-			} else if( pEntity->GetTeamNum() == 3 || ( gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
-				return gCvars.color_blue.get_color();
+		if( Global.color_type.value == 0 ) { //red/blue
+			if( pEntity->GetTeamNum() == 2 || ( Global.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
+				return Global.color_red.get_color();
+			} else if( pEntity->GetTeamNum() == 3 || ( Global.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
+				return Global.color_blue.get_color();
 			}
 
 			return Colors::White;
 		} else { //ally/enemy
-			if( pEntity->GetTeamNum() == pLocal->GetTeamNum() || ( gCvars.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
-				return gCvars.color_ally.get_color();
+			if( pEntity->GetTeamNum() == pLocal->GetTeamNum() || ( Global.Ignore_E_disguise.value && pEntity->GetCond() & TFCond_Disguised ) ) {
+				return Global.color_ally.get_color();
 			} else {
-				return gCvars.color_enemy.get_color();
+				return Global.color_enemy.get_color();
 			}
 
 			return Colors::White;

@@ -5,24 +5,24 @@
 namespace ESP {
 	void Run( CBaseEntity* pLocal ) {
 
-		if( !gCvars.ESP_enable.value ) {
+		if( !Global.ESP_enable.value ) {
 			return;
 		}
 
-		if( gCvars.ESP_fov.value || gCvars.ESP_around_fov.value ) {
+		if( Global.ESP_fov.value || Global.ESP_around_fov.value ) {
 			float cx = (float)gScreen.Width / 2.0f;
 			float cy = (float)gScreen.Height / 2.0f;
 
-			int radius = tanf( DEG2RAD( gCvars.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !gCvars.sniper_nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * gScreen.Width;
+			int radius = tanf( DEG2RAD( Global.Aimbot_fov.value ) / 2 ) / tanf( DEG2RAD( ( pLocal->GetCond() & tf_cond::TFCond_Zoomed && !Global.sniper_nozoom.value ) ? 30.0f : 90.0f ) / 2 ) * gScreen.Width;
 
-			if( gCvars.ESP_fov.value == 1 ) {
-				DrawManager::DrawCircle( cx, cy, radius, 16.0f, gCvars.color_fov.get_color() );
-			} else if( gCvars.ESP_fov.value == 2 ) {
-				DrawManager::Rotating_Dot_Circle( cx, cy, radius, 14.0f, gCvars.color_fov.get_color() );
+			if( Global.ESP_fov.value == 1 ) {
+				DrawManager::DrawCircle( cx, cy, radius, 16.0f, Global.color_fov.get_color() );
+			} else if( Global.ESP_fov.value == 2 ) {
+				DrawManager::Rotating_Dot_Circle( cx, cy, radius, 14.0f, Global.color_fov.get_color() );
 			}
 
-			if( gCvars.ESP_around_fov.value ) {
-				for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
+			if( Global.ESP_around_fov.value ) {
+				for( int i = 1; i <= Int::Engine->GetMaxClients(); i++ ) {
 					if( i == me ) {
 						continue;
 					}
@@ -41,7 +41,7 @@ namespace ESP {
 						continue;
 					}
 
-					static ConVar* mp_friendlyfire = gInts.cvar->FindVar( "mp_friendlyfire" );
+					static ConVar* mp_friendlyfire = Int::cvar->FindVar( "mp_friendlyfire" );
 
 					if( mp_friendlyfire->GetInt() == 0 && pEntity->GetTeamNum() == pLocal->GetTeamNum() ) {
 						continue;
@@ -49,7 +49,7 @@ namespace ESP {
 
 					Vector angle = Util::CalcAngle( pLocal->GetVecOrigin(), pEntity->GetVecOrigin() );
 					Vector view_angle;
-					gInts.Engine->GetViewAngles( view_angle );
+					Int::Engine->GetViewAngles( view_angle );
 					const float deg = Util::GetClockwiseAngle( view_angle, angle );
 					//rotation
 					const float xrot = cos( deg - PI / 2 );
@@ -77,26 +77,26 @@ namespace ESP {
 					//arrow
 					//  ^
 					//  |
-					DrawManager::DrawLine( cx + x2, cy + y2, cx + left.x, cy + left.y, gCvars.color_fov.get_color() );
-					DrawManager::DrawLine( cx + x2, cy + y2, cx + right.x, cy + right.y, gCvars.color_fov.get_color() );
-					DrawManager::DrawLine( cx + x1, cy + y1, cx + x2, cy + y2, gCvars.color_fov.get_color() );
+					DrawManager::DrawLine( cx + x2, cy + y2, cx + left.x, cy + left.y, Global.color_fov.get_color() );
+					DrawManager::DrawLine( cx + x2, cy + y2, cx + right.x, cy + right.y, Global.color_fov.get_color() );
+					DrawManager::DrawLine( cx + x1, cy + y1, cx + x2, cy + y2, Global.color_fov.get_color() );
 				}
 			}
 		}
 
-		if( ( gCvars.ESP_target.value == 1 || gCvars.ESP_target.value == 3 ) && gCvars.aim_index != -1 ) {
+		if( ( Global.ESP_target.value == 1 || Global.ESP_target.value == 3 ) && Global.aim_index != -1 && Global.Aimbot_auto_aim.KeyDown() ) {
 			Vector draw0, draw1;
 
-			if( !gCvars.aim_spot.IsZero() )
-				if( DrawManager::WorldToScreen( gCvars.aim_spot, draw0 ) && DrawManager::WorldToScreen( pLocal->GetAbsOrigin(), draw1 ) ) {
-					DrawManager::DrawLine( draw0.x, draw0.y, draw1.x, draw1.y, gCvars.color_aim.get_color() );
-					DrawManager::DrawRect( draw0.x - 5, draw0.y - 5, 10, 10, gCvars.color_aim.get_color() );
+			if( !Global.aim_spot.IsZero() )
+				if( DrawManager::WorldToScreen( Global.aim_spot, draw0 ) && DrawManager::WorldToScreen( pLocal->GetAbsOrigin(), draw1 ) ) {
+					DrawManager::DrawLine( draw0.x, draw0.y, draw1.x, draw1.y, Global.color_aim.get_color() );
+					DrawManager::DrawRect( draw0.x - 5, draw0.y - 5, 10, 10, Global.color_aim.get_color() );
 				}
 		}
 
-		if( gCvars.ESP_building_text.value || gCvars.ESP_item_text.value ) {
-			for( int i = 1; i <= gInts.EntList->GetHighestEntityIndex(); i++ ) {
-				CBaseEntity* pEnt = gInts.EntList->GetClientEntity( i );
+		if( Global.ESP_building_text.value || Global.ESP_item_text.value ) {
+			for( int i = 1; i <= Int::EntityList->GetHighestEntityIndex(); i++ ) {
+				CBaseEntity* pEnt = Int::EntityList->GetClientEntity( i );
 
 				if( !pEnt ) {
 					continue;
@@ -114,16 +114,12 @@ namespace ESP {
 				Vector pos;
 				std::string name = pEnt->GetClientClass()->name;
 
-				if( DrawManager::WorldToScreen( center, pos ) && Util::Distance( pLocal->GetShootPosition(), center ) < 100 ) {
-					if( gCvars.ESP_building_text.value ) {
+				if( DrawManager::WorldToScreen( center, pos ) && Util::Distance( pLocal->GetEyePosition(), center ) < 100 ) {
+					if( Global.ESP_building_text.value ) {
 						switch( (classId)pEnt->GetClassId() ) {
 							case classId::CObjectDispenser:
 							{
 								CObjectDispenser* pDispenser = (CObjectDispenser*)( pEnt );
-
-								if( pDispenser == nullptr ) {
-									continue;
-								}
 
 								if( !pDispenser->GetLevel() ) {
 									continue;
@@ -147,10 +143,6 @@ namespace ESP {
 							case classId::CObjectSentrygun:
 							{
 								CObjectSentryGun* pSentryGun = (CObjectSentryGun*)( pEnt );
-
-								if( pSentryGun == nullptr ) {
-									continue;
-								}
 
 								if( !pSentryGun->GetLevel() ) {
 									continue;
@@ -180,10 +172,6 @@ namespace ESP {
 							{
 								CObjectTeleporter* pTeleporter = (CObjectTeleporter*)( pEnt );
 
-								if( pTeleporter == nullptr ) {
-									continue;
-								}
-
 								if( !pTeleporter->GetLevel() ) {
 									continue;
 								}
@@ -203,7 +191,7 @@ namespace ESP {
 
 							case classId::CCaptureFlag:
 							{
-								if( gCvars.ESP_item_text.value ) {
+								if( Global.ESP_item_text.value ) {
 									DrawManager::DrawString( pos.x, pos.y, Util::team_color( pLocal, pEnt ), L"Intel", gFonts.anon, true );
 								}
 
@@ -212,10 +200,10 @@ namespace ESP {
 							case classId::CBaseAnimating:
 							case classId::CTFAmmoPack:
 							{
-								if( gCvars.ESP_item_text.value ) {
+								if( Global.ESP_item_text.value ) {
 									static std::unordered_map<std::string, std::wstring> cached_convert;
 
-									std::string model = gInts.ModelInfo->GetModelName( pEnt->GetModel() );
+									std::string model = Int::ModelInfo->GetModelName( pEnt->GetModel() );
 									int size = model.size();
 
 									auto cache = [&]( int start ) {
@@ -252,10 +240,10 @@ namespace ESP {
 			}
 		}
 
-		if( gCvars.ESP_spectators.value ) {
+		if( Global.ESP_spectators.value ) {
 			int SpectatorCount = 2;
 			DrawManager::DrawString( 15, 15, Colors::White, L"Spectators:" );
-			for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
+			for( int i = 1; i <= Int::Engine->GetMaxClients(); i++ ) {
 
 				CBaseEntity* pEntity = GetBaseEntity( i );
 
@@ -265,7 +253,7 @@ namespace ESP {
 
 				player_info_t PlayerInfo;
 
-				if( !gInts.Engine->GetPlayerInfo( pEntity->GetIndex(), &PlayerInfo ) )
+				if( !Int::Engine->GetPlayerInfo( pEntity->GetIndex(), &PlayerInfo ) )
 					continue;
 
 				CBaseEntity* pObserverTarget = GetBaseEntityFromHandle( pEntity->ObserverTarget() );
@@ -290,9 +278,9 @@ namespace ESP {
 				}
 			}
 		}
-		if( gCvars.ESP_head_points.value ) {
+		if( Global.ESP_head_points.value ) {
 			int my_index = me;
-			int max = gInts.Engine->GetMaxClients();
+			int max = Int::Engine->GetMaxClients();
 
 			for( int i = 1; i <= max; i++ ) {
 
@@ -308,7 +296,7 @@ namespace ESP {
 					continue;
 				}
 
-				studiohdr_t* hdr = gInts.ModelInfo->GetStudiomodel( model );
+				studiohdr_t* hdr = Int::ModelInfo->GetStudiomodel( model );
 
 				if( !hdr ) {
 					continue;
@@ -316,7 +304,7 @@ namespace ESP {
 
 				matrix3x4 matrix[128];
 
-				if( !pEntity->SetupBones( matrix, 128, 0x100, gInts.globals->curtime ) ) {
+				if( !pEntity->SetupBones( matrix, 128, 0x100, Int::globals->curtime ) ) {
 					continue;
 				}
 

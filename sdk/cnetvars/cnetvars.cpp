@@ -11,7 +11,7 @@ CNetVars gNetVars;
 * Call populate_nodes on every RecvTable under client->GetAllClasses()
 */
 void CNetVars::Initialize() {
-	const auto* client_class = gInts.Client->GetAllClasses();
+	const auto* client_class = Int::Client->GetAllClasses();
 
 	while( client_class != nullptr ) {
 		const auto class_info = std::make_shared<node>( 0 );

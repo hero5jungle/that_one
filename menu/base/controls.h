@@ -254,9 +254,9 @@ public:
 	int Draw( bool mouseOver = false );
 	void HandleInput();
 
-	Listbox( const char* Name, std::vector<std::string> List, int Value = 0, int W = 100, int X = 0, int Y = 0 ) {
+	Listbox( const char* Name, std::vector<std::string> &&List, int Value = 0, int W = 100, int X = 0, int Y = 0 ) {
 		type = e_control::listbox, flags = scale_width;
-		name = Name, value = Value, list = List, x = X, y = Y;
+		name = Name, value = Value, list = std::move(List), x = X, y = Y;
 		h = 15 + 15, w = W;
 	}
 };

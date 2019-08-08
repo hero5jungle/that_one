@@ -9,7 +9,7 @@ static bool     s_bRegistered = false;
 class CDefaultAccessor : public IConCommandBaseAccessor {
 public:
 	virtual bool RegisterConCommandBase( ConCommandBase* pVar ) {
-		gInts.cvar->RegisterConCommand( pVar );
+		Int::cvar->RegisterConCommand( pVar );
 		return true;
 	}
 };
@@ -24,7 +24,7 @@ void ConVar_Register( int nCVarFlag, IConCommandBaseAccessor* pAccessor ) {
 
 	s_bRegistered = true;
 	s_nCVarFlag = nCVarFlag;
-	s_nDLLIdentifier = gInts.cvar->AllocateDLLIdentifier();
+	s_nDLLIdentifier = Int::cvar->AllocateDLLIdentifier();
 	ConCommandBase::s_pAccessor = pAccessor ? pAccessor : &s_DefaultAccessor;
 	ConCommandBase* pCur = ConCommandBase::s_pConCommandBases;
 
@@ -133,10 +133,7 @@ void ConVar::ChangeStringValue( const char* tempVal, float flOldValue ) {
 	int len = strlen( tempVal ) + 1;
 
 	if( len > m_Value.m_StringLength ) {
-		if( m_Value.m_pszString ) {
-			delete[] m_Value.m_pszString;
-		}
-
+		delete[] m_Value.m_pszString;
 		m_Value.m_pszString = new char[len];
 		m_Value.m_StringLength = len;
 	}

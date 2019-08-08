@@ -28,7 +28,7 @@ namespace Backtrack {
 	bool is_tick_valid( float simtime );
 
 	const inline void Run( CBaseEntity* pLocal, INetChannel* ch ) {
-		if( gCvars.Backtrack.value ) {
+		if( Global.Backtrack.value ) {
 			collect_tick( pLocal );
 			cache_INetChannel( ch );
 		}

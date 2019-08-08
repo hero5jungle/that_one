@@ -2,86 +2,82 @@
 #include "hook/client/client.h"
 #include "hook/panel/panels.h"
 #include "hook/dx9/dx9.h"
+#include "hook/wndproc/wndproc.h"
 #include "menu/gui/menu.h"
 #include "hack/event/event.h"
 #include "sdk/cmat/keyvalues.h"
 #include <thread>
-
-CGlobalVariables gCvars;
-CInterfaces gInts;
-CHooks gHooks;
-HWND window;
 
 #define Interface(dll) (CreateInterfaceFn)(GetProcAddress(Signatures::GetModuleHandleSafe( dll ), "CreateInterface"))
 
 DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
 	//Client
 	CreateInterfaceFn ClientFactory = Interface( L"client.dll" );
-	gInts.Client = (CHLClient*)( ClientFactory( "VClient017", nullptr ) );
-	gInts.EntList = (CEntList*)( ClientFactory( "VClientEntityList003", nullptr ) );
-	gInts.Prediction = (IPrediction*)( ClientFactory( "VClientPrediction001", nullptr ) );
-	gInts.GameMovement = (IGameMovement*)( ClientFactory( "GameMovement001", nullptr ) );
-	XASSERT( gInts.Client );
-	XASSERT( gInts.EntList );
-	XASSERT( gInts.Prediction );
-	XASSERT( gInts.GameMovement );
+	Int::Client = (CHLClient*)( ClientFactory( "VClient017", nullptr ) );
+	Int::EntityList = (CEntList*)( ClientFactory( "VClientEntityList003", nullptr ) );
+	Int::Prediction = (IPrediction*)( ClientFactory( "VClientPrediction001", nullptr ) );
+	Int::GameMovement = (IGameMovement*)( ClientFactory( "GameMovement001", nullptr ) );
+	XASSERT( Int::Client );
+	XASSERT( Int::EntityList );
+	XASSERT( Int::Prediction );
+	XASSERT( Int::GameMovement );
 	//Engine
 	CreateInterfaceFn EngineFactory = Interface( L"engine.dll" );
-	gInts.Engine = (EngineClient*)( EngineFactory( "VEngineClient013", nullptr ) );
-	gInts.EngineTrace = (IEngineTrace*)( EngineFactory( "EngineTraceClient003", nullptr ) );
-	gInts.ModelInfo = (IVModelInfo*)( EngineFactory( "VModelInfoClient006", nullptr ) );
-	gInts.EventManager = (IGameEventManager2*)( EngineFactory( "GAMEEVENTSMANAGER002", nullptr ) );
-	gInts.RenderView = (CRenderView*)( EngineFactory( "VEngineRenderView014", nullptr ) );
-	gInts.MdlRender = (CModelRender*)( EngineFactory( "VEngineModel016", nullptr ) );
-	XASSERT( gInts.Engine );
-	XASSERT( gInts.EngineTrace );
-	XASSERT( gInts.ModelInfo );
-	XASSERT( gInts.EventManager );
-	XASSERT( gInts.RenderView );
-	XASSERT( gInts.MdlRender );
+	Int::Engine = (EngineClient*)( EngineFactory( "VEngineClient013", nullptr ) );
+	Int::EngineTrace = (IEngineTrace*)( EngineFactory( "EngineTraceClient003", nullptr ) );
+	Int::ModelInfo = (IVModelInfo*)( EngineFactory( "VModelInfoClient006", nullptr ) );
+	Int::EventManager = (IGameEventManager2*)( EngineFactory( "GAMEEVENTSMANAGER002", nullptr ) );
+	Int::RenderView = (CRenderView*)( EngineFactory( "VEngineRenderView014", nullptr ) );
+	Int::MdlRender = (CModelRender*)( EngineFactory( "VEngineModel016", nullptr ) );
+	XASSERT( Int::Engine );
+	XASSERT( Int::EngineTrace );
+	XASSERT( Int::ModelInfo );
+	XASSERT( Int::EventManager );
+	XASSERT( Int::RenderView );
+	XASSERT( Int::MdlRender );
 	//Surface
 	CreateInterfaceFn VGUIFactory = Interface( L"vguimatsurface.dll" );
-	gInts.Surface = (ISurface*)( VGUIFactory( "VGUI_Surface030", nullptr ) );
-	XASSERT( gInts.Surface );
+	Int::Surface = (ISurface*)( VGUIFactory( "VGUI_Surface030", nullptr ) );
+	XASSERT( Int::Surface );
 	//Cvar
 	CreateInterfaceFn CvarFactory = Interface( L"vstdlib.dll" );
-	gInts.cvar = (ICvar*)( CvarFactory( "VEngineCvar004", nullptr ) );
-	XASSERT( gInts.cvar );
+	Int::cvar = (ICvar*)( CvarFactory( "VEngineCvar004", nullptr ) );
+	XASSERT( Int::cvar );
 	//Materials
 	CreateInterfaceFn MatSysFactory = Interface( L"materialsystem.dll" );
-	gInts.MatSystem = (CMaterialSystem*)( MatSysFactory( "VMaterialSystem081", nullptr ) );
-	XASSERT( gInts.MatSystem );
+	Int::MatSystem = (CMaterialSystem*)( MatSysFactory( "VMaterialSystem081", nullptr ) );
+	XASSERT( Int::MatSystem );
 	CreateInterfaceFn VGUI2Factory = Interface( L"vgui2.dll" );
-	gInts.Panels = (IPanel*)( VGUI2Factory( "VGUI_Panel009", nullptr ) );
-	XASSERT( gInts.Panels );
+	Int::Panels = (IPanel*)( VGUI2Factory( "VGUI_Panel009", nullptr ) );
+	XASSERT( Int::Panels );
 	//globals
-	gInts.globals = *(CGlobals * *)( Signatures::GetEngineSignature( "A1 ? ? ? ? 8B 11 68" ) + 8 );
-	XASSERT( gInts.globals );
+	Int::globals = *(CGlobals * *)( Signatures::GetEngineSignature( "A1 ? ? ? ? 8B 11 68" ) + 8 );
+	XASSERT( Int::globals );
 	//
 	const DWORD ClientMode = Signatures::GetClientSignature( "8B 0D ? ? ? ? 8B 02 D9 05" );
 	XASSERT( ClientMode );
-	gInts.ClientMode = **(ClientModeShared * **)( ClientMode + 2 );
-	XASSERT( gInts.ClientMode );
+	Int::ClientMode = **(ClientModeShared * **)( ClientMode + 2 );
+	XASSERT( Int::ClientMode );
 	//glow
-	gInts.GlowManager = *(CGlowObjectManager * *)( Signatures::GetClientSignature( "8B 0D ? ? ? ? A1 ? ? ? ? 56 8B 37" ) + 0x2 );
-	XASSERT( gInts.GlowManager );
+	Int::GlowManager = *(CGlowObjectManager * *)( Signatures::GetClientSignature( "8B 0D ? ? ? ? A1 ? ? ? ? 56 8B 37" ) + 0x2 );
+	XASSERT( Int::GlowManager );
 	//dx9
-	gInts.DirectXDevice = **(DWORD **)( Signatures::GetDirectSignature( "A1 ?? ?? ?? ?? 50 8B 08 FF 51 0C" ) + 0x1 );
-	XASSERT( gInts.DirectXDevice );
+	Int::DirectXDevice = **(DWORD **)( Signatures::GetDirectSignature( "A1 ?? ?? ?? ?? 50 8B 08 FF 51 0C" ) + 0x1 );
+	XASSERT( Int::DirectXDevice );
 	// material stuff
 	Keyvalues::GetOffsets();
 	//
-	gHooks.PaintTraverse.setup( gInts.Panels, gOffsets::PaintTraverse, &Hooked_PaintTraverse );
+	Hook::PaintTraverse.setup( Int::Panels, gOffsets::PaintTraverse, &Hooked_PaintTraverse );
 	//
-	gHooks.FrameStageNotifyThink.setup( gInts.Client, gOffsets::FrameStageNotifyThink, &Hooked_FrameStageNotifyThink );
+	Hook::FrameStageNotifyThink.setup( Int::Client, gOffsets::FrameStageNotifyThink, &Hooked_FrameStageNotifyThink );
 	//
-	gHooks.CreateMove.setup( gInts.ClientMode, gOffsets::CreateMove, &Hooked_CreateMove );
+	Hook::CreateMove.setup( Int::ClientMode, gOffsets::CreateMove, &Hooked_CreateMove );
 	//
-	gHooks.DrawModelExecute.setup( gInts.MdlRender, gOffsets::DrawModelExecute, &Hooked_DrawModelExecute );
+	Hook::DrawModelExecute.setup( Int::MdlRender, gOffsets::DrawModelExecute, &Hooked_DrawModelExecute );
 	//
-	gHooks.dx9.setup((DWORD * *)gInts.DirectXDevice);
-	gHooks.EndScene.setup(gOffsets::EndSceneOffset,&Hooked_EndScene);
-	gHooks.Reset.setup( gOffsets::ResetOffset, &Hooked_Reset );
+	Hook::dx9.setup((DWORD * *)Int::DirectXDevice);
+	Hook::EndScene.setup(gOffsets::EndSceneOffset,&Hooked_EndScene);
+	Hook::Reset.setup( gOffsets::ResetOffset, &Hooked_Reset );
 	//
 	gEvents.InitEvents();
 
@@ -91,9 +87,7 @@ DWORD WINAPI dwMainThread( LPVOID lpArguments ) {
 		}
 	}
 
-	if( window ) {
-		gMenu.windowProc = (WNDPROC)( SetWindowLongPtr( window, GWLP_WNDPROC, (LONG_PTR)( &Hooked_WndProc ) ) );
-	}
+	windowProc = (WNDPROC)( SetWindowLongPtr( window, GWLP_WNDPROC, (LONG_PTR)( &Hooked_WndProc ) ) );
 
 	return 0;
 }
@@ -103,10 +97,10 @@ void WINAPI detach_loop( HMODULE hInstance ) {
 		std::this_thread::sleep_for( std::chrono::milliseconds( 200 ) );
 	}
 
-	gInts.Panels->SetMouseInputEnabled( FocusOverlayPanel, false );
+	Int::Panels->SetMouseInputEnabled( FocusOverlayPanel, false );
 
 	//wndproc undo
-	SetWindowLongW( window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>( gMenu.windowProc ) );
+	SetWindowLongW( window, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>( windowProc ) );
 
 	FreeLibraryAndExitThread( hInstance, 0 );
 }

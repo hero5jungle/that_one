@@ -7,7 +7,7 @@ CKey gKey;
 #define GROUP_WIDTH 180
 
 void Menu::CreateGUI() {
-	Tabs = gCvars.tf2;
+	Tabs = Global.tf2;
 
 	try {
 		if( checkExists( "that_one.json" ) ) {
@@ -38,7 +38,7 @@ void Menu::Draw() {
 		}
 
 		if( !enabled ) {
-			if( gCvars.loadbyclass.value ) {
+			if( Global.loadbyclass.value ) {
 				LoadFromJson();
 			}
 		}
@@ -152,7 +152,7 @@ bool Menu::mouseOver( int x, int y, int w, int h ) {
 }
 void Menu::GetInput() {
 	int mx = 0, my = 0;
-	gInts.Surface->GetCursorPosition( mx, my );
+	Int::Surface->GetCursorPosition( mx, my );
 	pmouse = mouse;
 	mouse = { mx, my };
 
@@ -176,42 +176,6 @@ void Menu::EndInput() {
 	// Reseting Window message variables so they won't stick
 	mw = e_mw::null;
 	key = NULL;
-}
-LRESULT __stdcall Hooked_WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
-	switch( uMsg ) {
-		case WM_MOUSEWHEEL:
-			if( (int)wParam < 0 ) {
-				gMenu.mw = e_mw::up;
-			} else {
-				gMenu.mw = e_mw::down;
-			}
-
-			break;
-
-		case WM_KEYDOWN:
-			if( wParam > 255 ) {
-				break;
-			}
-
-			gMenu.keys[wParam] = true, gMenu.last_key = wParam, gMenu.key = wParam;
-			break;
-
-		case WM_KEYUP:
-			if( wParam > 255 ) {
-				break;
-			}
-
-			gMenu.keys[wParam] = false;
-
-			if( gMenu.last_key == wParam ) {
-				gMenu.last_key = NULL;
-			}
-
-		default:
-			break;
-	}
-
-	return CallWindowProcW( gMenu.windowProc, hWnd, uMsg, wParam, lParam );
 }
 void Menu::OpenDialog( Dialog& dlg ) {
 	dialogs.push_back( &dlg );

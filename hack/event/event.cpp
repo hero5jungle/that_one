@@ -1,14 +1,14 @@
-#include "event.h"
+ #include "event.h"
 
 CEvents gEvents;
 Shots shots[64];
 
 void CEvents::InitEvents() {
-	gInts.EventManager->AddListener( this, "player_hurt", false );
-	gInts.EventManager->AddListener( this, "player_death", false );
+	Int::EventManager->AddListener( this, "player_hurt", false );
+	Int::EventManager->AddListener( this, "player_death", false );
 }
 void CEvents::UndoEvents() {
-	gInts.EventManager->RemoveListener( this );
+	Int::EventManager->RemoveListener( this );
 }
 
 void CEvents::FireGameEvent( IGameEvent* event ) {
@@ -21,7 +21,7 @@ void CEvents::FireGameEvent( IGameEvent* event ) {
 			return;
 		}
 
-		int ind = gInts.Engine->GetPlayerForUserID( userid );
+		int ind = Int::Engine->GetPlayerForUserID( userid );
 		shots[ind].hits++;
 
 		if( crit ) {
@@ -31,21 +31,17 @@ void CEvents::FireGameEvent( IGameEvent* event ) {
 		int userid = event->GetInt( "userid" );
 		int attacker = event->GetInt( "attacker" );
 
-		if( userid == attacker ) {
+		if( userid == attacker || attacker == 0 ) {
 			return;
 		}
 
 		player_info_t pInfo;
 
-		if( !gInts.Engine->GetPlayerInfo( userid, &pInfo ) ) {
+		if( !Int::Engine->GetPlayerInfo( userid, &pInfo ) ) {
 			return;
 		}
 
-		if( userid == attacker || attacker == 0 ) {
-			return;
-		}
-
-		int ind = gInts.Engine->GetPlayerForUserID( userid );
+		int ind = Int::Engine->GetPlayerForUserID( userid );
 		shots[ind].deaths++;
 	}
 }

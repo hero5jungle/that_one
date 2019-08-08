@@ -1,4 +1,4 @@
-#include "fake.h"
+ #include "fake.h"
 #include "../../tools/util/util.h"
 
 // Initialize Edge vars
@@ -18,9 +18,10 @@ float edgeDistance( CBaseEntity* pLocal, float edgeRayYaw ) {
 	forward.x = cp * cy;
 	forward.y = cp * sy;
 	forward.z = -sp;
-	forward = forward * 300.0f + pLocal->GetShootPosition();
-	ray.Init( pLocal->GetShootPosition(), forward );
-	gInts.EngineTrace->TraceRay( ray, 0x4200400B, &filter, &trace );
+	forward = forward * 300.0f + pLocal->GetEyePosition();
+	Vector start = pLocal->GetEyePosition();
+	ray.Init( start, forward );
+	Int::EngineTrace->TraceRay( ray, 0x4200400B, &filter, &trace );
 	float edgeDistance = ( sqrt( pow( trace.startpos.x - trace.endpos.x, 2 ) + pow( trace.startpos.y - trace.endpos.y, 2 ) ) );
 	return edgeDistance;
 }
@@ -50,7 +51,7 @@ bool findEdge( CBaseEntity* pLocal, float edgeOrigYaw ) {
 
 float useEdge( float edgeViewAngle ) {
 	bool edgeTest = true;
-	if( ( ( edgeViewAngle < -135 ) || ( edgeViewAngle > 135 ) ) && edgeTest == true ) {
+	if( ( ( edgeViewAngle < -135 ) || ( edgeViewAngle > 135 ) ) ) {
 		if( edgeToEdgeOn == 1 )
 			edgeYaw = (float)-90;
 		if( edgeToEdgeOn == 2 )
@@ -83,7 +84,7 @@ float useEdge( float edgeViewAngle ) {
 
 
 void Fake::Run( CBaseEntity* pLocal, CUserCmd* pCommand, bool* packet ) {
-	if( !gCvars.fake.value )
+	if( !Global.fake.value )
 		return;
 
 	if( pCommand->buttons & IN_ATTACK )
@@ -93,9 +94,9 @@ void Fake::Run( CBaseEntity* pLocal, CUserCmd* pCommand, bool* packet ) {
 	float  OldForward = pCommand->forwardmove;
 	float  OldSidemove = pCommand->sidemove;
 
-	CNetChan* netchan = gInts.Engine->GetNetChannelInfo();
+	CNetChan* netchan = Int::Engine->GetNetChannelInfo();
 
-	*packet = !( netchan->m_nChokedPackets < (int)gCvars.fake_amount.value );
+	*packet = !( netchan->m_nChokedPackets < (int)Global.fake_amount.value );
 
 	static bool flip = false;
 
@@ -111,12 +112,12 @@ void Fake::Run( CBaseEntity* pLocal, CUserCmd* pCommand, bool* packet ) {
 		}
 	} else {
 		Vector vAngs;
-		VectorAngles( ( gCvars.aim_spot - pLocal->GetShootPosition() ), vAngs );
+		VectorAngles( ( Global.aim_spot - pLocal->GetEyePosition() ), vAngs );
 		ClampAngle( vAngs );
 		if( *packet ) {//fake
-			pCommand->viewangles.y = vAngs.y + flip ? 90.0f : -90.0f;
+			pCommand->viewangles.y = vAngs.y + (flip ? 90.0f : -90.0f);
 		} else {
-			pCommand->viewangles.y = vAngs.y + flip ? -90.0f : 90.0f;
+			pCommand->viewangles.y = vAngs.y + (flip ? -90.0f : 90.0f);
 		}
 	}
 	ClampAngle( pCommand->viewangles );

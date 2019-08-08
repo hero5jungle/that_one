@@ -7,7 +7,7 @@ namespace DemoSticky {
 		Vector sticky_loc;
 		float closest_dist = 0;
 
-		if( !gCvars.demo_sticky.value ) {
+		if( !Global.demo_sticky.value ) {
 			return;
 		}
 
@@ -19,8 +19,8 @@ namespace DemoSticky {
 			return;
 		}
 
-		for( int i = 0; i < gInts.EntList->GetHighestEntityIndex(); i++ ) {
-			CBaseEntity* sticky = gInts.EntList->GetClientEntity( i );
+		for( int i = 0; i < Int::EntityList->GetHighestEntityIndex(); i++ ) {
+			CBaseEntity* sticky = Int::EntityList->GetClientEntity( i );
 
 			if( !sticky ) {
 				continue;
@@ -30,10 +30,10 @@ namespace DemoSticky {
 				continue;
 			}
 
-			if( strstr( gInts.ModelInfo->GetModelName( sticky->GetModel() ), "sticky" ) ) {
+			if( strstr( Int::ModelInfo->GetModelName( sticky->GetModel() ), "sticky" ) ) {
 				sticky_loc = sticky->GetWorldSpaceCenter();
 
-				for( int j = 1; j < gInts.Engine->GetMaxClients(); j++ ) {
+				for( int j = 1; j < Int::Engine->GetMaxClients(); j++ ) {
 					if( j == me ) {
 						continue;
 					}

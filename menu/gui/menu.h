@@ -50,8 +50,6 @@ public:
 
 	WindowStyle* style = new DefaultStyle();
 
-	WNDPROC windowProc;
-
 	// - Store flags for all keys.
 	// - The largest integers can't hold 256 flags, so we use an array
 	byte keys[256];
@@ -76,5 +74,3 @@ private:
 	TabGroup Tabs;
 };
 extern Menu gMenu;
-
-LRESULT __stdcall Hooked_WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );

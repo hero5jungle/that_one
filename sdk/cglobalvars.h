@@ -20,7 +20,6 @@ struct CGlobalVariables {
 	int aim_mode = -1;
 	Vector aim_spot;
 
-	bool spyalert = false;
 	int hitbox = -1;
 	int last_cmd_number = 0;
 

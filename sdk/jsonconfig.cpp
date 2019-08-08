@@ -129,9 +129,9 @@ void SaveToJson() {
 
 	std::string player_class;
 
-	if( !gInts.Engine->IsInGame() ) {
+	if( !Int::Engine->IsInGame() ) {
 		player_class = "general";
-	} else if( gCvars.loadbyclass.value ) {
+	} else if( Global.loadbyclass.value ) {
 		CBaseEntity* pLocal = GetBaseEntity( me );
 
 		if( pLocal ) {
@@ -164,9 +164,9 @@ void LoadFromJson() {
 		json main;
 		std::string player_class;
 
-		if( !gInts.Engine->IsInGame() ) {
+		if( !Int::Engine->IsInGame() ) {
 			player_class = "general";
-		} else if( gCvars.loadbyclass.value ) {
+		} else if( Global.loadbyclass.value ) {
 			CBaseEntity* pLocal = GetBaseEntity( me );
 
 			if( pLocal ) {

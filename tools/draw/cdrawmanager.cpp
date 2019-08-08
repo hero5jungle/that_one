@@ -5,7 +5,7 @@ namespace DrawManager {
 	unsigned long m_Font;
 
 	void Initialize() {
-		if( gInts.Surface == nullptr ) {
+		if( Int::Surface == nullptr ) {
 			return;
 		}
 
@@ -15,11 +15,11 @@ namespace DrawManager {
 	}
 
 	void Reload() {
-		if( gInts.Surface == nullptr ) {
+		if( Int::Surface == nullptr ) {
 			return;
 		}
 
-		gInts.Engine->GetScreenSize( gScreen.Width, gScreen.Height );
+		Int::Engine->GetScreenSize( gScreen.Width, gScreen.Height );
 		gFonts.Reload();
 		gTex.Reload();
 	}
@@ -43,38 +43,38 @@ namespace DrawManager {
 
 		if( center ) {
 			int Wide = 0, Tall = 0;
-			gInts.Surface->GetTextSize( font, text, Wide, Tall );
+			Int::Surface->GetTextSize( font, text, Wide, Tall );
 			x -= Wide / 2;
 		}
 
-		gInts.Surface->DrawSetTextPos( x, y );
-		gInts.Surface->DrawSetTextFont( font );
-		gInts.Surface->DrawSetTextColor( Color[0], Color[1], Color[2], Color[3] );
-		gInts.Surface->DrawPrintText( text, wcslen( text ) );
+		Int::Surface->DrawSetTextPos( x, y );
+		Int::Surface->DrawSetTextFont( font );
+		Int::Surface->DrawSetTextColor( Color[0], Color[1], Color[2], Color[3] );
+		Int::Surface->DrawPrintText( text, wcslen( text ) );
 	}
 
 	void DrawLine( int x, int y, int x1, int y1, Color color ) {
-		gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
-		gInts.Surface->DrawLine( x, y, x1, y1 );
+		Int::Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
+		Int::Surface->DrawLine( x, y, x1, y1 );
 	}
 
 	void DrawLineEx( int x, int y, int w, int h, Color color ) {
-		gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
-		gInts.Surface->DrawLine( x, y, x + w, y + h );
+		Int::Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
+		Int::Surface->DrawLine( x, y, x + w, y + h );
 	}
 
 	void DrawRect( int x, int y, int w, int h, Color color ) {
-		gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
-		gInts.Surface->DrawFilledRect( x, y, x + w, y + h );
+		Int::Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
+		Int::Surface->DrawFilledRect( x, y, x + w, y + h );
 	}
 
 	void OutlineRect( int x, int y, int w, int h, Color color ) {
-		gInts.Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
-		gInts.Surface->DrawOutlinedRect( x, y, x + w, y + h );
+		Int::Surface->DrawSetColor( color[0], color[1], color[2], color[3] );
+		Int::Surface->DrawOutlinedRect( x, y, x + w, y + h );
 	}
 
 	bool WorldToScreen( Vector& vOrigin, Vector& vScreen ) {
-		const matrix3x4& worldToScreen = gInts.Engine->WorldToScreenMatrix(); //Grab the world to screen matrix from CEngineClient::WorldToScreenMatrix
+		const matrix3x4& worldToScreen = Int::Engine->WorldToScreenMatrix(); //Grab the world to screen matrix from CEngineClient::WorldToScreenMatrix
 		float w = worldToScreen[3][0] * vOrigin[0] + worldToScreen[3][1] * vOrigin[1] + worldToScreen[3][2] * vOrigin[2] + worldToScreen[3][3]; //Calculate the angle in compareson to the player's camera.
 		vScreen.z = 0; //Screen doesn't have a 3rd dimension.
 
@@ -115,7 +115,7 @@ namespace DrawManager {
 
 	void Rotating_Dot_Circle( float x, float y, float r, float s, Color color ) {
 		float Step = 3.141 / s;
-		float timer = gInts.globals->curtime;
+		float timer = Int::globals->curtime;
 
 		for( float a = timer; a < timer + ( 3.141 * 2 ); a += Step ) {
 			float xt = r * cos( a ) + x;

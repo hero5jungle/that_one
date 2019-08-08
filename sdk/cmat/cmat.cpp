@@ -4,7 +4,7 @@ namespace Materials {
 	IMaterial* shaded, * glow;
 
 	void  Initialize() {
-		glow = gInts.MatSystem->FindMaterial( "dev/glow_color", "Model textures" );
+		glow = Int::MatSystem->FindMaterial( "dev/glow_color", "Model textures" );
 		glow->IncrementReferenceCount();
 		shaded = CreateMaterial( false );
 	}
@@ -30,7 +30,7 @@ namespace Materials {
 		KeyValues* keyValues = new KeyValues;
 		keyValues->Initialize( keyValues, const_cast<char*>( type.c_str() ) );
 		keyValues->LoadFromBuffer( keyValues, name.c_str(), data.c_str() );
-		IMaterial* createdMaterial = gInts.MatSystem->CreateMaterial( name.c_str(), keyValues );
+		IMaterial* createdMaterial = Int::MatSystem->CreateMaterial( name.c_str(), keyValues );
 
 		if( !createdMaterial ) {
 			return nullptr;
@@ -42,9 +42,9 @@ namespace Materials {
 
 	void  ResetMaterial() {
 		static const float flDefault[3] = { 1, 1, 1 };
-		gInts.RenderView->SetBlend( 1 );
-		gInts.RenderView->SetColorModulation( flDefault );
-		gInts.MdlRender->ForcedMaterialOverride( nullptr );
+		Int::RenderView->SetBlend( 1 );
+		Int::RenderView->SetColorModulation( flDefault );
+		Int::MdlRender->ForcedMaterialOverride( nullptr );
 	}
 
 	void ForceMaterial( IMaterial* material, Color color ) {
@@ -54,9 +54,9 @@ namespace Materials {
 			base[1] = color[1] / 255.0f;
 			base[2] = color[2] / 255.0f;
 			float alpha = color[3] / 255.0f;
-			gInts.RenderView->SetBlend( alpha );
-			gInts.RenderView->SetColorModulation( base );
-			gInts.MdlRender->ForcedMaterialOverride( material );
+			Int::RenderView->SetBlend( alpha );
+			Int::RenderView->SetColorModulation( base );
+			Int::MdlRender->ForcedMaterialOverride( material );
 		}
 	}
 }

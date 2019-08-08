@@ -1,4 +1,4 @@
-#include "misc.h"
+ #include "misc.h"
 namespace Misc {
 
 
@@ -7,11 +7,11 @@ namespace Misc {
 		bool jump = pCommand->buttons & IN_JUMP;
 
 		if( pLocal->GetClass() != TF2_Scout ) {
-			if( gCvars.Bunnyhop.value ) {
+			if( Global.Bunnyhop.value ) {
 				if( !ground && jump ) {
 					pCommand->buttons &= ~IN_JUMP;
 
-					if( gCvars.Autostrafe.value )
+					if( Global.Autostrafe.value )
 						if( pCommand->mousedx > 1 || pCommand->mousedx < -1 ) { //> 1 < -1 so we have some wiggle room
 							pCommand->sidemove = pCommand->mousedx > 1 ? 450.f : -450.f;
 						}
@@ -19,10 +19,10 @@ namespace Misc {
 			}
 		}
 
-		static ConVar* sv_cheats = gInts.cvar->FindVar( "sv_cheats" );
+		static ConVar* sv_cheats = Int::cvar->FindVar( "sv_cheats" );
 		static bool cheat = false;
 
-		if( gCvars.Sv_cheat.value ) {
+		if( Global.Sv_cheat.value ) {
 			if( sv_cheats->GetInt() == 0 ) {
 				sv_cheats->SetValue( 1 );
 			}
@@ -33,9 +33,9 @@ namespace Misc {
 			cheat = false;
 		}
 
-		static ConVar* tf_avoidteammates_pushaway = gInts.cvar->FindVar( "tf_avoidteammates_pushaway" );
+		static ConVar* tf_avoidteammates_pushaway = Int::cvar->FindVar( "tf_avoidteammates_pushaway" );
 
-		if( gCvars.NoPush.value ) {
+		if( Global.NoPush.value ) {
 			if( tf_avoidteammates_pushaway->GetInt() == 1 ) {
 				tf_avoidteammates_pushaway->SetValue( 0 );
 			}

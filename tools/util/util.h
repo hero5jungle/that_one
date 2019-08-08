@@ -6,8 +6,8 @@ namespace Util {
 
 	void vector_transform( const Vector& vSome, const matrix3x4& vMatrix, Vector& vOut );
 
-	void FixMove( CUserCmd* pCmd, Vector m_vOldAngles, float m_fOldForward, float m_fOldSidemove );
-	void lookAt( const bool silent, Vector vAngs, CUserCmd* pCommand );
+	void FixMove( CUserCmd* pCmd, Vector &m_vOldAngles, float m_fOldForward, float m_fOldSidemove );
+	void lookAt( const bool silent, Vector &vAngs, CUserCmd* pCommand );
 
 
 	float DistanceToGround( Vector origin, Vector min, Vector max );
@@ -29,8 +29,7 @@ namespace Util {
 	void minDist( weaponid id, float& dist );
 	bool weaponSetup( float& speed, float& chargetime, float& gravity, bool& quick_release, weaponid id, CBaseCombatWeapon* wpn );
 
-	void Collect_Velocity();
-	Vector ProjectilePrediction( CBaseEntity* local, CBaseEntity* ent, Vector hitbox, float speed, float gravitymod );
+	Vector ProjectilePrediction( CBaseEntity* local, CBaseEntity* ent, Vector &hitbox, float speed, float gravitymod );
 
 	Color team_color( CBaseEntity* pLocal, CBaseEntity* pEntity );
 }

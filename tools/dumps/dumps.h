@@ -1,4 +1,4 @@
-#include "../../sdk/sdk.h"
+#pragma once
 
 namespace Dumps {
 	void dumpClassIds();

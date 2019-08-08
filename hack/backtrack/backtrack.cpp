@@ -5,7 +5,7 @@ std::deque<LagRecord> BacktrackData[64];
 namespace Backtrack {
 	void collect_tick( CBaseEntity* pLocal ) {
 
-		for( int i = 1; i <= gInts.Engine->GetMaxClients(); i++ ) {
+		for( int i = 1; i <= Int::Engine->GetMaxClients(); i++ ) {
 			CBaseEntity* pEntity = GetBaseEntity( i );
 
 			if( !pEntity ) {
@@ -24,11 +24,11 @@ namespace Backtrack {
 				continue;
 			}
 
-			Vector hitbox = pEntity->GetHitbox( pLocal, gCvars.hitbox != -1 ? gCvars.hitbox : 0, true );
+			Vector hitbox = pEntity->GetHitbox( pLocal, Global.hitbox != -1 ? Global.hitbox : 0, true );
 
 			BacktrackData[i].push_front( LagRecord{ false, pEntity->flSimulationTime(), Util::EstimateAbsVelocity( pEntity ), hitbox, pEntity->GetEyeAngles(), pEntity->GetWorldSpaceCenter() } );
 
-			BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, 128, BONE_USED_BY_ANYTHING, gInts.globals->curtime );
+			BacktrackData[i].front().valid = pEntity->SetupBones( BacktrackData[i].front().boneMatrix, 128, BONE_USED_BY_ANYTHING, Int::globals->curtime );
 
 			if( BacktrackData[i].size() > 70 ) {
 				BacktrackData[i].pop_back();
@@ -36,13 +36,13 @@ namespace Backtrack {
 		}
 	}
 	float lerp_time() {
-		static ConVar* c_updaterate = gInts.cvar->FindVar( "cl_updaterate" );
-		static ConVar* c_minupdate = gInts.cvar->FindVar( "sv_minupdaterate" );
-		static ConVar* c_maxupdate = gInts.cvar->FindVar( "sv_maxupdaterate" );
-		static ConVar* c_lerp = gInts.cvar->FindVar( "cl_interp" );
-		static ConVar* c_cmin = gInts.cvar->FindVar( "sv_client_min_interp_ratio" );
-		static ConVar* c_cmax = gInts.cvar->FindVar( "sv_client_max_interp_ratio" );
-		static ConVar* c_ratio = gInts.cvar->FindVar( "cl_interp_ratio" );
+		static ConVar* c_updaterate = Int::cvar->FindVar( "cl_updaterate" );
+		static ConVar* c_minupdate = Int::cvar->FindVar( "sv_minupdaterate" );
+		static ConVar* c_maxupdate = Int::cvar->FindVar( "sv_maxupdaterate" );
+		static ConVar* c_lerp = Int::cvar->FindVar( "cl_interp" );
+		static ConVar* c_cmin = Int::cvar->FindVar( "sv_client_min_interp_ratio" );
+		static ConVar* c_cmax = Int::cvar->FindVar( "sv_client_max_interp_ratio" );
+		static ConVar* c_ratio = Int::cvar->FindVar( "cl_interp_ratio" );
 		float lerp = c_lerp->GetFloat();
 		float maxupdate = c_maxupdate->GetFloat();
 		int updaterate = c_updaterate->GetInt();
@@ -76,12 +76,12 @@ namespace Backtrack {
 		correct += INetChannel_cache.flow_outgoing;
 		correct += INetChannel_cache.lerptime;
 
-		if( gCvars.latency.value ) {
-			correct += ( gCvars.latency_amount.value + gCvars.ping_diff.value ) / 1000.0f;
+		if( Global.latency.value ) {
+			correct += ( Global.latency_amount.value + Global.ping_diff.value ) / 1000.0f;
 		}
 
 		correct = clamp( correct, 0.0f, 1.0f );
-		float deltaTime = correct - ( gInts.globals->curtime - simtime );
+		float deltaTime = correct - ( Int::globals->curtime - simtime );
 		return fabs( deltaTime ) <= 0.2f;
 	}
 }

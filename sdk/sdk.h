@@ -1,6 +1,6 @@
 #pragma once
-#include <cmath>
 #include <Windows.h>
+#include <cmath>
 #include "cglobalvars.h"
 #include "../sdk/cnetvars/cnetvars.h"
 #include "../sdk/convar/convar.h"
@@ -13,9 +13,8 @@
 #include "headers/weaponlist.h"
 #include "headers/bspflags.h"
 #include "headers/utlvector.h"
-#include "d3dx9.h"
 
-#define WIN32_LEAN_AND_MEAN
+#pragma warning(disable:4081)
 #pragma warning(disable:4996)
 #pragma warning(disable:4244)
 
@@ -77,14 +76,14 @@ using matrix3x4 = float[3][4];
 using ModelInstanceHandle_t = int;
 using FileHandle_t = void*;
 using MaterialHandle_t = unsigned short;
+using CBaseHandle = unsigned int;
 
-#define me gInts.Engine->GetLocalPlayer()
-#define GetBaseEntity gInts.EntList->GetClientEntity
-#define GetBaseEntityFromHandle gInts.EntList->GetClientEntityFromHandle
+#define me Int::Engine->GetLocalPlayer()
+#define GetBaseEntity Int::EntityList->GetClientEntity
+#define GetBaseEntityFromHandle Int::EntityList->GetClientEntityFromHandle
 #define FL_ONGROUND 1
 #define FLOW_OUTGOING 0
 #define FLOW_INCOMING 1
-
 
 inline std::wstring ToWstring( const char* text ) {
 	size_t length = strlen( text ) + 1;
@@ -499,12 +498,11 @@ struct CBaseEntity {
 	}
 
 	//CBaseEntity.cpp
-	Vector GetShootPosition();
 	Vector GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind = false );
 	Vector GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind = false );
 	CBaseCombatWeapon* GetActiveWeapon();
-	bool CanSee( CBaseEntity* pEntity, const Vector& pos );
-	Vector CanSeeSpot( CBaseEntity* pEntity, const Vector& pos );
+	bool CanSee( CBaseEntity* pEntity, Vector& pos );
+	Vector CanSeeSpot( CBaseEntity* pEntity, Vector& pos );
 	void RemoveNoDraw();
 	int registerGlowObject( Color color, bool bRenderWhenOccluded, bool bRenderWhenUnoccluded );
 	bool HasGlowEffect();
@@ -602,6 +600,105 @@ public:
 			default:
 				return L"Building";
 		}
+	}
+};
+
+class CObjectTeleporter : public CObject {
+public:
+	char* GetStateString() {
+		switch( GetState() ) {
+			case 1:
+			{
+				return "Idle";
+			}
+
+			case 2:
+			{
+				return "Active";
+			}
+
+			case 4:
+			{
+				return "Teleporting";
+			}
+
+			case 6:
+			{
+				return "Charging";
+			}
+
+			default:
+				return "Unknown";
+		}
+	}
+
+	float GetRechargeTime() {
+		DYNVAR_RETURN( float, this, "DT_ObjectTeleporter",
+			"m_flCurrentRechargeDuration" );
+	}
+
+	int GetYawToExit() {
+		DYNVAR_RETURN( int, this, "DT_ObjectTeleporter", "m_flYawToExit" );
+	}
+};
+
+class CBaseCombatWeapon : public CBaseEntity {
+public:
+	int GetSlot() {
+		typedef int( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 327 )( this );
+	}
+
+	char* GetName() {
+		typedef char* ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 329 )( this );
+	}
+
+	char* GetPrintName() {
+		typedef char* ( __thiscall * OriginalFn )( PVOID );
+		return getvfunc<OriginalFn>( this, 330 )( this );
+	}
+
+	float GetChargeTime() {
+		DYNVAR_RETURN( float, this, "DT_WeaponPipebombLauncher", "PipebombLauncherLocalData", "m_flChargeBeginTime" );
+	}
+
+	float GetChargeDamage() {
+		DYNVAR_RETURN( float, this, "DT_TFSniperRifle", "SniperRifleLocalData", "m_flChargedDamage" );
+	}
+
+	weaponid GetItemDefinitionIndex() {
+		DYNVAR_RETURN( weaponid, this, "DT_EconEntity", "m_AttributeManager", "m_Item", "m_iItemDefinitionIndex" );
+	}
+
+	float GetLastFireTime() {
+		DYNVAR_RETURN( float, this, "DT_TFWeaponBase", "LocalActiveTFWeaponData", "m_flLastFireTime" );
+	}
+
+	float GetNextFireTime() {
+		DYNVAR_RETURN( float, this, "DT_BaseCombatWeapon", "LocalActiveWeaponData", "m_flNextPrimaryAttack" );
+	}
+
+	int GetAmmo() {
+		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalActiveWeaponData", "DT_BasePlayer", "localdata", "m_iAmmo" );
+	}
+
+	int GetClip1() {
+		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalWeaponData", "m_iClip1" );
+	}
+
+	int GetClip2() {
+		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalWeaponData", "m_iClip2" );
+	}
+
+	float GetSwingRange( CBaseEntity* pLocal ) {
+		typedef int( __thiscall * OriginalFn )( CBaseEntity* );
+		return  4.0f + (float)getvfunc<OriginalFn>( this, 451 )( pLocal ) / 10.0f;
+	}
+
+	bool DoSwingTrace( CBaseEntity* pLocal, trace_t* trace ) {
+		typedef int( __thiscall * OriginalFn )( CBaseEntity*, trace_t* );
+		return getvfunc<OriginalFn>( this, 453 )( pLocal, trace );
 	}
 };
 
@@ -733,105 +830,6 @@ enum ButtonCode_t {
 	// wheel is moved down
 	MOUSE_LAST = MOUSE_WHEEL_DOWN,
 	MOUSE_COUNT = MOUSE_LAST - MOUSE_FIRST + 1,
-};
-
-class CObjectTeleporter : public CObject {
-public:
-	char* GetStateString() {
-		switch( GetState() ) {
-			case 1:
-			{
-				return "Idle";
-			}
-
-			case 2:
-			{
-				return "Active";
-			}
-
-			case 4:
-			{
-				return "Teleporting";
-			}
-
-			case 6:
-			{
-				return "Charging";
-			}
-
-			default:
-				return "Unknown";
-		}
-	}
-
-	float GetRechargeTime() {
-		DYNVAR_RETURN( float, this, "DT_ObjectTeleporter",
-			"m_flCurrentRechargeDuration" );
-	}
-
-	int GetYawToExit() {
-		DYNVAR_RETURN( int, this, "DT_ObjectTeleporter", "m_flYawToExit" );
-	}
-};
-
-class CBaseCombatWeapon : public CBaseEntity {
-public:
-	int GetSlot() {
-		typedef int( __thiscall * OriginalFn )( PVOID );
-		return getvfunc<OriginalFn>( this, 327 )( this );
-	}
-
-	char* GetName() {
-		typedef char* ( __thiscall * OriginalFn )( PVOID );
-		return getvfunc<OriginalFn>( this, 329 )( this );
-	}
-
-	char* GetPrintName() {
-		typedef char* ( __thiscall * OriginalFn )( PVOID );
-		return getvfunc<OriginalFn>( this, 330 )( this );
-	}
-
-	float GetChargeTime() {
-		DYNVAR_RETURN( float, this, "DT_WeaponPipebombLauncher", "PipebombLauncherLocalData", "m_flChargeBeginTime" );
-	}
-
-	float GetChargeDamage() {
-		DYNVAR_RETURN( float, this, "DT_TFSniperRifle", "SniperRifleLocalData", "m_flChargedDamage" );
-	}
-
-	weaponid GetItemDefinitionIndex() {
-		DYNVAR_RETURN( weaponid, this, "DT_EconEntity", "m_AttributeManager", "m_Item", "m_iItemDefinitionIndex" );
-	}
-
-	float GetLastFireTime() {
-		DYNVAR_RETURN( float, this, "DT_TFWeaponBase", "LocalActiveTFWeaponData", "m_flLastFireTime" );
-	}
-
-	float GetNextFireTime() {
-		DYNVAR_RETURN( float, this, "DT_BaseCombatWeapon", "LocalActiveWeaponData", "m_flNextPrimaryAttack" );
-	}
-
-	int GetAmmo() {
-		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalActiveWeaponData", "DT_BasePlayer", "localdata", "m_iAmmo" );
-	}
-
-	int GetClip1() {
-		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalWeaponData", "m_iClip1" );
-	}
-
-	int GetClip2() {
-		DYNVAR_RETURN( int, this, "DT_BaseCombatWeapon", "LocalWeaponData", "m_iClip2" );
-	}
-
-	float GetSwingRange( CBaseEntity* pLocal ) {
-		typedef int( __thiscall * OriginalFn )( CBaseEntity* );
-		return  4.0f + (float)getvfunc<OriginalFn>( this, 451 )( pLocal ) / 10.0f;
-	}
-
-	bool DoSwingTrace( CBaseEntity* pLocal, trace_t* trace ) {
-		typedef int( __thiscall * OriginalFn )( CBaseEntity*, trace_t* );
-		return getvfunc<OriginalFn>( this, 453 )( pLocal, trace );
-	}
 };
 
 enum class classId : int {
@@ -2072,17 +2070,17 @@ public:
 class CEntList {
 public:
 	CBaseEntity* GetClientEntity( int entnum ) {
-		typedef CBaseEntity* ( __thiscall * OriginalFn )( PVOID, int );
+		typedef CBaseEntity* ( __thiscall * OriginalFn )( void*, int );
 		return getvfunc<OriginalFn>( this, 3 )( this, entnum );
 	}
 
 	CBaseEntity* GetClientEntityFromHandle( int hEnt ) {
-		typedef CBaseEntity* ( __thiscall * OriginalFn )( PVOID, int );
+		typedef CBaseEntity* ( __thiscall * OriginalFn )( void*, int );
 		return getvfunc<OriginalFn>( this, 4 )( this, hEnt );
 	}
 
 	int GetHighestEntityIndex( void ) {
-		typedef int( __thiscall * OriginalFn )( PVOID );
+		typedef int( __thiscall * OriginalFn )( void* );
 		return getvfunc<OriginalFn>( this, 6 )( this );
 	}
 };
@@ -2090,7 +2088,7 @@ public:
 class __declspec( align( 16 ) ) VectorAligned : public Vector {
 public:
 	VectorAligned( void ) {
-	};
+	}
 
 	VectorAligned( float X, float Y, float Z ) {
 		Init( X, Y, Z );
@@ -2117,7 +2115,7 @@ struct Ray_t {
 	bool m_IsRay;
 	bool m_IsSwept;
 
-	void Init( Vector start, Vector end ) {
+	void Init(Vector& start,Vector &end ) {
 		m_Delta = end - start;
 		m_IsSwept = ( m_Delta.LengthSqr() != 0 );
 		m_Extents.Init();
@@ -2293,11 +2291,10 @@ public:
 
 	CBaseEntity* m_pEnt;
 	int hitbox;
-
 	CGameTrace() {
 	}
-
-	CGameTrace( const CGameTrace& vOther );
+	CGameTrace( const CGameTrace& vOther ) {
+	};
 };
 
 class IEngineTrace {
@@ -2985,8 +2982,6 @@ struct CIncomingSequence {
 	float curtime;
 };
 
-using CBaseHandle = unsigned int;
-
 class CMoveData {
 public:
 	bool m_bFirstRunOfFunctions : 1;
@@ -3091,27 +3086,27 @@ public:
 	int m_nFirstFreeSlot;
 };
 
-struct CInterfaces {
-	CEntList* EntList;
-	EngineClient* Engine;
-	IPanel* Panels;
-	ISurface* Surface;
-	ClientModeShared* ClientMode;
-	ICvar* cvar;
-	CGlobals* globals;
-	CHLClient* Client;
-	IEngineTrace* EngineTrace;
-	IVModelInfo* ModelInfo;
-	CModelRender* MdlRender;
-	CRenderView* RenderView;
-	CMaterialSystem* MatSystem;
-	IGameEventManager2* EventManager;
-	IInputSystem* InputSys;
-	PVOID* ClientState;
-	IGameMovement* GameMovement;
-	IPrediction* Prediction;
-	CGlowObjectManager* GlowManager;
-	DWORD DirectXDevice;
+namespace Int {
+	extern CEntList* EntityList;
+	extern EngineClient* Engine;
+	extern IPanel* Panels;
+	extern ISurface* Surface;
+	extern ClientModeShared* ClientMode;
+	extern ICvar* cvar;
+	extern CGlobals* globals;
+	extern CHLClient* Client;
+	extern IEngineTrace* EngineTrace;
+	extern IVModelInfo* ModelInfo;
+	extern CModelRender* MdlRender;
+	extern CRenderView* RenderView;
+	extern CMaterialSystem* MatSystem;
+	extern IGameEventManager2* EventManager;
+	extern IInputSystem* InputSys;
+	extern PVOID* ClientState;
+	extern IGameMovement* GameMovement;
+	extern IPrediction* Prediction;
+	extern CGlowObjectManager* GlowManager;
+	extern DWORD DirectXDevice;
 };
 
 using CreateMoveFn = bool( __thiscall* )( PVOID, float, CUserCmd* );
@@ -3120,17 +3115,17 @@ using DrawModelExecuteFn = void( __stdcall* )( void* state, ModelRenderInfo_t& p
 using PaintTraverseFn = void( __thiscall* )( PVOID, unsigned int, bool, bool );
 using SendDatagramFn = int( __thiscall* )( CNetChan*, bf_write* );
 using EndSceneFn = long( __stdcall* ) ( struct IDirect3DDevice9* pDevice );
-using ResetFn = long( __stdcall* ) ( IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentParams );
+using ResetFn = long( __stdcall* ) ( struct IDirect3DDevice9* pDevice, struct D3DPRESENT_PARAMETERS* pPresentParams );
 
-struct CHooks {
-	vmt_single<CreateMoveFn> CreateMove;
-	vmt_single<DrawModelExecuteFn> DrawModelExecute;
-	vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
-	vmt_single<PaintTraverseFn> PaintTraverse;
-	vmt_single<SendDatagramFn> SendDatagram;
-	vmt_hook dx9;
-	vmt_func<EndSceneFn> EndScene{ &dx9 };
-	vmt_func<ResetFn> Reset{ &dx9 };
+namespace Hook {
+	extern vmt_single<CreateMoveFn> CreateMove;
+	extern vmt_single<DrawModelExecuteFn> DrawModelExecute;
+	extern vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
+	extern vmt_single<PaintTraverseFn> PaintTraverse;
+	extern vmt_single<SendDatagramFn> SendDatagram;
+	extern vmt_hook dx9;
+	extern vmt_func<EndSceneFn> EndScene;
+	extern vmt_func<ResetFn> Reset;
 };
 
 enum gOffsets {
@@ -3143,6 +3138,5 @@ enum gOffsets {
 	ResetOffset = 16
 };
 
-extern CInterfaces gInts;
-extern CGlobalVariables gCvars;
-extern CHooks gHooks;
+extern CGlobalVariables Global;
+extern HWND window;

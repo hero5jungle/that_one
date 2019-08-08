@@ -218,7 +218,7 @@ __forceinline  Vector& Vector::operator/=( const Vector& v ) {
 //===============================================
 inline float Vector::Length() const {
 	CHECK_VALID( *this );
-	return sqrt( x * x + y * y );
+	return sqrt( x * x + y * y + z * z );
 }
 //===============================================
 inline float Vector::Length2D() const {
@@ -330,7 +330,7 @@ inline void AngleVectors( const Vector& angles, Vector* forward, Vector* right, 
 		up->z = cr * cp;
 	}
 }
-inline void VectorAngles( Vector forward, Vector& angles ) {
+inline void VectorAngles( Vector &forward, Vector& angles ) {
 	float yaw, pitch;
 
 	if( forward.y == 0 && forward.x == 0 ) {

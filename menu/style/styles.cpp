@@ -7,7 +7,7 @@ int DefaultStyle::ControlPanel( int x, int y, int w, int h, const char* name ) {
 	int textW = 0, textH = 15;
 
 	if( name ) {
-		gInts.Surface->GetTextSize( gFonts.calibri_light_small, ToWstring( name ).c_str(), textW, textH );
+		Int::Surface->GetTextSize( gFonts.calibri_light_small, ToWstring( name ).c_str(), textW, textH );
 	}
 
 	DrawManager::DrawRect( x + 1, y + 1, w - 2, textH + txtMargin, Color( 25 ) );

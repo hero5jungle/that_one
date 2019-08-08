@@ -2,12 +2,50 @@
 #include "../tools/util/Util.h"
 #include "../tools/signature/csignature.h"
 
-bool CBaseEntity::CanSee( CBaseEntity* pEntity, const Vector& pos ) {
+CGlobalVariables Global;
+HWND window;
+
+namespace Int {
+	CEntList* EntityList;
+	EngineClient* Engine;
+	IPanel* Panels;
+	ISurface* Surface;
+	ClientModeShared* ClientMode;
+	ICvar* cvar;
+	CGlobals* globals;
+	CHLClient* Client;
+	IEngineTrace* EngineTrace;
+	IVModelInfo* ModelInfo;
+	CModelRender* MdlRender;
+	CRenderView* RenderView;
+	CMaterialSystem* MatSystem;
+	IGameEventManager2* EventManager;
+	IInputSystem* InputSys;
+	PVOID* ClientState;
+	IGameMovement* GameMovement;
+	IPrediction* Prediction;
+	CGlowObjectManager* GlowManager;
+	DWORD DirectXDevice;
+};
+
+namespace Hook {
+	vmt_single<CreateMoveFn> CreateMove;
+	vmt_single<DrawModelExecuteFn> DrawModelExecute;
+	vmt_single<FrameStageNotifyThinkFn> FrameStageNotifyThink;
+	vmt_single<PaintTraverseFn> PaintTraverse;
+	vmt_single<SendDatagramFn> SendDatagram;
+	vmt_hook dx9;
+	vmt_func<EndSceneFn> EndScene{ &dx9 };
+	vmt_func<ResetFn> Reset{ &dx9 };
+};
+
+bool CBaseEntity::CanSee( CBaseEntity* pEntity, Vector& pos ) {
 	trace_t tr;
 	Ray_t ray;
 	CTraceFilterNothing filter;
-	ray.Init( this->GetShootPosition(), pos );
-	gInts.EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
+	Vector start = this->GetEyePosition();
+	ray.Init( start, pos );
+	Int::EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
 
 	if( tr.m_pEnt == nullptr || pEntity == nullptr ) {
 		return tr.fraction == 1.0f;
@@ -15,23 +53,21 @@ bool CBaseEntity::CanSee( CBaseEntity* pEntity, const Vector& pos ) {
 	return ( tr.m_pEnt->GetIndex() == pEntity->GetIndex() ) || ( tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum() );
 }
 
-Vector CBaseEntity::CanSeeSpot( CBaseEntity* pEntity, const Vector& pos ) {
+Vector CBaseEntity::CanSeeSpot( CBaseEntity* pEntity, Vector& pos ) {
 	trace_t tr;
 	Ray_t ray;
 	CTraceFilterNothing filter;
-	ray.Init( this->GetShootPosition(), pos );
-	gInts.EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
+	Vector start = this->GetEyePosition();
+	ray.Init( start, pos );
+	Int::EngineTrace->TraceRay( ray, MASK_SHOT | CONTENTS_GRATE, &filter, &tr );
 
-	if( tr.m_pEnt == nullptr || pEntity == nullptr ) {
-		if( tr.fraction == 1.0f )
-			return tr.endpos;
-	}
-
-	if( ( tr.m_pEnt->GetIndex() == pEntity->GetIndex() ) || ( tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum() ) ) {
+	if( tr.m_pEnt == nullptr ) {
+		return tr.fraction == 1.0f ? tr.endpos : Vector();
+	} else if( ( tr.m_pEnt->GetIndex() == pEntity->GetIndex() ) || ( tr.m_pEnt->GetTeamNum() == pEntity->GetTeamNum() ) ) {
 		return tr.endpos;
+	} else {
+		return Vector();
 	}
-
-	return Vector();
 }
 
 void CBaseEntity::RemoveNoDraw() {
@@ -47,26 +83,17 @@ int CBaseEntity::registerGlowObject( Color color, bool bRenderWhenOccluded, bool
 	static DWORD dwFn = Signatures::GetClientSignature( "55 8B EC 51 53 56 8B F1 57 8B 5E 14" );
 	static registerFn Register = (registerFn)dwFn;
 
-	return Register( gInts.GlowManager, this, color.rgb(), color[3] / 255.0f, bRenderWhenOccluded, bRenderWhenUnoccluded, -1 );
+	return Register( Int::GlowManager, this, color.rgb(), color[3] / 255.0f, bRenderWhenOccluded, bRenderWhenUnoccluded, -1 );
 }
 
 bool CBaseEntity::HasGlowEffect() {
-	for( int n = 0; n < gInts.GlowManager->m_GlowObjectDefinitions.Count(); n++ ) {
-		GlowObjectDefinition_t& GlowObject = gInts.GlowManager->m_GlowObjectDefinitions[n];
-		CBaseEntity* ent = gInts.EntList->GetClientEntityFromHandle( GlowObject.m_hEntity );
+	for( int n = 0; n < Int::GlowManager->m_GlowObjectDefinitions.Count(); n++ ) {
+		GlowObjectDefinition_t& GlowObject = Int::GlowManager->m_GlowObjectDefinitions[n];
+		CBaseEntity* ent = Int::EntityList->GetClientEntityFromHandle( GlowObject.m_hEntity );
 		if( ent == this )
 			return true;
 	}
 	return false;
-}
-
-Vector CBaseEntity::GetShootPosition() {
-	static auto Weapon_ShootPositionFn = reinterpret_cast<float* ( __thiscall* )( void*, Vector* )>( Signatures::GetClientSignature( "55 8B EC 56 8B 75 08 57 8B F9 56 8B 07 FF 90" ) );
-
-	Vector vOut;
-	Weapon_ShootPositionFn( this, &vOut );
-
-	return vOut;
 }
 
 Vector CBaseEntity::GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind ) {
@@ -76,7 +103,7 @@ Vector CBaseEntity::GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind ) {
 		return Vector();
 	}
 
-	studiohdr_t* hdr = gInts.ModelInfo->GetStudiomodel( model );
+	studiohdr_t* hdr = Int::ModelInfo->GetStudiomodel( model );
 
 	if( !hdr ) {
 		return Vector();
@@ -84,7 +111,7 @@ Vector CBaseEntity::GetHitbox( CBaseEntity* pLocal, int hitbox, bool blind ) {
 
 	matrix3x4 matrix[128];
 
-	if( !SetupBones( matrix, 128, 0x100, gInts.globals->curtime ) ) {
+	if( !SetupBones( matrix, 128, 0x100, Int::globals->curtime ) ) {
 		return Vector();
 	}
 
@@ -119,7 +146,7 @@ Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind )
 		return Vector();
 	}
 
-	studiohdr_t* hdr = gInts.ModelInfo->GetStudiomodel( model );
+	studiohdr_t* hdr = Int::ModelInfo->GetStudiomodel( model );
 
 	if( !hdr ) {
 		return Vector();
@@ -127,7 +154,7 @@ Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind )
 
 	matrix3x4 matrix[128];
 
-	if( !SetupBones( matrix, 128, 0x100, gInts.globals->curtime ) ) {
+	if( !SetupBones( matrix, 128, 0x100, Int::globals->curtime ) ) {
 		return Vector();
 	}
 
@@ -181,6 +208,6 @@ Vector CBaseEntity::GetMultipoint( CBaseEntity* pLocal, int hitbox, bool blind )
 }
 
 CBaseCombatWeapon* CBaseEntity::GetActiveWeapon() {
-	DYNVAR( pHandle, DWORD, "DT_BaseCombatCharacter", "m_hActiveWeapon" );
-	return (CBaseCombatWeapon*)gInts.EntList->GetClientEntityFromHandle( pHandle.GetValue( this ) );
+	DYNVAR( pHandle, CBaseHandle, "DT_BaseCombatCharacter", "m_hActiveWeapon" );
+	return (CBaseCombatWeapon*)GetBaseEntityFromHandle( pHandle.GetValue( this ) );
 }
