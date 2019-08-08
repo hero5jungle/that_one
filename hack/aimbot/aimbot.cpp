@@ -83,11 +83,10 @@ namespace Aimbot {
 		int Class = pLocal->GetClass();
 
 		bool fov = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( vLocal, Global.aim_spot ) ) < Global.Aimbot_fov.value;
-		bool lazy_pyro = ( Global.pyro_lazy.value && Class == TF2_Pyro && wpn_slot == 0 && !( wpn->GetItemDefinitionIndex() == weaponid::Pyro_m_DragonsFury ) );
 		bool lazy_melee = is_melee && Global.Aimbot_melee.value;
 		bool lazy_proj = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( vLocal, pEntity->GetHitbox( pLocal, 4, true ) ) ) < Global.Aimbot_fov.value;
 
-		if( ( fov || lazy_melee || lazy_pyro || lazy_proj ) && Util::CanShoot( pLocal, wpn ) ) {
+		if( fov || lazy_melee || lazy_proj ) {
 
 			if( Global.backtrack_tick != -1 && Global.backtrack_arr != -1 ) {
 				pCommand->tick_count = Global.backtrack_tick;
@@ -136,12 +135,13 @@ namespace Aimbot {
 					pCommand->buttons |= IN_ATTACK;
 				}
 			}
-			if( pCommand->buttons & IN_ATTACK ) {
-				if( packet ) {
-					Util::lookAt( Global.Aimbot_silent.value, vAngs, pCommand );
-				} else {
-					pCommand->buttons &= ~IN_ATTACK;
-				}
+
+			if( pCommand->buttons & IN_ATTACK && !Util::CanShoot( pLocal, wpn ) ) {
+				pCommand->buttons &= ~IN_ATTACK;
+			}
+
+			if( packet ) {
+				Util::lookAt( Global.Aimbot_silent.value, vAngs, pCommand );
 			}
 		}
 

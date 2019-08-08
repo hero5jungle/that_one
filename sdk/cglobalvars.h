@@ -52,27 +52,25 @@ struct CGlobalVariables {
 		}, 170
 	};
 
-	Checkbox pyro_lazy{ "Lazy pyro primary", true };
 	Checkbox Airblast_enable{ "Enable airblast", true };
 	Checkbox Airblast_silent{ "Silent aim", true };
 
-	Checkbox demo_sticky{ "Auto sticky", true };
-
-	Checkbox sniper_zoomed{ "Zoomed only", true };
-	Checkbox sniper_delay{ "Wait for headshot", true };
-	Checkbox sniper_nozoom{ "No zoom" };
-	Checkbox sniper_noscope{ "No scope", true };
-
 	Groupbox PYRO{ "--Pyro--", {
-		&pyro_lazy,
 		&Airblast_enable, &Airblast_silent
 		}
 	};
+
+	Checkbox demo_sticky{ "Auto sticky", true };
 
 	Groupbox DEMOMAN{ "--Demoman--", {
 		&demo_sticky
 		}
 	};
+	
+	Checkbox sniper_zoomed{ "Zoomed only", true };
+	Checkbox sniper_delay{ "Wait for headshot", true };
+	Checkbox sniper_nozoom{ "No zoom" };
+	Checkbox sniper_noscope{ "No scope", true };
 
 	Groupbox SNIPER{ "--Sniper--", {
 		&sniper_zoomed,

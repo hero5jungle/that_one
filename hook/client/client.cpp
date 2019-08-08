@@ -428,7 +428,8 @@ void __stdcall Hooked_DrawModelExecute( void* state, ModelRenderInfo_t& pInfo, m
 		case classId::CBaseAnimating:
 		case classId::CTFAmmoPack:
 		{
-			if( Global.ESP_object.value == 1 ) {
+			if( Global.ESP_object.value == 1 && model_name[24] != 'h' ) {//skip "models/effects/cappoint_hologram.mdl"
+
 				Color RGBA = Global.color_objects.get_color();
 				//Hidden
 				wanted_material->SetMaterialVarFlag( MATERIAL_VAR_IGNOREZ, true );
