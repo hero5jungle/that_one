@@ -628,7 +628,6 @@ namespace Util {
 				break;
 			}
 		}
-
 		return true;
 	}
 

@@ -60,7 +60,21 @@ namespace Aimbot {
 			return;
 		}
 
+		int Class = pLocal->GetClass();
 		Vector vLocal = pLocal->GetEyePosition();
+
+		if( Class == TF2_Soldier && speed != -1 && wpn->GetSlot() == 0 ) {//fix rocket launcher offset
+			Vector vecForward, vecRight, vecUp;
+			AngleVectors( pLocal->GetEyeAngles(), &vecForward, &vecRight, &vecUp );
+
+			Vector offset{ 23.5f, 12.0f, -3.0f };
+			
+			if( pLocal->GetFlags() & FL_DUCKING ) {
+				offset.z = 8.0f;
+			}
+
+			vLocal += ( vecForward * offset.x ) + ( vecRight * offset.y ) + ( vecUp * offset.z );
+		}
 
 		float minimalDistance = 9999.0f;
 		int wpn_slot = wpn->GetSlot();
@@ -80,7 +94,6 @@ namespace Aimbot {
 		VectorAngles( ( Global.aim_spot - vLocal ), vAngs );
 		ClampAngle( vAngs );
 
-		int Class = pLocal->GetClass();
 
 		bool fov = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( vLocal, Global.aim_spot ) ) < Global.Aimbot_fov.value;
 		bool lazy_melee = is_melee && Global.Aimbot_melee.value;

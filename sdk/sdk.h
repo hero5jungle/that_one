@@ -81,7 +81,8 @@ using CBaseHandle = unsigned int;
 #define me Int::Engine->GetLocalPlayer()
 #define GetBaseEntity Int::EntityList->GetClientEntity
 #define GetBaseEntityFromHandle Int::EntityList->GetClientEntityFromHandle
-#define FL_ONGROUND 1
+#define FL_ONGROUND (1<<0)
+#define FL_DUCKING (1<<1)
 #define FLOW_OUTGOING 0
 #define FLOW_INCOMING 1
 
