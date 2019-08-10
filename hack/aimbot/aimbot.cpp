@@ -97,7 +97,7 @@ namespace Aimbot {
 
 		bool fov = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( vLocal, Global.aim_spot ) ) < Global.Aimbot_fov.value;
 		bool lazy_melee = is_melee && Global.Aimbot_melee.value;
-		bool lazy_proj = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( vLocal, pEntity->GetHitbox( pLocal, 4, true ) ) ) < Global.Aimbot_fov.value;
+		bool lazy_proj = Util::GetFOV( pCommand->viewangles, Util::CalcAngle( vLocal, pEntity->GetWorldSpaceCenter() ) ) < Global.Aimbot_fov.value;
 
 		if( fov || lazy_melee || lazy_proj ) {
 
